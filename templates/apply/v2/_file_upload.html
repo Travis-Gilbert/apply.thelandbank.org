@@ -7,16 +7,18 @@
         </label>
     </div>
 
-    {# Drop zone #}
-    <label class="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-warm-300 bg-warm-50/50 cursor-pointer hover:border-warm-400 hover:bg-warm-50 transition-colors"
+    {# Drop zone — mobile-friendly with responsive text #}
+    <label class="file-upload-zone flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-warm-300 bg-warm-50/50 cursor-pointer hover:border-warm-400 hover:bg-warm-50 transition-colors"
            id="dropzone-{{ field_name }}">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-warm-400">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
             <polyline points="17 8 12 3 7 8" stroke-linecap="round" stroke-linejoin="round"/>
             <line x1="12" y1="3" x2="12" y2="15" stroke-linecap="round"/>
         </svg>
-        <p class="text-sm text-warm-500">
-            <span class="font-medium" style="color:#2E7D32">Choose files</span> or drag and drop
+        <p class="text-sm text-warm-500 text-center">
+            {# Mobile: "Tap to take a photo or choose a file" / Desktop: "Choose files or drag and drop" #}
+            <span class="sm:hidden"><span class="font-medium" style="color:#2E7D32">Tap to choose a file</span> or take a photo</span>
+            <span class="hidden sm:inline"><span class="font-medium" style="color:#2E7D32">Choose files</span> or drag and drop</span>
         </p>
         <p class="text-xs text-warm-400">PDF, JPG, PNG up to 10MB each</p>
         <input type="file"

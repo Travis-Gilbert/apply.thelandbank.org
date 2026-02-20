@@ -21,13 +21,13 @@
 
                 <div class="grid gap-3">
                     {% for name, field in form.interior_fields %}
-                    <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center justify-between gap-4 reno-line-item">
                         <label for="{{ field.id_for_label }}" class="text-sm text-warm-700 min-w-0">
                             {{ field.label }}
                         </label>
-                        <div class="relative flex-shrink-0 w-32">
+                        <div class="relative flex-shrink-0 w-32 reno-input-wrap">
                             <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-warm-400 font-mono text-xs">$</span>
-                            <input type="number" step="0.01" min="0"
+                            <input type="number" step="0.01" min="0" inputmode="decimal"
                                    name="{{ field.html_name }}" id="{{ field.id_for_label }}"
                                    value="{{ field.value|default:'0' }}"
                                    data-reno-group="interior"
@@ -52,13 +52,13 @@
 
                 <div class="grid gap-3">
                     {% for name, field in form.exterior_fields %}
-                    <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center justify-between gap-4 reno-line-item">
                         <label for="{{ field.id_for_label }}" class="text-sm text-warm-700 min-w-0">
                             {{ field.label }}
                         </label>
-                        <div class="relative flex-shrink-0 w-32">
+                        <div class="relative flex-shrink-0 w-32 reno-input-wrap">
                             <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-warm-400 font-mono text-xs">$</span>
-                            <input type="number" step="0.01" min="0"
+                            <input type="number" step="0.01" min="0" inputmode="decimal"
                                    name="{{ field.html_name }}" id="{{ field.id_for_label }}"
                                    value="{{ field.value|default:'0' }}"
                                    data-reno-group="exterior"

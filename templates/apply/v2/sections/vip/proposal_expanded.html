@@ -36,10 +36,10 @@
                 </p>
                 <div class="flex gap-4">
                     {% for value, label in form.vip_q2_prior_purchases.field.widget.choices %}
-                    <label class="flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-xl border border-warm-200 bg-white/60 hover:bg-white transition-colors">
+                    <label class="touch-label px-4 py-2.5 rounded-xl border border-warm-200 bg-white/60 hover:bg-white transition-colors">
                         <input type="radio" name="{{ form.vip_q2_prior_purchases.html_name }}" value="{{ value }}"
                                {% if form.vip_q2_prior_purchases.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
-                               class="w-4 h-4 border-warm-300 focus:ring-2"
+                               class="border-warm-300 focus:ring-2"
                                style="color: {{ program_color }}">
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
@@ -91,10 +91,10 @@
                 </p>
                 <div class="flex gap-4">
                     {% for value, label in form.vip_q5_has_experience.field.widget.choices %}
-                    <label class="flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-xl border border-warm-200 bg-white/60 hover:bg-white transition-colors">
+                    <label class="touch-label px-4 py-2.5 rounded-xl border border-warm-200 bg-white/60 hover:bg-white transition-colors">
                         <input type="radio" name="{{ form.vip_q5_has_experience.html_name }}" value="{{ value }}"
                                {% if form.vip_q5_has_experience.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
-                               class="w-4 h-4 border-warm-300 focus:ring-2"
+                               class="border-warm-300 focus:ring-2"
                                style="color: {{ program_color }}">
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
@@ -122,7 +122,7 @@
                         {{ form.vip_q6_completion_plan.label }} <span class="text-red-500 text-xs">*</span>
                     </label>
                     <select name="{{ form.vip_q6_completion_plan.html_name }}" id="{{ form.vip_q6_completion_plan.id_for_label }}"
-                            class="gclba-input gclba-select" required>
+                            class="gclba-input gclba-select" style="min-height: 44px;" required>
                         {% for value, label in form.vip_q6_completion_plan.field.choices %}
                         <option value="{{ value }}" {% if form.vip_q6_completion_plan.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}

@@ -23,7 +23,7 @@
                 </label>
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
-                    <input type="number" step="0.01" min="1"
+                    <input type="number" step="0.01" min="1" inputmode="decimal"
                            name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
                            value="{{ form.offer_amount.value|default:'' }}" required
                            placeholder="15,000.00"
@@ -38,7 +38,7 @@
                     How do you plan to use this property? <span class="text-red-500 text-xs">*</span>
                 </label>
                 <select name="{{ form.intended_use.html_name }}" id="{{ form.intended_use.id_for_label }}"
-                        class="gclba-input gclba-select"
+                        class="gclba-input gclba-select" style="min-height: 44px;"
                         hx-post="{% url 'applications:htmx_intended_use_fields' %}"
                         hx-target="#intended-use-fields"
                         hx-swap="innerHTML"
@@ -73,10 +73,10 @@
             </div>
 
             {# Prior GCLBA purchase #}
-            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
+            <label class="touch-label items-start p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
                 <input type="checkbox" name="{{ form.has_prior_gclba_purchase.html_name }}"
                        {% if form.has_prior_gclba_purchase.value %}checked{% endif %}
-                       class="mt-0.5 w-4 h-4 rounded border-warm-300 focus:ring-2 flex-shrink-0"
+                       class="mt-0.5 rounded border-warm-300 focus:ring-2 flex-shrink-0"
                        style="color: {{ program_color }}">
                 <div>
                     <span class="text-sm text-warm-900">{{ form.has_prior_gclba_purchase.label }}</span>

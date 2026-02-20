@@ -14,7 +14,7 @@
                     How do you plan to use this property? <span class="text-red-500 text-xs">*</span>
                 </label>
                 <select name="{{ form.intended_use.html_name }}" id="{{ form.intended_use.id_for_label }}"
-                        class="gclba-input gclba-select"
+                        class="gclba-input gclba-select" style="min-height: 44px;"
                         hx-post="{% url 'applications:htmx_intended_use_fields' %}"
                         hx-target="#intended-use-fields"
                         hx-swap="innerHTML"
