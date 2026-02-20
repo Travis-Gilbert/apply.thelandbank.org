@@ -15,10 +15,10 @@
             {# Acknowledgment checkboxes #}
             <div class="space-y-3">
                 {% for field in form %}
-                <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
+                <label class="touch-label items-start p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
                     <input type="checkbox" name="{{ field.html_name }}"
                            {% if field.value %}checked{% endif %} required
-                           class="mt-0.5 w-4 h-4 rounded border-warm-300 focus:ring-2 flex-shrink-0"
+                           class="mt-0.5 rounded border-warm-300 focus:ring-2 flex-shrink-0"
                            style="color: {{ program_color }}">
                     <span class="text-sm text-warm-800 leading-relaxed">{{ field.label }}</span>
                 </label>
@@ -39,13 +39,13 @@
             </div>
 
             {# Submit button (filled, not outlined) #}
-            <div class="flex justify-end pt-3">
+            <div class="pt-3">
                 <button type="submit"
                         hx-post="{{ validate_url }}"
                         hx-target="#section-{{ section_id }}"
                         hx-swap="outerHTML"
                         hx-disabled-elt="this"
-                        class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:opacity-90"
+                        class="w-full sm:w-auto sm:float-right inline-flex items-center justify-center gap-2 px-8 py-3.5 sm:py-3 rounded-lg text-base sm:text-sm font-semibold text-white transition-all duration-200 hover:opacity-90"
                         style="background: {{ program_color }}">
                     Submit Proposal
                 </button>

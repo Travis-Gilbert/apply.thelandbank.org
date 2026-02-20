@@ -2,13 +2,14 @@
 {# Include with: completed_count, total_count, program_color (hex), program_name #}
 {% with progress_pct=completed_count|divisibleby:1 %}
 <div id="progress-bar" class="sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 transition-shadow"
-     style="background: linear-gradient(180deg, #F2EDE6 0%, rgba(242,237,230,0.95) 100%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0,0,0,0.06);">
+     style="background: rgba(242,237,230,0.97); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0,0,0,0.06);">
+    {# Solid fallback bg ensures readability when backdrop-filter unsupported (some mobile browsers) #}
     <div class="flex items-center gap-3">
         <div class="flex items-center gap-2 flex-shrink-0">
             {% if program_name %}
-            <span class="text-sm font-semibold text-warm-900 truncate">{{ program_name }}</span>
+            <span class="text-sm font-semibold text-warm-900 truncate max-w-[120px] sm:max-w-none">{{ program_name }}</span>
             {% else %}
-            <span class="text-sm font-semibold text-warm-900 truncate">Application</span>
+            <span class="text-sm font-semibold text-warm-900 truncate max-w-[120px] sm:max-w-none">Application</span>
             {% endif %}
         </div>
         <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: rgba(0,0,0,0.06)">

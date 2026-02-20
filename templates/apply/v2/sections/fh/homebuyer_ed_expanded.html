@@ -22,10 +22,10 @@
             </div>
 
             {# Checkbox #}
-            <label class="flex items-start gap-3 cursor-pointer">
+            <label class="touch-label items-start">
                 <input type="checkbox" name="{{ form.homebuyer_ed_completed.html_name }}"
                        {% if form.homebuyer_ed_completed.value %}checked{% endif %}
-                       class="mt-0.5 w-4 h-4 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
+                       class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
                 <span class="text-sm text-warm-900">I have completed (or will complete before closing) a homebuyer education course</span>
             </label>
 
@@ -35,7 +35,7 @@
                     Education Provider
                 </label>
                 <select name="{{ form.homebuyer_ed_agency.html_name }}" id="{{ form.homebuyer_ed_agency.id_for_label }}"
-                        class="gclba-input gclba-select">
+                        class="gclba-input gclba-select" style="min-height: 44px;">
                     {% for value, label in form.homebuyer_ed_agency.field.choices %}
                     <option value="{{ value }}" {% if form.homebuyer_ed_agency.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}

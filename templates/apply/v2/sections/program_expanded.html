@@ -18,17 +18,19 @@
                         hx-vals='{"program": "featured_homes"}'
                         hx-include="#accordion-form"
                         hx-disabled-elt="this"
-                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer{% if program_type == 'featured_homes' %} ring-2 ring-offset-1{% endif %}"
+                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer min-h-[56px]{% if program_type == 'featured_homes' %} ring-2 ring-offset-1{% endif %}"
                         style="border-color: rgba(0,0,0,0.08);"
                         onmouseover="this.style.borderColor='#2E7D32'"
                         onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
-                    <div class="flex flex-col gap-2">
-                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base" style="background: #2E7D3215">&#127968;</div>
-                        <h4 class="text-sm font-bold font-heading text-warm-900">Featured Homes</h4>
-                        <p class="text-xs text-warm-500 leading-relaxed">Move-in ready homes at affordable prices</p>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span class="text-[11px] text-warm-400">10-15 minutes</span>
+                    <div class="flex flex-col sm:flex-col gap-2 program-card-inner">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0" style="background: #2E7D3215">&#127968;</div>
+                        <div class="program-card-text min-w-0">
+                            <h4 class="text-sm font-bold font-heading text-warm-900">Featured Homes</h4>
+                            <p class="text-xs text-warm-500 leading-relaxed">Move-in ready homes at affordable prices</p>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span class="text-[11px] text-warm-400">10-15 minutes</span>
+                            </div>
                         </div>
                     </div>
                 </button>
@@ -41,17 +43,19 @@
                         hx-vals='{"program": "ready_for_rehab"}'
                         hx-include="#accordion-form"
                         hx-disabled-elt="this"
-                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer{% if program_type == 'ready_for_rehab' %} ring-2 ring-offset-1{% endif %}"
+                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer min-h-[56px]{% if program_type == 'ready_for_rehab' %} ring-2 ring-offset-1{% endif %}"
                         style="border-color: rgba(0,0,0,0.08);"
                         onmouseover="this.style.borderColor='#F57C00'"
                         onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
-                    <div class="flex flex-col gap-2">
-                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base" style="background: #F57C0015">&#128296;</div>
-                        <h4 class="text-sm font-bold font-heading text-warm-900">Ready for Rehab</h4>
-                        <p class="text-xs text-warm-500 leading-relaxed">Homes that need renovation at lower costs</p>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span class="text-[11px] text-warm-400">15-20 minutes</span>
+                    <div class="flex flex-col sm:flex-col gap-2 program-card-inner">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0" style="background: #F57C0015">&#128296;</div>
+                        <div class="program-card-text min-w-0">
+                            <h4 class="text-sm font-bold font-heading text-warm-900">Ready for Rehab</h4>
+                            <p class="text-xs text-warm-500 leading-relaxed">Homes that need renovation at lower costs</p>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span class="text-[11px] text-warm-400">15-20 minutes</span>
+                            </div>
                         </div>
                     </div>
                 </button>
@@ -64,17 +68,19 @@
                         hx-vals='{"program": "vip_spotlight"}'
                         hx-include="#accordion-form"
                         hx-disabled-elt="this"
-                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer{% if program_type == 'vip_spotlight' %} ring-2 ring-offset-1{% endif %}"
+                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer min-h-[56px]{% if program_type == 'vip_spotlight' %} ring-2 ring-offset-1{% endif %}"
                         style="border-color: rgba(0,0,0,0.08);"
                         onmouseover="this.style.borderColor='#1565C0'"
                         onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
-                    <div class="flex flex-col gap-2">
-                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base" style="background: #1565C015">&#11088;</div>
-                        <h4 class="text-sm font-bold font-heading text-warm-900">VIP Spotlight</h4>
-                        <p class="text-xs text-warm-500 leading-relaxed">Unique properties evaluated by proposal</p>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span class="text-[11px] text-warm-400">20-30 minutes</span>
+                    <div class="flex flex-col sm:flex-col gap-2 program-card-inner">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0" style="background: #1565C015">&#11088;</div>
+                        <div class="program-card-text min-w-0">
+                            <h4 class="text-sm font-bold font-heading text-warm-900">VIP Spotlight</h4>
+                            <p class="text-xs text-warm-500 leading-relaxed">Unique properties evaluated by proposal</p>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span class="text-[11px] text-warm-400">20-30 minutes</span>
+                            </div>
                         </div>
                     </div>
                 </button>

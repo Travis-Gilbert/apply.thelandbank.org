@@ -34,10 +34,10 @@
                 </p>
                 <div class="flex gap-4">
                     {% for value, label in form.has_delinquent_taxes.field.widget.choices %}
-                    <label class="flex items-center gap-2 cursor-pointer">
+                    <label class="touch-label">
                         <input type="radio" name="{{ form.has_delinquent_taxes.html_name }}" value="{{ value }}"
                                {% if form.has_delinquent_taxes.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
-                               class="w-4 h-4 border-warm-300 text-civic-green-600 focus:ring-civic-green-200" required>
+                               class="border-warm-300 text-civic-green-600 focus:ring-civic-green-200" required>
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
                     {% endfor %}
@@ -53,10 +53,10 @@
                 </p>
                 <div class="flex gap-4">
                     {% for value, label in form.has_tax_foreclosure.field.widget.choices %}
-                    <label class="flex items-center gap-2 cursor-pointer">
+                    <label class="touch-label">
                         <input type="radio" name="{{ form.has_tax_foreclosure.html_name }}" value="{{ value }}"
                                {% if form.has_tax_foreclosure.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
-                               class="w-4 h-4 border-warm-300 text-civic-green-600 focus:ring-civic-green-200" required>
+                               class="border-warm-300 text-civic-green-600 focus:ring-civic-green-200" required>
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
                     {% endfor %}

@@ -35,10 +35,10 @@
 
             {# Open house checkbox + date #}
             <div class="space-y-3">
-                <label class="flex items-start gap-3 cursor-pointer">
+                <label class="touch-label items-start">
                     <input type="checkbox" name="{{ form.attended_open_house.html_name }}"
                            {% if form.attended_open_house.value %}checked{% endif %}
-                           class="mt-0.5 w-4 h-4 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
+                           class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
                     <span class="text-sm text-warm-900">I have attended an open house or visited this property</span>
                 </label>
 

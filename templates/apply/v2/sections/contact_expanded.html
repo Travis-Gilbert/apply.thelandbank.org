@@ -37,7 +37,7 @@
                         Email <span class="text-red-500 text-xs">*</span>
                     </label>
                     <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}"
-                           value="{{ form.email.value|default:'' }}" required
+                           value="{{ form.email.value|default:'' }}" required inputmode="email"
                            placeholder="you@example.com" class="gclba-input{% if form.email.errors %} has-error{% endif %}">
                     {% if form.email.errors %}<p class="text-xs text-red-600 font-medium">{{ form.email.errors.0 }}</p>{% endif %}
                 </div>
@@ -46,7 +46,7 @@
                         Phone <span class="text-red-500 text-xs">*</span>
                     </label>
                     <input type="tel" name="{{ form.phone.html_name }}" id="{{ form.phone.id_for_label }}"
-                           value="{{ form.phone.value|default:'' }}" required
+                           value="{{ form.phone.value|default:'' }}" required inputmode="tel"
                            placeholder="(810) 555-0123" class="gclba-input{% if form.phone.errors %} has-error{% endif %}">
                     {% if form.phone.errors %}<p class="text-xs text-red-600 font-medium">{{ form.phone.errors.0 }}</p>{% endif %}
                 </div>
@@ -58,7 +58,7 @@
                     Preferred Contact Method <span class="text-red-500 text-xs">*</span>
                 </label>
                 <select name="{{ form.preferred_contact.html_name }}" id="{{ form.preferred_contact.id_for_label }}"
-                        class="gclba-input gclba-select">
+                        class="gclba-input gclba-select" style="min-height: 44px;">
                     {% for value, label in form.preferred_contact.field.choices %}
                     <option value="{{ value }}" {% if form.preferred_contact.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -99,7 +99,7 @@
                         ZIP <span class="text-red-500 text-xs">*</span>
                     </label>
                     <input type="text" name="{{ form.zip_code.html_name }}" id="{{ form.zip_code.id_for_label }}"
-                           value="{{ form.zip_code.value|default:'' }}" required maxlength="10"
+                           value="{{ form.zip_code.value|default:'' }}" required maxlength="10" inputmode="numeric"
                            placeholder="48502" class="gclba-input{% if form.zip_code.errors %} has-error{% endif %}">
                 </div>
             </div>

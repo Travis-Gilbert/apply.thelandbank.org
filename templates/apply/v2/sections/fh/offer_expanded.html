@@ -15,10 +15,10 @@
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3">
                     {% for value, label in form.purchase_type.field.widget.choices %}
-                    <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border border-warm-200 bg-white/60 hover:bg-white transition-colors">
+                    <label class="touch-label px-4 py-3 rounded-xl border border-warm-200 bg-white/60 hover:bg-white transition-colors">
                         <input type="radio" name="{{ form.purchase_type.html_name }}" value="{{ value }}"
                                {% if form.purchase_type.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
-                               class="w-4 h-4 border-warm-300 text-civic-green-600 focus:ring-civic-green-200"
+                               class="border-warm-300 text-civic-green-600 focus:ring-civic-green-200"
                                hx-post="{% url 'applications:htmx_purchase_type_fields' %}"
                                hx-target="#purchase-type-fields"
                                hx-swap="innerHTML"
@@ -38,7 +38,7 @@
                 </label>
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
-                    <input type="number" step="0.01" min="1"
+                    <input type="number" step="0.01" min="1" inputmode="decimal"
                            name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
                            value="{{ form.offer_amount.value|default:'' }}" required
                            placeholder="15,000.00"
@@ -58,7 +58,7 @@
                         </label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
-                            <input type="number" step="0.01" min="1000"
+                            <input type="number" step="0.01" min="1000" inputmode="decimal"
                                    name="{{ form.down_payment_amount.html_name }}" id="{{ form.down_payment_amount.id_for_label }}"
                                    value="{{ form.down_payment_amount.value|default:'' }}"
                                    placeholder="1,500.00"
@@ -68,10 +68,10 @@
                         {% if form.down_payment_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.down_payment_amount.errors.0 }}</p>{% endif %}
                     </div>
 
-                    <label class="flex items-start gap-3 cursor-pointer">
+                    <label class="touch-label items-start p-2 rounded-lg hover:bg-warm-50/50 transition-colors">
                         <input type="checkbox" name="{{ form.is_self_employed.html_name }}"
                                {% if form.is_self_employed.value %}checked{% endif %}
-                               class="mt-0.5 w-4 h-4 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
+                               class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
                         <div>
                             <span class="text-sm text-warm-900">I am self-employed</span>
                             <p class="text-xs text-warm-500 mt-0.5">This changes your income documentation requirements</p>
