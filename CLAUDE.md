@@ -21,7 +21,7 @@ and nobody has delivered it. Build it well.
 
 | Layer | Choice | Why |
 |-------|--------|-----|
-| Framework | Django 5.2 | Built-in admin, forms, auth, migrations |
+| Framework | Django 6.0.2 | Built-in admin, forms, auth, migrations |
 | Admin theme | django-unfold | Modern Tailwind-based replacement for Django Admin |
 | Buyer forms | Custom Django views + Tailwind CSS + HTMX | Server-rendered, HTMX for conditional field logic |
 | Database | PostgreSQL (Railway) | Prod DB via Railway plugin |
@@ -420,6 +420,20 @@ Generated on final submission only. Example: GCLBA-2026-0001
 
 ---
 
+## Development Commands
+
+```bash
+source venv/bin/activate          # Required — python not on PATH without it
+python manage.py runserver 8199   # Dev server (port 8199 avoids conflicts)
+python manage.py check            # Validate models, urls, templates
+python manage.py makemigrations --check  # Verify no missing migrations
+```
+
+**Deploy:** merge develop → main, push main (Railway auto-deploys)
+**Railway URL:** https://apply-thelandbankorg.up.railway.app/apply/
+
+---
+
 ## Deployment
 
 **Platform: Railway** — PostgreSQL plugin, auto-deploy on push to main
@@ -481,7 +495,11 @@ AWS_S3_REGION_NAME
 9. **Fat models, thin views** — validation, reference number generation, status
    transitions in models.py, not views.py.
 
-10. **Django version** — Django 5.2 (LTS). Not 6.0, which does not exist yet.
+10. **Django version** — Django 6.0.2 (current production). Spec originally said 5.2 but 6.0 was released; no breaking changes affect this project.
+
+11. **NullBooleanField + RadioSelect** — choices live on `field.widget.choices`, not `field.choices`. In templates: `{% for value, label in form.my_field.field.widget.choices %}`. Use `|stringformat:"s"` on both sides for checked comparison.
+
+12. **Template-form field alignment** — every `{{ form.field_name }}` in a template must exist on the form class that the dispatcher passes for that step. If a field renders with empty name/id/options, it's missing from the form class.
 
 ---
 
@@ -510,6 +528,41 @@ AWS_S3_REGION_NAME
 - Spanish language version
 - Payment processing
 - API endpoints
+
+---
+
+## Current Status
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Models + Migration (Batch 1) | Done | 87 fields, 4 program types, all choices updated |
+| Forms Package (Batch 2) | Done | shared.py, featured_homes.py, ready_for_rehab.py, vip_spotlight.py |
+| Views + URLs + Routing (Batch 3) | Done | Dispatcher pattern, HTMX endpoints, save/resume |
+| Templates (Batch 4) | Done | 28 templates, civic design system, all 4 program paths |
+| Admin (Batch 5) | Done | django-unfold config, admin_utils.py, fieldsets |
+| Railway deployment | Done | Live at https://apply-thelandbankorg.up.railway.app/apply/ |
+| Document uploads (S3/B2) | Open | Not yet implemented — file fields exist but no storage backend |
+| Email (SendGrid/Resend) | Open | No email integration yet |
+| Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing |
+| Submission flow | Open | _submit_application() not yet wired — drafts work, final submit doesn't |
+
+## Next Step
+
+Wire up `_submit_application()` in `applications/views/submission.py` — hydrate ApplicationDraft
+JSON into a real Application model instance, generate reference number, mark draft as submitted.
+This is the critical path to a working end-to-end flow.
+
+---
+
+## Recent Decisions
+
+| Decision | Why | Date |
+|----------|-----|------|
+| Django 6.0.2 instead of spec's 5.2 | 6.0 released after spec written; no breaking changes; already deployed | 2026-02-19 |
+| Port 8199 for dev server | Avoids conflict with other local services | 2026-02-20 |
+| Civic design system (green #2e7d32, blue #2d6a8a) | Evolved from GCLBA brand colors; warmer, more accessible than raw brand hex | 2026-02-20 |
+| Forms package split by program | One file per program (featured_homes.py, ready_for_rehab.py, vip_spotlight.py) + shared.py — keeps each under 200 lines | 2026-02-19 |
+| intended_use on renovation form, not offer form | Template for renovation step references it; dispatcher passes one form per step | 2026-02-20 |
 
 ---
 
