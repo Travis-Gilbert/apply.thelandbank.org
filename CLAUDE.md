@@ -403,9 +403,10 @@ Generated on final submission only. Example: GCLBA-2026-0001
 ## Design System
 
 ### Buyer-Facing
-- GCLBA brand green: #2B6553 (primary), #1a4035 (dark), #e8f4f0 (light bg)
-- GCLBA brand blue: #1B4F8A (accent, from logo)
-- Tailwind CSS, Inter or system sans-serif
+- Civic green: #2e7d32 (primary), civic blue: #2d6a8a (accent)
+- Tailwind CSS via Play CDN (no build step, config in base.html `<script>`)
+- Fonts: Bitter (headings, `font-heading`), IBM Plex Sans (body, `font-sans`), JetBrains Mono (`font-mono`)
+- **font-mono rule:** ONLY on dollar amounts, reference numbers (GCLBA-YYYY-NNNN), property IDs, and numeric inputs. Never on phone numbers, emails, addresses, labels, or time phrases.
 - Each step = its own screen with progress bar
 - Mobile-first, large touch targets
 - Plain language labels throughout — no legal jargon
@@ -501,6 +502,14 @@ AWS_S3_REGION_NAME
 
 12. **Template-form field alignment** — every `{{ form.field_name }}` in a template must exist on the form class that the dispatcher passes for that step. If a field renders with empty name/id/options, it's missing from the form class.
 
+13. **Tailwind config** — loaded via Play CDN `<script>` in `templates/base.html`, not a build pipeline.
+    Custom colors (`civic-green-*`, `civic-blue-*`, `warm-*`), fonts, and utilities are defined in
+    the inline `tailwind.config` block. No `tailwind.config.js` or PostCSS.
+
+14. **Plain language** — avoid developer jargon in buyer-facing text. Say "a link to resume your
+    application" not "magic link". Say "reference number" not "token". The audience is Flint
+    residents buying homes, not developers.
+
 ---
 
 ## Phase 1 MVP Scope
@@ -544,13 +553,17 @@ AWS_S3_REGION_NAME
 | Document uploads (S3/B2) | Open | Not yet implemented — file fields exist but no storage backend |
 | Email (SendGrid/Resend) | Open | No email integration yet |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing |
-| Submission flow | Open | _submit_application() not yet wired — drafts work, final submit doesn't |
+| Submission flow | Done | transaction.atomic(), reference number generation, error handling |
+| Security hardening | Done | Step-order enforcement, CSRF, rate limiting, input validation |
+| UI polish | Done | Logo, header redesign, font-mono audit, plain language |
 
 ## Next Step
 
-Wire up `_submit_application()` in `applications/views/submission.py` — hydrate ApplicationDraft
-JSON into a real Application model instance, generate reference number, mark draft as submitted.
-This is the critical path to a working end-to-end flow.
+Two critical-path items remain for end-to-end MVP:
+1. **Document uploads** — wire S3/Backblaze B2 storage backend via django-storages. File fields
+   exist on models but no storage configured. Pre-signed URLs needed for staff viewing.
+2. **Email integration** — django-anymail with Resend is installed but not configured. Need
+   save-and-resume email, submission confirmation, and staff notification templates.
 
 ---
 
@@ -563,6 +576,7 @@ This is the critical path to a working end-to-end flow.
 | Civic design system (green #2e7d32, blue #2d6a8a) | Evolved from GCLBA brand colors; warmer, more accessible than raw brand hex | 2026-02-20 |
 | Forms package split by program | One file per program (featured_homes.py, ready_for_rehab.py, vip_spotlight.py) + shared.py — keeps each under 200 lines | 2026-02-19 |
 | intended_use on renovation form, not offer form | Template for renovation step references it; dispatcher passes one form per step | 2026-02-20 |
+| font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
 
 ---
 
