@@ -1,0 +1,23 @@
+<p>Dear {{ application.first_name }},</p>
+
+<p>Your application has been approved.</p>
+
+<p>
+  <strong>Reference Number:</strong> {{ application.reference_number }}<br>
+  <strong>Property:</strong> {{ application.property_address }}<br>
+  <strong>Program:</strong> {{ application.get_program_type_display }}
+</p>
+
+{% if note %}
+<p><strong>Staff note:</strong><br>{{ note|linebreaksbr }}</p>
+{% endif %}
+
+<p>Our sales team will follow up with next steps for closing.</p>
+
+<p>If you have questions, contact <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+
+<p>
+  Genesee County Land Bank Authority<br>
+  {{ contact_phone }}
+</p>
+

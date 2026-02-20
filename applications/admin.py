@@ -5,11 +5,15 @@ Uses Django Unfold for a modern staff dashboard with colored status badges,
 organized fieldsets, inline documents, and automatic status audit logging.
 """
 
-from django.contrib import admin
+from django import forms
+from django.contrib import admin, messages
+from django.utils import timezone
+from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import display
 
 from .models import Application, ApplicationDraft, Document, StatusLog
+from .status_notifications import requires_transition_note, send_buyer_status_email
 
 # ── Inlines ──────────────────────────────────────────────────────
 
@@ -17,8 +21,18 @@ from .models import Application, ApplicationDraft, Document, StatusLog
 class DocumentInline(TabularInline):
     model = Document
     extra = 0
-    fields = ("doc_type", "file", "original_filename", "uploaded_at")
-    readonly_fields = ("uploaded_at",)
+    fields = ("doc_type", "file", "view_file", "original_filename", "uploaded_at")
+    readonly_fields = ("view_file", "uploaded_at")
+    classes = ("collapse",)
+
+    @display(description="View")
+    def view_file(self, instance):
+        if not instance.file:
+            return "—"
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">Open</a>',
+            instance.file.url,
+        )
 
 
 class StatusLogInline(TabularInline):
@@ -26,6 +40,64 @@ class StatusLogInline(TabularInline):
     extra = 0
     fields = ("from_status", "to_status", "changed_by", "notes", "changed_at")
     readonly_fields = ("from_status", "to_status", "changed_by", "changed_at")
+    classes = ("collapse",)
+
+
+class DocsStateFilter(admin.SimpleListFilter):
+    """Filter applications by whether required documents are complete."""
+
+    title = "documents"
+    parameter_name = "docs_state"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("complete", "Complete"),
+            ("missing", "Missing"),
+        )
+
+    def queryset(self, request, queryset):
+        choice = self.value()
+        if choice not in {"complete", "missing"}:
+            return queryset
+
+        target_complete = choice == "complete"
+        matching_ids = [
+            app.pk
+            for app in queryset.prefetch_related("documents")
+            if app.docs_complete == target_complete
+        ]
+        return queryset.filter(pk__in=matching_ids)
+
+
+class ApplicationAdminForm(forms.ModelForm):
+    """Admin form with transition-note requirements for buyer-facing updates."""
+
+    class Meta:
+        model = Application
+        fields = "__all__"
+
+    def clean(self):
+        cleaned = super().clean()
+        new_status = cleaned.get("status")
+
+        # Instance with no PK means a brand-new object creation in admin.
+        if not self.instance.pk or not new_status:
+            return cleaned
+
+        old_status = self.instance.status
+        if old_status == new_status:
+            return cleaned
+
+        if requires_transition_note(new_status):
+            note = (cleaned.get("staff_notes") or "").strip()
+            if not note:
+                self.add_error(
+                    "staff_notes",
+                    "A transition note is required when setting status to "
+                    f"{dict(Application.Status.choices).get(new_status, new_status)}.",
+                )
+
+        return cleaned
 
 
 # ── Application Admin ────────────────────────────────────────────
@@ -33,33 +105,95 @@ class StatusLogInline(TabularInline):
 
 @admin.register(Application)
 class ApplicationAdmin(ModelAdmin):
+    COMMON_FIELDSET_TITLES = {
+        "Review Snapshot",
+        "Applicant Identity",
+        "Property & Program",
+        "Eligibility",
+        "Acknowledgments",
+        "Timestamps",
+    }
+
+    PROGRAM_FIELDSET_TITLES = {
+        Application.ProgramType.FEATURED_HOMES: {
+            "Offer Details",
+            "Intended Use & Renovation Narrative",
+        },
+        Application.ProgramType.READY_FOR_REHAB: {
+            "Offer Details",
+            "Intended Use & Renovation Narrative",
+            "R4R: Renovation Line Items — Interior",
+            "R4R: Renovation Line Items — Exterior",
+            "R4R: Prior GCLBA Purchase",
+        },
+        Application.ProgramType.VIP_SPOTLIGHT: {"VIP Proposal"},
+        Application.ProgramType.VACANT_LOT: set(),
+    }
+
     list_display = (
         "reference_number",
         "full_name",
         "property_address",
         "display_program",
+        "display_offer",
         "display_status",
         "display_docs",
+        "display_assignee",
+        "submitted_age",
         "submitted_at",
     )
-    list_filter = ("status", "program_type", "purchase_type", "submitted_at")
+    list_filter = (
+        "status",
+        "program_type",
+        "purchase_type",
+        "assigned_to",
+        DocsStateFilter,
+        "submitted_at",
+    )
+    list_display_links = ("reference_number", "full_name")
     list_filter_submit = True
+    date_hierarchy = "submitted_at"
+    ordering = ("status", "-submitted_at")
+    list_per_page = 50
     search_fields = (
         "reference_number",
         "first_name",
         "last_name",
         "email",
+        "phone",
         "property_address",
         "parcel_id",
     )
-    readonly_fields = ("reference_number", "created_at", "updated_at", "submitted_at")
+    autocomplete_fields = ("assigned_to",)
+    readonly_fields = (
+        "reference_number",
+        "display_docs",
+        "closing_fee_display",
+        "submitted_age",
+        "created_at",
+        "updated_at",
+        "submitted_at",
+    )
     inlines = [DocumentInline, StatusLogInline]
+    actions = (
+        "mark_under_review",
+        "mark_needs_more_info",
+        "mark_approved",
+        "mark_declined",
+        "assign_to_me",
+        "clear_assignee",
+    )
 
     fieldsets = (
         (
-            "Reference & Status",
+            "Review Snapshot",
             {
-                "fields": ("reference_number", "status", "staff_notes"),
+                "fields": (
+                    ("reference_number", "status"),
+                    ("assigned_to", "display_docs"),
+                    ("submitted_age", "closing_fee_display"),
+                    "staff_notes",
+                ),
             },
         ),
         (
@@ -227,6 +361,29 @@ class ApplicationAdmin(ModelAdmin):
         ),
     )
 
+    def get_fieldsets(self, request, obj=None):
+        """Hide irrelevant field groups for the selected program."""
+        if obj is None:
+            return self.fieldsets
+
+        allowed = set(self.COMMON_FIELDSET_TITLES)
+        allowed |= self.PROGRAM_FIELDSET_TITLES.get(obj.program_type, set())
+        if (
+            obj.program_type == Application.ProgramType.FEATURED_HOMES
+            and obj.purchase_type == Application.PurchaseType.LAND_CONTRACT
+        ):
+            allowed.add("Homebuyer Education (Land Contract Only)")
+
+        return tuple(fieldset for fieldset in self.fieldsets if fieldset[0] in allowed)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("assigned_to")
+            .prefetch_related("documents")
+        )
+
     @display(
         description="Status",
         label={
@@ -244,11 +401,156 @@ class ApplicationAdmin(ModelAdmin):
     def display_program(self, instance):
         return instance.get_program_type_display()
 
-    @display(description="Docs")
+    @display(description="Offer")
+    def display_offer(self, instance):
+        if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+            return "See Proposal"
+        if instance.offer_amount is None:
+            return "—"
+        return f"${instance.offer_amount:,.2f}"
+
+    @display(description="Docs", label={"Complete": "success", "Incomplete": "danger"})
     def display_docs(self, instance):
         if instance.docs_complete:
             return "Complete"
         return "Incomplete"
+
+    @display(description="Assigned", ordering="assigned_to__username")
+    def display_assignee(self, instance):
+        if not instance.assigned_to:
+            return "Unassigned"
+        return instance.assigned_to.get_full_name() or instance.assigned_to.get_username()
+
+    @display(description="Age", ordering="submitted_at")
+    def submitted_age(self, instance):
+        days_open = (timezone.now() - instance.submitted_at).days
+        if days_open == 0:
+            return "Today"
+        label = f"{days_open} day" if days_open == 1 else f"{days_open} days"
+        if (
+            instance.status in (Application.Status.RECEIVED, Application.Status.UNDER_REVIEW)
+            and days_open >= 7
+        ):
+            return format_html("<span style='color:#b91c1c;font-weight:600'>{}</span>", label)
+        return label
+
+    @display(description="Closing Fee")
+    def closing_fee_display(self, instance):
+        if instance.program_type == Application.ProgramType.FEATURED_HOMES:
+            if instance.purchase_type == Application.PurchaseType.LAND_CONTRACT:
+                return "$125"
+            return "$75"
+        if instance.program_type == Application.ProgramType.READY_FOR_REHAB:
+            return "$75"
+        if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+            return "Per Purchase & Development Agreement"
+        return "TBD"
+
+    def _bulk_set_status(self, request, queryset, new_status):
+        apps = list(queryset.only(
+            "id",
+            "status",
+            "staff_notes",
+            "reference_number",
+            "first_name",
+            "email",
+            "property_address",
+            "program_type",
+            "purchase_type",
+            "offer_amount",
+        ))
+        changed = [app for app in apps if app.status != new_status]
+        if not changed:
+            self.message_user(request, "No status changes were needed.")
+            return
+
+        skipped_missing_note = []
+        eligible = []
+        for app in changed:
+            note = (app.staff_notes or "").strip()
+            if requires_transition_note(new_status) and not note:
+                skipped_missing_note.append(app.reference_number)
+                continue
+            eligible.append(app)
+
+        if not eligible:
+            self.message_user(
+                request,
+                "No updates applied. Add a staff note before using this status action.",
+                level=messages.WARNING,
+            )
+            return
+
+        ids = [app.id for app in eligible]
+        old_status_map = {app.id: app.status for app in eligible}
+        note_by_id = {app.id: (app.staff_notes or "").strip() for app in eligible}
+        updated_at = timezone.now()
+
+        Application.objects.filter(id__in=ids).update(status=new_status, updated_at=updated_at)
+        StatusLog.objects.bulk_create(
+            [
+                StatusLog(
+                    application_id=app_id,
+                    from_status=old_status_map[app_id],
+                    to_status=new_status,
+                    changed_by=request.user,
+                    notes=note_by_id[app_id],
+                )
+                for app_id in ids
+            ]
+        )
+
+        email_failures = 0
+        for app in eligible:
+            app.status = new_status
+            outcome = send_buyer_status_email(
+                application=app,
+                old_status=old_status_map[app.id],
+                note=note_by_id[app.id],
+            )
+            if outcome == "failed":
+                email_failures += 1
+
+        msg = f"Updated {len(ids)} application(s)."
+        if skipped_missing_note:
+            msg += f" Skipped {len(skipped_missing_note)} without required notes."
+        if email_failures:
+            msg += f" {email_failures} buyer status email(s) failed."
+
+        level = messages.WARNING if skipped_missing_note or email_failures else messages.SUCCESS
+        self.message_user(request, msg, level=level)
+
+    @admin.action(description="Set status to Under Review")
+    def mark_under_review(self, request, queryset):
+        self._bulk_set_status(request, queryset, Application.Status.UNDER_REVIEW)
+
+    @admin.action(description="Set status to Needs More Info")
+    def mark_needs_more_info(self, request, queryset):
+        self._bulk_set_status(request, queryset, Application.Status.NEEDS_MORE_INFO)
+
+    @admin.action(description="Set status to Approved")
+    def mark_approved(self, request, queryset):
+        self._bulk_set_status(request, queryset, Application.Status.APPROVED)
+
+    @admin.action(description="Set status to Declined")
+    def mark_declined(self, request, queryset):
+        self._bulk_set_status(request, queryset, Application.Status.DECLINED)
+
+    @admin.action(description="Assign selected to me")
+    def assign_to_me(self, request, queryset):
+        updated = queryset.exclude(assigned_to=request.user).update(
+            assigned_to=request.user,
+            updated_at=timezone.now(),
+        )
+        self.message_user(request, f"Assigned {updated} application(s) to you.")
+
+    @admin.action(description="Clear assignee")
+    def clear_assignee(self, request, queryset):
+        updated = queryset.exclude(assigned_to=None).update(
+            assigned_to=None,
+            updated_at=timezone.now(),
+        )
+        self.message_user(request, f"Cleared assignee for {updated} application(s).")
 
     def save_model(self, request, obj, form, change):
         """Auto-create StatusLog when status changes."""
@@ -257,12 +559,25 @@ class ApplicationAdmin(ModelAdmin):
             new_status = obj.status
             if old_status != new_status:
                 super().save_model(request, obj, form, change)
+                note = (obj.staff_notes or "").strip()
                 StatusLog.objects.create(
                     application=obj,
                     from_status=old_status,
                     to_status=new_status,
                     changed_by=request.user,
+                    notes=note,
                 )
+                outcome = send_buyer_status_email(
+                    application=obj,
+                    old_status=old_status,
+                    note=note,
+                )
+                if outcome == "failed":
+                    self.message_user(
+                        request,
+                        "Status updated, but buyer email failed to send.",
+                        level=messages.WARNING,
+                    )
                 return
         super().save_model(request, obj, form, change)
 
@@ -272,10 +587,26 @@ class ApplicationAdmin(ModelAdmin):
 
 @admin.register(ApplicationDraft)
 class ApplicationDraftAdmin(ModelAdmin):
-    list_display = ("token_short", "email", "program_type", "current_step", "is_expired_display", "updated_at")
-    list_filter = ("program_type", "current_step")
+    list_display = (
+        "token_short",
+        "email",
+        "program_type",
+        "current_step",
+        "submitted",
+        "is_expired_display",
+        "updated_at",
+    )
+    list_filter = ("program_type", "current_step", "submitted")
     search_fields = ("email",)
-    readonly_fields = ("token", "form_data", "created_at", "updated_at", "expires_at")
+    readonly_fields = (
+        "token",
+        "form_data",
+        "created_at",
+        "updated_at",
+        "expires_at",
+        "submitted",
+        "submitted_at",
+    )
 
     def token_short(self, obj):
         return obj.token.hex[:8]
@@ -287,3 +618,4 @@ class ApplicationDraftAdmin(ModelAdmin):
 
     is_expired_display.short_description = "Expired?"
     is_expired_display.boolean = True
+    form = ApplicationAdminForm

@@ -1,0 +1,21 @@
+<p>Dear {{ application.first_name }},</p>
+
+<p>Thank you for your application. After review, your application was not selected at this time.</p>
+
+<p>
+  <strong>Reference Number:</strong> {{ application.reference_number }}<br>
+  <strong>Property:</strong> {{ application.property_address }}<br>
+  <strong>Program:</strong> {{ application.get_program_type_display }}
+</p>
+
+<p><strong>Review note:</strong><br>
+{% if note %}{{ note|linebreaksbr }}{% else %}Your application was not selected in this review round.{% endif %}
+</p>
+
+<p>If you have questions, contact <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+
+<p>
+  Genesee County Land Bank Authority<br>
+  {{ contact_phone }}
+</p>
+
