@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Application Submitted — {{ application.reference_number }}{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-12">
+    <div class="mx-auto w-16 h-16 bg-gclba-100 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-8 h-8 text-gclba-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h2>
+    <p class="text-lg text-gclba-700 font-mono font-bold mb-4">{{ application.reference_number }}</p>
+
+    <p class="text-gray-600 mb-8">
+        Thank you, {{ application.first_name }}. Your application has been received and
+        a confirmation email has been sent to <strong>{{ application.email }}</strong>.
+    </p>
+
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-left space-y-3 mb-8">
+        <h3 class="font-semibold text-gray-900">What happens next?</h3>
+        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-2">
+            <li>Our team will review your application within <strong>5-7 business days</strong>.</li>
+            <li>We may contact you if additional documents are needed.</li>
+            <li>You'll receive an email when a decision has been made.</li>
+            <li>If approved, you'll have <strong>30 days to close</strong> on the property.</li>
+        </ol>
+    </div>
+
+    <div class="bg-gclba-50 border border-gclba-200 rounded-lg p-4 mb-8">
+        <h3 class="font-semibold text-gray-900 mb-1">Your Application Summary</h3>
+        <div class="text-sm text-gray-600 space-y-1">
+            <p>Property: {{ application.property_address }}</p>
+            <p>Offer: ${{ application.offer_amount|floatformat:2 }}</p>
+            <p>Program: {{ application.get_program_type_display }}</p>
+        </div>
+    </div>
+
+    <div class="space-y-2">
+        <p class="text-sm text-gray-500">Questions? Contact us:</p>
+        <p class="text-gray-600">(810) 257-3088 &middot;
+            <a href="mailto:offers@thelandbank.org" class="text-gclba-600 hover:underline">
+                offers@thelandbank.org
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

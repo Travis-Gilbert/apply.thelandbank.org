@@ -1,0 +1,82 @@
+{% extends "apply/base_form.html" %}
+
+{% block form_content %}
+<h3 class="text-lg font-semibold text-gray-900 mb-2">Review & Submit</h3>
+<p class="text-sm text-gray-600 mb-6">
+    Please review the summary below and confirm the acknowledgments to submit your application.
+</p>
+
+<!-- Summary -->
+<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 space-y-3">
+    <h4 class="font-medium text-gray-900">Application Summary</h4>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        <div>
+            <span class="text-gray-500">Name:</span>
+            <span class="text-gray-900">{{ form_data.first_name }} {{ form_data.last_name }}</span>
+        </div>
+        <div>
+            <span class="text-gray-500">Email:</span>
+            <span class="text-gray-900">{{ form_data.email }}</span>
+        </div>
+        <div>
+            <span class="text-gray-500">Property:</span>
+            <span class="text-gray-900">{{ form_data.property_address }}</span>
+        </div>
+        <div>
+            <span class="text-gray-500">Offer:</span>
+            <span class="text-gray-900">${{ form_data.offer_amount }}</span>
+        </div>
+        <div>
+            <span class="text-gray-500">Program:</span>
+            <span class="text-gray-900">{{ form_data.program_type|title }}</span>
+        </div>
+        <div>
+            <span class="text-gray-500">Purchase Type:</span>
+            <span class="text-gray-900">{{ form_data.purchase_type|title }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Acknowledgments -->
+<div class="space-y-4">
+    <div class="flex items-start gap-3">
+        <input type="checkbox" name="{{ form.ack_info_accurate.html_name }}" id="{{ form.ack_info_accurate.id_for_label }}"
+               {% if form.ack_info_accurate.value %}checked{% endif %}
+               class="mt-1 rounded text-gclba-600 focus:ring-gclba-500" required>
+        <label for="{{ form.ack_info_accurate.id_for_label }}" class="text-sm text-gray-700">
+            {{ form.ack_info_accurate.label }} <span class="text-red-500">*</span>
+        </label>
+    </div>
+    {% if form.ack_info_accurate.errors %}
+    <p class="ml-8 text-sm text-red-600">{{ form.ack_info_accurate.errors.0 }}</p>
+    {% endif %}
+
+    <div class="flex items-start gap-3">
+        <input type="checkbox" name="{{ form.ack_terms_conditions.html_name }}" id="{{ form.ack_terms_conditions.id_for_label }}"
+               {% if form.ack_terms_conditions.value %}checked{% endif %}
+               class="mt-1 rounded text-gclba-600 focus:ring-gclba-500" required>
+        <label for="{{ form.ack_terms_conditions.id_for_label }}" class="text-sm text-gray-700">
+            {{ form.ack_terms_conditions.label }} <span class="text-red-500">*</span>
+        </label>
+    </div>
+    {% if form.ack_terms_conditions.errors %}
+    <p class="ml-8 text-sm text-red-600">{{ form.ack_terms_conditions.errors.0 }}</p>
+    {% endif %}
+
+    <div class="flex items-start gap-3">
+        <input type="checkbox" name="{{ form.ack_inspection_waiver.html_name }}" id="{{ form.ack_inspection_waiver.id_for_label }}"
+               {% if form.ack_inspection_waiver.value %}checked{% endif %}
+               class="mt-1 rounded text-gclba-600 focus:ring-gclba-500" required>
+        <label for="{{ form.ack_inspection_waiver.id_for_label }}" class="text-sm text-gray-700">
+            {{ form.ack_inspection_waiver.label }} <span class="text-red-500">*</span>
+        </label>
+    </div>
+    {% if form.ack_inspection_waiver.errors %}
+    <p class="ml-8 text-sm text-red-600">{{ form.ack_inspection_waiver.errors.0 }}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block submit_label %}Submit Application{% endblock %}
+{% block save_button %}{% endblock %}
+{% block prev_url %}{{ prev_url }}{% endblock %}

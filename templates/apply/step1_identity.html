@@ -1,0 +1,149 @@
+{% extends "apply/base_form.html" %}
+
+{% block form_content %}
+<h3 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h3>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- First Name -->
+    <div>
+        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            First Name <span class="text-red-500">*</span>
+        </label>
+        <input type="text" name="{{ form.first_name.html_name }}" id="{{ form.first_name.id_for_label }}"
+               value="{{ form.first_name.value|default:'' }}"
+               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+               {% if form.first_name.errors %}border-red-300 text-red-900{% endif %}"
+               required>
+        {% if form.first_name.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Last Name -->
+    <div>
+        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            Last Name <span class="text-red-500">*</span>
+        </label>
+        <input type="text" name="{{ form.last_name.html_name }}" id="{{ form.last_name.id_for_label }}"
+               value="{{ form.last_name.value|default:'' }}"
+               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+               {% if form.last_name.errors %}border-red-300 text-red-900{% endif %}"
+               required>
+        {% if form.last_name.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Email -->
+<div>
+    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        Email Address <span class="text-red-500">*</span>
+    </label>
+    <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}"
+           value="{{ form.email.value|default:'' }}"
+           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+           {% if form.email.errors %}border-red-300 text-red-900{% endif %}"
+           required>
+    {% if form.email.errors %}
+    <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Phone -->
+    <div>
+        <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            Phone Number <span class="text-red-500">*</span>
+        </label>
+        <input type="tel" name="{{ form.phone.html_name }}" id="{{ form.phone.id_for_label }}"
+               value="{{ form.phone.value|default:'' }}"
+               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+               {% if form.phone.errors %}border-red-300 text-red-900{% endif %}"
+               required>
+        {% if form.phone.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Preferred Contact -->
+    <div>
+        <label for="{{ form.preferred_contact.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            Preferred Contact Method
+        </label>
+        <select name="{{ form.preferred_contact.html_name }}" id="{{ form.preferred_contact.id_for_label }}"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
+            {% for value, label in form.preferred_contact.field.choices %}
+            <option value="{{ value }}" {% if form.preferred_contact.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<h3 class="text-lg font-semibold text-gray-900 mt-6 mb-4">Current Address</h3>
+
+<!-- Street Address -->
+<div>
+    <label for="{{ form.street_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        Street Address <span class="text-red-500">*</span>
+    </label>
+    <input type="text" name="{{ form.street_address.html_name }}" id="{{ form.street_address.id_for_label }}"
+           value="{{ form.street_address.value|default:'' }}"
+           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+           {% if form.street_address.errors %}border-red-300 text-red-900{% endif %}"
+           required>
+    {% if form.street_address.errors %}
+    <p class="mt-1 text-sm text-red-600">{{ form.street_address.errors.0 }}</p>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <!-- City -->
+    <div class="col-span-2">
+        <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            City <span class="text-red-500">*</span>
+        </label>
+        <input type="text" name="{{ form.city.html_name }}" id="{{ form.city.id_for_label }}"
+               value="{{ form.city.value|default:'' }}"
+               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+               {% if form.city.errors %}border-red-300 text-red-900{% endif %}"
+               required>
+        {% if form.city.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.city.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- State -->
+    <div>
+        <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            State <span class="text-red-500">*</span>
+        </label>
+        <input type="text" name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}"
+               value="{{ form.state.value|default:'MI' }}" maxlength="2"
+               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+               {% if form.state.errors %}border-red-300 text-red-900{% endif %}"
+               required>
+        {% if form.state.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.state.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Zip Code -->
+    <div>
+        <label for="{{ form.zip_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            ZIP Code <span class="text-red-500">*</span>
+        </label>
+        <input type="text" name="{{ form.zip_code.html_name }}" id="{{ form.zip_code.id_for_label }}"
+               value="{{ form.zip_code.value|default:'' }}" maxlength="10"
+               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+               {% if form.zip_code.errors %}border-red-300 text-red-900{% endif %}"
+               required>
+        {% if form.zip_code.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.zip_code.errors.0 }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block prev_url %}{% endblock %}
+{% block save_url %}/apply/save/{% endblock %}
