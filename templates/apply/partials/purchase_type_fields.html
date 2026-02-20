@@ -1,8 +1,8 @@
 {% if show_land_contract %}
-<div class="p-4 border border-gclba-200 bg-gclba-50 rounded-lg space-y-4">
-    <h4 class="text-sm font-semibold text-gclba-800">Land Contract Details</h4>
+<div class="p-5 rounded-xl border-2 border-civic-green-200 bg-civic-green-50/50 space-y-5">
+    <h4 class="text-sm font-semibold text-civic-green-800">Land Contract Details</h4>
 
-    <div class="p-3 bg-amber-50 border border-amber-200 rounded-md">
+    <div class="p-3 rounded-lg bg-amber-50 border border-amber-200">
         <p class="text-xs text-amber-800">
             <strong>Owner-occupied only.</strong> Land contract purchases are not available for
             rental or investment properties. Minimum down payment: 10% of offer amount or $1,000,
@@ -11,38 +11,40 @@
     </div>
 
     <!-- Down Payment -->
-    <div>
-        <label for="id_down_payment_amount" class="block text-sm font-medium text-gray-700 mb-1">
+    <div class="space-y-1.5">
+        <label for="id_down_payment_amount" class="block text-sm font-medium text-warm-900">
             Down Payment Amount <span class="text-red-500">*</span>
         </label>
         <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 font-mono">$</span>
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-warm-400 font-mono text-lg pointer-events-none">$</span>
             <input type="number" step="0.01" min="0" name="down_payment_amount" id="id_down_payment_amount"
                    value="{{ down_payment_value|default:'' }}"
-                   class="block w-full pl-7 rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm font-mono"
+                   class="gclba-input pl-8 font-mono"
                    required>
         </div>
         {% if min_down %}
-        <p class="mt-1 text-xs text-gray-500">
-            Minimum: <span class="font-mono">${{ min_down }}</span>
+        <p class="text-xs text-warm-500">
+            Minimum: <span class="font-mono font-semibold text-warm-700">${{ min_down }}</span>
         </p>
         {% endif %}
     </div>
 
     <!-- Self-Employed -->
     <div id="self-employed-container">
-        <label class="flex items-center gap-2">
+        <label class="flex items-center gap-3 p-3 rounded-lg border border-warm-200 cursor-pointer hover:bg-warm-50 transition-colors has-[input:checked]:border-civic-green-300 has-[input:checked]:bg-civic-green-50/50">
             <input type="checkbox" name="is_self_employed"
                    {% if is_self_employed %}checked{% endif %}
-                   class="rounded text-gclba-600 focus:ring-gclba-500"
-                   hx-get="/apply/htmx/self-employed-label/"
+                   class="w-5 h-5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200"
+                   hx-get="{% url 'applications:htmx_self_employed_label' %}"
                    hx-target="#income-doc-label"
                    hx-trigger="change">
-            <span class="text-sm text-gray-700">I am self-employed</span>
+            <div>
+                <span class="text-sm font-medium text-warm-900">I am self-employed</span>
+                <p class="text-xs text-warm-500 mt-0.5">
+                    Self-employed buyers should provide tax returns instead of pay stubs.
+                </p>
+            </div>
         </label>
-        <p class="text-xs text-gray-500 mt-1 ml-6">
-            Self-employed buyers should provide tax returns instead of pay stubs.
-        </p>
     </div>
 </div>
 {% endif %}

@@ -1,88 +1,114 @@
 {% extends "apply/base_form.html" %}
 
+{% block step_subtitle %}Upload the required and optional supporting documents for your VIP proposal.{% endblock %}
+
 {% block form_content %}
-<h3 class="font-title text-xl font-semibold text-gray-900 mb-4">Documents</h3>
-
-<p class="text-sm text-gray-600 mb-6">
-    Upload the required documents below. Accepted formats: PDF, JPG, PNG (max 10 MB each).
-</p>
-
-{% if error %}
-<div class="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
-    <p class="text-sm text-red-700">{{ error }}</p>
-</div>
-{% endif %}
-
 <!-- Required Documents -->
-<h4 class="font-title text-lg font-semibold text-gray-800 mb-3">Required</h4>
-<div class="space-y-6 mb-8">
-    {% for doc_type in required_docs %}
-    <div class="p-4 border {% if uploaded and doc_type in uploaded %}border-gclba-300 bg-gclba-50{% else %}border-gray-200{% endif %} rounded-lg">
-        <label class="block text-sm font-medium text-gray-900 mb-1">
-            {% if doc_type == "photo_id" %}Valid Photo ID
-            {% elif doc_type == "proof_of_funds" %}Proof of Funds (Equity Portion)
-            {% endif %}
-            <span class="text-red-500">*</span>
-        </label>
+<div class="section-card p-6 sm:p-8 space-y-5">
+    {% include "apply/_section_label.html" with text="Required Documents" %}
 
-        {% if doc_type == "photo_id" %}
-        <p class="text-xs text-gray-500 mb-2">State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted.</p>
-        {% elif doc_type == "proof_of_funds" %}
-        <p class="text-xs text-gray-500 mb-2">Bank statement or documentation showing available funds for the equity portion of your purchase.</p>
-        {% endif %}
+    <p class="text-sm text-warm-600">
+        Accepted formats: PDF, JPG, PNG (max 10 MB each).
+    </p>
 
-        {% if uploaded and doc_type in uploaded %}
-        <div class="flex items-center gap-2 mb-2">
-            <svg class="w-4 h-4 text-gclba-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
-            <span class="text-sm text-gclba-700">Uploaded</span>
-        </div>
-        {% endif %}
-
-        <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
-               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gclba-50 file:text-gclba-700 hover:file:bg-gclba-100">
+    {% if error %}
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200">
+        <p class="text-sm text-red-700 font-medium">{{ error }}</p>
     </div>
-    {% endfor %}
+    {% endif %}
+
+    <div class="space-y-4">
+        {% for doc_type in required_docs %}
+        <div class="p-4 rounded-xl border-2 transition-all
+                    {% if uploaded and doc_type in uploaded %}border-civic-green-300 bg-civic-green-50/50{% else %}border-warm-200{% endif %}">
+            <label class="block text-sm font-semibold text-warm-900 mb-1">
+                {% if doc_type == "photo_id" %}Valid Photo ID
+                {% elif doc_type == "proof_of_funds" %}Proof of Funds (Equity Portion)
+                {% endif %}
+                <span class="text-red-500">*</span>
+            </label>
+
+            {% if doc_type == "photo_id" %}
+            <p class="text-xs text-warm-500 mb-3">State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted.</p>
+            {% elif doc_type == "proof_of_funds" %}
+            <p class="text-xs text-warm-500 mb-3">Bank statement or documentation showing available funds for the equity portion of your purchase.</p>
+            {% endif %}
+
+            {% if uploaded and doc_type in uploaded %}
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-4 h-4 text-civic-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-sm font-medium text-civic-green-700">Uploaded</span>
+            </div>
+            {% endif %}
+
+            <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
+                   class="block w-full text-sm text-warm-600
+                          file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                          file:text-sm file:font-medium file:bg-civic-blue-50 file:text-civic-blue-700
+                          hover:file:bg-civic-blue-100 file:transition-colors file:cursor-pointer">
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
-<!-- Optional Documents -->
+<!-- Optional Supporting Documents -->
 {% if optional_docs %}
-<h4 class="font-title text-lg font-semibold text-gray-800 mb-3">Optional Supporting Documents</h4>
-<p class="text-sm text-gray-500 mb-4">
-    These documents strengthen your proposal but are not required to submit.
-</p>
-<div class="space-y-6">
-    {% for doc_type in optional_docs %}
-    <div class="p-4 border {% if uploaded and doc_type in uploaded %}border-gclba-300 bg-gclba-50{% else %}border-gray-200{% endif %} rounded-lg">
-        <label class="block text-sm font-medium text-gray-900 mb-1">
-            {% if doc_type == "vip_preapproval" %}Pre-Approval Letter (Construction Financing)
-            {% elif doc_type == "vip_portfolio_photo" %}Portfolio Photos (Past Renovations)
-            {% elif doc_type == "vip_support_letter" %}Letters of Support
+<div class="section-card p-6 sm:p-8 space-y-5 mt-5">
+    {% include "apply/_section_label.html" with text="Optional Supporting Documents" blue=True %}
+
+    <p class="text-sm text-warm-600">
+        These documents strengthen your proposal but are not required to submit.
+    </p>
+
+    <div class="space-y-4">
+        {% for doc_type in optional_docs %}
+        <div class="p-4 rounded-xl border-2 transition-all border-dashed
+                    {% if uploaded and doc_type in uploaded %}border-civic-green-300 bg-civic-green-50/50 border-solid{% else %}border-warm-300{% endif %}">
+            <label class="block text-sm font-semibold text-warm-900 mb-1">
+                {% if doc_type == "vip_preapproval" %}Pre-Approval Letter (Construction Financing)
+                {% elif doc_type == "vip_portfolio_photo" %}Portfolio Photos (Past Renovations)
+                {% elif doc_type == "vip_support_letter" %}Letters of Support
+                {% endif %}
+            </label>
+
+            {% if doc_type == "vip_preapproval" %}
+            <p class="text-xs text-warm-500 mb-3">If using construction financing, include your pre-approval letter.</p>
+            {% elif doc_type == "vip_portfolio_photo" %}
+            <p class="text-xs text-warm-500 mb-3">Before/after photos of previously renovated properties. You may upload multiple files.</p>
+            {% elif doc_type == "vip_support_letter" %}
+            <p class="text-xs text-warm-500 mb-3">Letters of support, references, or community endorsements. You may upload multiple files.</p>
             {% endif %}
-        </label>
 
-        {% if doc_type == "vip_preapproval" %}
-        <p class="text-xs text-gray-500 mb-2">If using construction financing, include your pre-approval letter.</p>
-        {% elif doc_type == "vip_portfolio_photo" %}
-        <p class="text-xs text-gray-500 mb-2">Before/after photos of previously renovated properties. You may upload multiple files.</p>
-        {% elif doc_type == "vip_support_letter" %}
-        <p class="text-xs text-gray-500 mb-2">Letters of support, references, or community endorsements. You may upload multiple files.</p>
-        {% endif %}
+            {% if uploaded and doc_type in uploaded %}
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-4 h-4 text-civic-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-sm font-medium text-civic-green-700">Uploaded</span>
+            </div>
+            {% endif %}
 
-        {% if uploaded and doc_type in uploaded %}
-        <div class="flex items-center gap-2 mb-2">
-            <svg class="w-4 h-4 text-gclba-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
-            <span class="text-sm text-gclba-700">Uploaded</span>
+            <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
+                   {% if doc_type == "vip_portfolio_photo" or doc_type == "vip_support_letter" %}multiple{% endif %}
+                   class="block w-full text-sm text-warm-600
+                          file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                          file:text-sm file:font-medium file:bg-civic-blue-50 file:text-civic-blue-700
+                          hover:file:bg-civic-blue-100 file:transition-colors file:cursor-pointer">
         </div>
-        {% endif %}
-
-        <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
-               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gclba-50 file:text-gclba-700 hover:file:bg-gclba-100">
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endif %}
+
+<!-- Security Note -->
+<div class="flex items-start gap-3 p-4 rounded-xl bg-warm-100/50 border border-warm-200 mt-5">
+    <svg class="w-5 h-5 text-warm-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+    </svg>
+    <p class="text-xs text-warm-500">
+        Your documents are encrypted and stored securely. Only authorized GCLBA staff can access uploaded files.
+    </p>
+</div>
 {% endblock %}

@@ -33,16 +33,6 @@ class FHOfferForm(forms.Form):
         widget=forms.RadioSelect,
         label="How will you finance this purchase?",
     )
-    intended_use = forms.ChoiceField(
-        choices=Application.IntendedUse.choices,
-        label="How do you plan to use this property?",
-    )
-    first_home_or_moving = forms.ChoiceField(
-        choices=[("", "— Select —")] + list(Application.FirstHomeOrMoving.choices),
-        required=False,
-        label="Is this your first home purchase, or are you moving to Michigan?",
-        help_text="Only applies if intended use is Renovate & Move In",
-    )
     down_payment_amount = forms.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -61,7 +51,6 @@ class FHOfferForm(forms.Form):
         purchase_type = cleaned.get("purchase_type")
         offer_amount = cleaned.get("offer_amount")
         down_payment = cleaned.get("down_payment_amount")
-        intended_use = cleaned.get("intended_use")
 
         if purchase_type == Application.PurchaseType.LAND_CONTRACT:
             # Down payment required for land contract
@@ -79,37 +68,26 @@ class FHOfferForm(forms.Form):
                         f"(10% of offer or $1,000, whichever is higher).",
                     )
 
-            # Land contract only for owner-occupied
-            if intended_use in (
-                Application.IntendedUse.RENOVATE_SELL,
-                Application.IntendedUse.RENOVATE_RENT,
-            ):
-                self.add_error(
-                    "intended_use",
-                    "Land contract is only available for owner-occupied properties.",
-                )
-
-        # first_home_or_moving only relevant when intended_use is RENOVATE_MOVE_IN
-        if (
-            intended_use == Application.IntendedUse.RENOVATE_MOVE_IN
-            and not cleaned.get("first_home_or_moving")
-        ):
-            self.add_error(
-                "first_home_or_moving",
-                "Please indicate if this is a first home purchase or relocation.",
-            )
-
         return cleaned
 
 
 class FHRenovationNarrativeForm(forms.Form):
     """
-    Renovation narrative for Featured Homes (and reused by R4R).
+    Renovation narrative for Featured Homes.
 
-    Four open-ended questions about renovation plans, timeline,
-    who performs the work, and how it's funded.
+    Intended use + sub-question, then four open-ended questions about
+    renovation plans, timeline, who performs the work, and how it's funded.
     """
 
+    intended_use = forms.ChoiceField(
+        choices=Application.IntendedUse.choices,
+        label="How do you plan to use this property?",
+    )
+    first_home_or_moving = forms.ChoiceField(
+        choices=[("", "— Select —")] + list(Application.FirstHomeOrMoving.choices),
+        required=False,
+        label="Is this your first home purchase, or are you moving to Michigan?",
+    )
     renovation_description = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 4}),
         label="What renovations will you be making?",
@@ -126,6 +104,22 @@ class FHRenovationNarrativeForm(forms.Form):
         widget=forms.Textarea(attrs={"rows": 3}),
         label="How will you pay for the purchase and renovations?",
     )
+
+    def clean(self):
+        cleaned = super().clean()
+        intended_use = cleaned.get("intended_use")
+
+        # first_home_or_moving only relevant when intended_use is RENOVATE_MOVE_IN
+        if (
+            intended_use == Application.IntendedUse.RENOVATE_MOVE_IN
+            and not cleaned.get("first_home_or_moving")
+        ):
+            self.add_error(
+                "first_home_or_moving",
+                "Please indicate if this is a first home purchase or relocation.",
+            )
+
+        return cleaned
 
 
 class FHHomebuyerEdForm(forms.Form):

@@ -1,81 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}Step {{ current_step }} of {{ total_steps }} — GCLBA Application{% endblock %}
+{% block title %}Step {{ current_step }} of {{ total_steps }} - GCLBA Application{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h2 class="font-title text-3xl font-bold text-gray-900 mb-2">Property Purchase Application</h2>
-    <p class="text-gray-600">Step <span class="font-mono font-medium">{{ current_step }}</span> of <span class="font-mono font-medium">{{ total_steps }}</span>: {{ step_title }}</p>
+<!-- Mobile progress bar (thin line at top + floating pill) -->
+<div class="lg:hidden fixed top-0 left-0 right-0 z-50 h-[3px]" style="background:rgba(0,0,0,0.06)">
+    <div class="h-full transition-all duration-500 ease-out bg-civic-green-600"
+         style="width: {% widthratio current_step total_steps 100 %}%"></div>
 </div>
-
-<!-- Progress Bar -->
-<div class="mb-8">
-    <div class="flex items-center justify-between mb-2">
-        {% for i in step_range %}
-        <div class="flex items-center">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-mono font-medium
-                {% if i < current_step %}bg-gclba-600 text-white
-                {% elif i == current_step %}bg-gclba-600 text-white ring-4 ring-gclba-200
-                {% else %}bg-gray-200 text-gray-600{% endif %}">
-                {% if i < current_step %}
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                {% else %}
-                    {{ i }}
-                {% endif %}
-            </div>
-            {% if not forloop.last %}
-            <div class="hidden sm:block w-12 h-0.5 mx-1
-                {% if i < current_step %}bg-gclba-600{% else %}bg-gray-200{% endif %}"></div>
-            {% endif %}
-        </div>
-        {% endfor %}
+<div class="lg:hidden fixed top-2.5 left-1/2 -translate-x-1/2 z-50">
+    <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full shadow-lg" style="background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border:1px solid rgba(0,0,0,0.08)">
+        <span class="w-5 h-5 rounded-full bg-civic-green-700 text-white flex items-center justify-center text-[10px] font-bold font-mono">{{ current_step }}</span>
+        <span class="text-xs font-medium text-warm-900">{{ step_title }}</span>
+        <span class="text-[10px] font-mono text-warm-500">{{ current_step }}/{{ total_steps }}</span>
     </div>
 </div>
 
-<!-- Form Card -->
-<div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 sm:p-8">
-    <form method="post" {% if has_file_upload %}enctype="multipart/form-data"{% endif %}
-          class="space-y-6">
-        {% csrf_token %}
+<div class="flex gap-10">
+    <!-- Desktop sidebar progress -->
+    <div class="hidden lg:block w-56 flex-shrink-0">
+        <div class="sticky top-8">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-civic-blue-600 font-mono mb-4">Application Progress</p>
+            <div class="space-y-1">
+                {% for step in steps %}
+                <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                    {% if forloop.counter == current_step %}
+                        bg-civic-green-50
+                    {% endif %}"
+                    {% if forloop.counter == current_step %}style="border:1px solid #b8ddb9"{% else %}style="border:1px solid transparent"{% endif %}>
 
-        {% block form_content %}{% endblock %}
+                    {% if forloop.counter < current_step %}
+                    <!-- Completed step -->
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-100 text-civic-green-700">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    {% elif forloop.counter == current_step %}
+                    <!-- Active step -->
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-700 text-white text-xs font-bold font-mono">{{ forloop.counter }}</div>
+                    {% else %}
+                    <!-- Future step -->
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold font-mono" style="background:#e7e2dc; color:#a09890">{{ forloop.counter }}</div>
+                    {% endif %}
 
-        <!-- Navigation Buttons -->
-        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-            <div>
-                {% if prev_url %}
-                <a href="{{ prev_url }}"
-                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-                    &larr; Previous
-                </a>
-                {% endif %}
-            </div>
-            <div class="flex items-center gap-3">
-                {% block save_button %}
-                <button type="button" id="save-progress-btn"
-                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gclba-700 bg-gclba-50 border border-gclba-200 rounded-md hover:bg-gclba-100 transition-colors"
-                        hx-post="/apply/save/"
-                        hx-target="#save-feedback"
-                        hx-indicator="#save-spinner">
-                    <span id="save-spinner" class="htmx-indicator mr-2">
-                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                        </svg>
+                    <span class="text-sm
+                        {% if forloop.counter == current_step %}font-semibold text-civic-green-800
+                        {% elif forloop.counter < current_step %}text-warm-900
+                        {% else %}text-warm-500{% endif %}">
+                        {{ step.title }}
                     </span>
-                    Save Progress
-                </button>
-                {% endblock %}
-                <button type="submit"
-                        class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-gclba-600 rounded-md hover:bg-gclba-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gclba-500"
-                        hx-disabled-elt="this">
-                    {% if is_last_step %}Submit Application{% else %}Continue &rarr;{% endif %}
-                </button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Sidebar help card -->
+            <div class="mt-8 p-4 rounded-xl bg-civic-blue-50 border border-civic-blue-100">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-civic-blue-600 font-mono mb-2">Need Help?</p>
+                <p class="text-xs leading-relaxed text-civic-blue-700">
+                    Call <span class="font-mono">(810) 257-3088</span> or visit
+                    <a href="https://www.thelandbank.org" class="underline underline-offset-2" target="_blank" rel="noopener">thelandbank.org</a>
+                </p>
             </div>
         </div>
-        <div id="save-feedback" class="text-sm text-gclba-600 text-right"></div>
-    </form>
+    </div>
+
+    <!-- Form content area -->
+    <div class="flex-1 min-w-0 animate-step">
+        <!-- Step header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-civic-green-700 text-white text-xs font-bold font-mono">{{ current_step }}</span>
+                <h2 class="text-2xl sm:text-[28px] font-bold font-title text-warm-900">{{ step_title }}</h2>
+            </div>
+            <p class="text-sm leading-relaxed text-warm-600 pl-11">{% block step_subtitle %}{% endblock %}</p>
+        </div>
+
+        <!-- Step form -->
+        <form method="post" {% if has_file_upload %}enctype="multipart/form-data"{% endif %}>
+            {% csrf_token %}
+
+            {% block form_content %}{% endblock %}
+
+            <!-- Navigation bar -->
+            <div class="mt-6 p-4 sm:px-6 rounded-2xl section-card flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    {% if prev_url %}
+                    <a href="{{ prev_url }}" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-warm-600 hover:bg-warm-200/50 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                        Back
+                    </a>
+                    {% endif %}
+                    <span id="save-feedback"
+                          hx-post="{% url 'applications:save_progress' %}"
+                          hx-swap="innerHTML"
+                          hx-trigger="click"
+                          hx-disabled-elt="this"
+                          class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-civic-blue-600 hover:bg-civic-blue-50 transition-colors cursor-pointer">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" stroke-linejoin="round"/></svg>
+                        Save Progress
+                    </span>
+                </div>
+
+                <button type="submit" class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-civic-green-700 hover:bg-civic-green-800 shadow-sm transition-all duration-200">
+                    {% block submit_label %}{% if is_last_step %}Submit Application{% else %}Continue{% endif %}{% endblock %}
+                    {% if not is_last_step %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+
+        <!-- Help text -->
+        <div class="mt-5 text-center">
+            <p class="text-xs text-warm-500" style="opacity:0.7">
+                Need help? Call <span class="font-mono text-[11px]">(810) 257-3088</span>
+                or email <a href="mailto:offers@thelandbank.org" class="font-mono text-[11px] text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
+            </p>
+        </div>
+    </div>
 </div>
 {% endblock %}
