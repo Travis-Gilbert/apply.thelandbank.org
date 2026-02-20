@@ -3,16 +3,18 @@
 {% block title %}Step {{ current_step }} of {{ total_steps }} - GCLBA Application{% endblock %}
 
 {% block content %}
-<!-- Mobile progress bar (thin line at top + floating pill) -->
-<div class="lg:hidden fixed top-0 left-0 right-0 z-50 h-[3px]" style="background:rgba(0,0,0,0.06)">
-    <div class="h-full transition-all duration-500 ease-out bg-civic-green-600"
-         style="width: {% widthratio current_step total_steps 100 %}%"></div>
-</div>
-<div class="lg:hidden fixed top-2.5 left-1/2 -translate-x-1/2 z-50">
-    <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full shadow-lg" style="background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border:1px solid rgba(0,0,0,0.08)">
-        <span class="w-5 h-5 rounded-full bg-civic-green-700 text-white flex items-center justify-center text-[10px] font-bold font-mono">{{ current_step }}</span>
-        <span class="text-xs font-medium text-warm-900">{{ step_title }}</span>
-        <span class="text-[10px] font-mono text-warm-500">{{ current_step }}/{{ total_steps }}</span>
+<!-- Mobile progress pill (below header, not overlapping) -->
+<div class="lg:hidden mb-4">
+    <div class="flex items-center gap-3 px-1">
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="w-7 h-7 rounded-full bg-civic-green-700 text-white flex items-center justify-center text-xs font-bold font-mono">{{ current_step }}</span>
+            <span class="text-sm font-semibold text-warm-900">{{ step_title }}</span>
+        </div>
+        <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:rgba(0,0,0,0.06)">
+            <div class="h-full rounded-full transition-all duration-500 ease-out bg-civic-green-600"
+                 style="width: {% widthratio current_step total_steps 100 %}%"></div>
+        </div>
+        <span class="text-[11px] font-mono text-warm-500 flex-shrink-0">{{ current_step }}/{{ total_steps }}</span>
     </div>
 </div>
 
@@ -66,12 +68,12 @@
     <!-- Form content area -->
     <div class="flex-1 min-w-0 animate-step">
         <!-- Step header -->
-        <div class="mb-8">
-            <div class="flex items-center gap-3 mb-2">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-civic-green-700 text-white text-xs font-bold font-mono">{{ current_step }}</span>
-                <h2 class="text-2xl sm:text-[28px] font-bold font-title text-warm-900">{{ step_title }}</h2>
+        <div class="mb-6 sm:mb-8">
+            <div class="flex items-center gap-2.5 sm:gap-3 mb-2">
+                <span class="hidden lg:inline-flex items-center justify-center w-8 h-8 rounded-full bg-civic-green-700 text-white text-xs font-bold font-mono">{{ current_step }}</span>
+                <h2 class="text-xl sm:text-2xl lg:text-[28px] font-bold font-title text-warm-900">{{ step_title }}</h2>
             </div>
-            <p class="text-sm leading-relaxed text-warm-600 pl-11">{% block step_subtitle %}{% endblock %}</p>
+            <p class="text-sm leading-relaxed text-warm-600 lg:pl-11">{% block step_subtitle %}{% endblock %}</p>
         </div>
 
         <!-- Step form -->
@@ -81,31 +83,35 @@
             {% block form_content %}{% endblock %}
 
             <!-- Navigation bar -->
-            <div class="mt-6 p-4 sm:px-6 rounded-2xl section-card flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    {% if prev_url %}
-                    <a href="{{ prev_url }}" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-warm-600 hover:bg-warm-200/50 transition-colors">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                        Back
-                    </a>
-                    {% endif %}
-                    <span id="save-feedback"
-                          hx-post="{% url 'applications:save_progress' %}"
-                          hx-swap="innerHTML"
-                          hx-trigger="click"
-                          hx-disabled-elt="this"
-                          class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-civic-blue-600 hover:bg-civic-blue-50 transition-colors cursor-pointer">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" stroke-linejoin="round"/></svg>
-                        Save Progress
-                    </span>
-                </div>
+            <div class="mt-6 p-4 sm:px-6 rounded-2xl section-card">
+                <!-- Mobile: stacked layout, primary action on top -->
+                <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex items-center justify-between sm:justify-start gap-2">
+                        {% if prev_url %}
+                        <a href="{{ prev_url }}" class="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-medium text-warm-600 hover:bg-warm-200/50 transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                            Back
+                        </a>
+                        {% endif %}
+                        <span id="save-feedback"
+                              hx-post="{% url 'applications:save_progress' %}"
+                              hx-swap="innerHTML"
+                              hx-trigger="click"
+                              hx-disabled-elt="this"
+                              class="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-medium text-civic-blue-600 hover:bg-civic-blue-50 transition-colors cursor-pointer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" stroke-linejoin="round"/></svg>
+                            <span class="hidden xs:inline">Save Progress</span>
+                            <span class="xs:hidden">Save</span>
+                        </span>
+                    </div>
 
-                <button type="submit" class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-civic-green-700 hover:bg-civic-green-800 shadow-sm transition-all duration-200">
-                    {% block submit_label %}{% if is_last_step %}Submit Application{% else %}Continue{% endif %}{% endblock %}
-                    {% if not is_last_step %}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                    {% endif %}
-                </button>
+                    <button type="submit" class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl text-sm font-semibold text-white bg-civic-green-700 hover:bg-civic-green-800 shadow-sm transition-all duration-200">
+                        {% block submit_label %}{% if is_last_step %}Submit Application{% else %}Continue{% endif %}{% endblock %}
+                        {% if not is_last_step %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        {% endif %}
+                    </button>
+                </div>
             </div>
         </form>
 

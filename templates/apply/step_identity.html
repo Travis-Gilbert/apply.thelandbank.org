@@ -44,12 +44,14 @@
 
     {% include "apply/_field.html" with field=form.mailing_address label="Street Address" required=True placeholder="123 Main St" %}
 
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="col-span-2">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="sm:col-span-2">
             {% include "apply/_field.html" with field=form.city label="City" required=True placeholder="Flint" %}
         </div>
-        {% include "apply/_field.html" with field=form.state label="State" required=True maxlength="2" %}
-        {% include "apply/_field.html" with field=form.zip_code label="ZIP Code" required=True maxlength="10" placeholder="48502" %}
+        <div class="grid grid-cols-2 gap-4 sm:contents">
+            {% include "apply/_field.html" with field=form.state label="State" required=True maxlength="2" %}
+            {% include "apply/_field.html" with field=form.zip_code label="ZIP Code" required=True maxlength="10" placeholder="48502" %}
+        </div>
     </div>
 </div>
 
