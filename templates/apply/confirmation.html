@@ -24,7 +24,11 @@
             <li>Our team will review your application within <strong class="font-mono">5–7 business days</strong>.</li>
             <li>We may contact you if additional documents are needed.</li>
             <li>You'll receive an email when a decision has been made.</li>
+            {% if application.program_type == "vip_spotlight" %}
+            <li>VIP proposals are evaluated on price, feasibility, experience, financing, and neighborhood benefit.</li>
+            {% else %}
             <li>If approved, you'll have <strong class="font-mono">30 days to close</strong> on the property.</li>
+            {% endif %}
         </ol>
     </div>
 
@@ -32,8 +36,14 @@
         <h3 class="font-title text-lg font-semibold text-gray-900 mb-1">Your Application Summary</h3>
         <div class="text-sm text-gray-600 space-y-1">
             <p>Property: {{ application.property_address }}</p>
-            <p>Offer: <span class="font-mono">${{ application.offer_amount|floatformat:2 }}</span></p>
             <p>Program: {{ application.get_program_type_display }}</p>
+            {% if application.offer_amount %}
+            <p>Offer: <span class="font-mono">${{ application.offer_amount|floatformat:2 }}</span></p>
+            {% endif %}
+            {% if application.purchase_type == "land_contract" %}
+            <p>Purchase Type: Land Contract</p>
+            <p>Down Payment: <span class="font-mono">${{ application.down_payment_amount|floatformat:2 }}</span></p>
+            {% endif %}
         </div>
     </div>
 

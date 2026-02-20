@@ -43,10 +43,14 @@
                    class="mt-0.5 text-gclba-600 focus:ring-gclba-500">
             <div>
                 <span class="font-medium text-gray-900">{{ label }}</span>
-                {% if value == "own_it_now" %}
-                <p class="text-sm text-gray-500">Purchase a move-in ready property</p>
+                {% if value == "featured_homes" %}
+                <p class="text-sm text-gray-500">Move-in ready or light-rehab homes. Cash or land contract purchase options.</p>
                 {% elif value == "ready_for_rehab" %}
-                <p class="text-sm text-gray-500">Purchase a property that needs rehabilitation work</p>
+                <p class="text-sm text-gray-500">Properties needing significant renovation. Cash only. Detailed renovation cost estimate required.</p>
+                {% elif value == "vip_spotlight" %}
+                <p class="text-sm text-gray-500">Unique or historically significant properties. Proposal-based selection — evaluated on price, experience, and project feasibility.</p>
+                {% elif value == "vacant_lot" %}
+                <p class="text-sm text-gray-500">Vacant land parcels. Coming soon — not available for applications at this time.</p>
                 {% endif %}
             </div>
         </label>
@@ -77,5 +81,3 @@
            class="block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
 </div>
 {% endblock %}
-
-{% block prev_url %}/apply/{% endblock %}

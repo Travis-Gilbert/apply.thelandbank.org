@@ -1,0 +1,52 @@
+{% extends "apply/base_form.html" %}
+
+{% block form_content %}
+<h3 class="font-title text-xl font-semibold text-gray-900 mb-4">Required Documents</h3>
+
+<p class="text-sm text-gray-600 mb-6">
+    Upload the required documents below. Accepted formats: PDF, JPG, PNG (max 10 MB each).
+</p>
+
+{% if error %}
+<div class="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
+    <p class="text-sm text-red-700">{{ error }}</p>
+</div>
+{% endif %}
+
+<div class="space-y-6">
+    {% for doc_type in required_docs %}
+    <div class="p-4 border {% if uploaded and doc_type in uploaded %}border-gclba-300 bg-gclba-50{% else %}border-gray-200{% endif %} rounded-lg">
+        <label class="block text-sm font-medium text-gray-900 mb-1">
+            {% if doc_type == "photo_id" %}Valid Photo ID
+            {% elif doc_type == "proof_of_funds" %}Proof of Available Funds (Offer Amount)
+            {% elif doc_type == "reno_funding_proof" %}Proof of Renovation Funding
+            {% elif doc_type == "prior_investment_proof" %}Proof of Prior GCLBA Investment
+            {% endif %}
+            <span class="text-red-500">*</span>
+        </label>
+
+        {% if doc_type == "photo_id" %}
+        <p class="text-xs text-gray-500 mb-2">State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted.</p>
+        {% elif doc_type == "proof_of_funds" %}
+        <p class="text-xs text-gray-500 mb-2">Bank statement or letter showing available funds for the full offer amount.</p>
+        {% elif doc_type == "reno_funding_proof" %}
+        <p class="text-xs text-gray-500 mb-2">Documentation showing available funds or financing for your estimated renovation costs.</p>
+        {% elif doc_type == "prior_investment_proof" %}
+        <p class="text-xs text-gray-500 mb-2">Photos, receipts, or documentation of improvements to your previously purchased GCLBA property.</p>
+        {% endif %}
+
+        {% if uploaded and doc_type in uploaded %}
+        <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-gclba-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm text-gclba-700">Uploaded</span>
+        </div>
+        {% endif %}
+
+        <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
+               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gclba-50 file:text-gclba-700 hover:file:bg-gclba-100">
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

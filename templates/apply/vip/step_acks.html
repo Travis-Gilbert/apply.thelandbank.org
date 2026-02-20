@@ -1,0 +1,130 @@
+{% extends "apply/base_form.html" %}
+
+{% block form_content %}
+<h3 class="font-title text-xl font-semibold text-gray-900 mb-2">Acknowledgments</h3>
+<p class="text-sm text-gray-600 mb-6">
+    VIP Spotlight proposals require additional acknowledgments. Please read and check each
+    item below before submitting.
+</p>
+
+<div class="space-y-4">
+    <!-- Sold As-Is -->
+    <div class="p-3 border border-gray-200 rounded-lg">
+        <label class="flex items-start gap-3">
+            <input type="checkbox" name="{{ form.ack_sold_as_is.html_name }}"
+                   {% if form.ack_sold_as_is.value %}checked{% endif %}
+                   class="mt-0.5 rounded text-gclba-600 focus:ring-gclba-500" required>
+            <span class="text-sm text-gray-700">
+                I understand that all GCLBA properties are sold "as-is" with no warranties.
+            </span>
+        </label>
+        {% if form.ack_sold_as_is.errors %}
+        <p class="ml-7 mt-1 text-sm text-red-600">{{ form.ack_sold_as_is.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Quit Claim Deed -->
+    <div class="p-3 border border-gray-200 rounded-lg">
+        <label class="flex items-start gap-3">
+            <input type="checkbox" name="{{ form.ack_quit_claim_deed.html_name }}"
+                   {% if form.ack_quit_claim_deed.value %}checked{% endif %}
+                   class="mt-0.5 rounded text-gclba-600 focus:ring-gclba-500" required>
+            <span class="text-sm text-gray-700">
+                I understand that properties are conveyed via Quit Claim Deed.
+            </span>
+        </label>
+        {% if form.ack_quit_claim_deed.errors %}
+        <p class="ml-7 mt-1 text-sm text-red-600">{{ form.ack_quit_claim_deed.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- No Title Insurance -->
+    <div class="p-3 border border-gray-200 rounded-lg">
+        <label class="flex items-start gap-3">
+            <input type="checkbox" name="{{ form.ack_no_title_insurance.html_name }}"
+                   {% if form.ack_no_title_insurance.value %}checked{% endif %}
+                   class="mt-0.5 rounded text-gclba-600 focus:ring-gclba-500" required>
+            <span class="text-sm text-gray-700">
+                I understand that GCLBA does not provide title insurance.
+            </span>
+        </label>
+        {% if form.ack_no_title_insurance.errors %}
+        <p class="ml-7 mt-1 text-sm text-red-600">{{ form.ack_no_title_insurance.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Tax Capture (5/50) -->
+    <div class="p-3 border border-amber-200 bg-amber-50 rounded-lg">
+        <label class="flex items-start gap-3">
+            <input type="checkbox" name="{{ form.ack_tax_capture.html_name }}"
+                   {% if form.ack_tax_capture.value %}checked{% endif %}
+                   class="mt-0.5 rounded text-gclba-600 focus:ring-gclba-500" required>
+            <span class="text-sm text-gray-700">
+                I understand any request to waive the Land Bank 5/50 tax capture must be
+                made before the Land Bank accepts my offer. Seeking Brownfield or other
+                abatements without a waiver conflicts with the 5/50 tax roll.
+            </span>
+        </label>
+        {% if form.ack_tax_capture.errors %}
+        <p class="ml-7 mt-1 text-sm text-red-600">{{ form.ack_tax_capture.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Reconveyance Deed (VIP-specific) -->
+    <div class="p-3 border border-amber-200 bg-amber-50 rounded-lg">
+        <label class="flex items-start gap-3">
+            <input type="checkbox" name="{{ form.ack_reconveyance_deed.html_name }}"
+                   {% if form.ack_reconveyance_deed.value %}checked{% endif %}
+                   class="mt-0.5 rounded text-gclba-600 focus:ring-gclba-500" required>
+            <span class="text-sm text-gray-700">
+                I acknowledge that I will sign a Reconveyance Deed at closing. The property
+                will revert to GCLBA if the project is not completed per the Purchase &amp;
+                Development Agreement.
+            </span>
+        </label>
+        {% if form.ack_reconveyance_deed.errors %}
+        <p class="ml-7 mt-1 text-sm text-red-600">{{ form.ack_reconveyance_deed.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- No Transfer (VIP-specific) -->
+    <div class="p-3 border border-amber-200 bg-amber-50 rounded-lg">
+        <label class="flex items-start gap-3">
+            <input type="checkbox" name="{{ form.ack_no_transfer.html_name }}"
+                   {% if form.ack_no_transfer.value %}checked{% endif %}
+                   class="mt-0.5 rounded text-gclba-600 focus:ring-gclba-500" required>
+            <span class="text-sm text-gray-700">
+                I understand that I may not transfer or encumber the property without prior
+                written consent from GCLBA until the Release of Interest is recorded.
+            </span>
+        </label>
+        {% if form.ack_no_transfer.errors %}
+        <p class="ml-7 mt-1 text-sm text-red-600">{{ form.ack_no_transfer.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Info Accurate -->
+    <div class="p-3 border border-gray-200 rounded-lg">
+        <label class="flex items-start gap-3">
+            <input type="checkbox" name="{{ form.ack_info_accurate.html_name }}"
+                   {% if form.ack_info_accurate.value %}checked{% endif %}
+                   class="mt-0.5 rounded text-gclba-600 focus:ring-gclba-500" required>
+            <span class="text-sm text-gray-700">
+                I certify that all information provided in this proposal is true and
+                accurate to the best of my knowledge.
+            </span>
+        </label>
+        {% if form.ack_info_accurate.errors %}
+        <p class="ml-7 mt-1 text-sm text-red-600">{{ form.ack_info_accurate.errors.0 }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-4 p-3 bg-gclba-50 border border-gclba-200 rounded-md">
+    <p class="text-sm text-gclba-800">
+        <strong>By submitting this proposal,</strong> you agree to all acknowledgments above.
+        VIP Spotlight properties are evaluated on multiple criteria — price alone does not
+        determine acceptance.
+    </p>
+</div>
+{% endblock %}

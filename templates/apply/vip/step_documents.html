@@ -1,0 +1,88 @@
+{% extends "apply/base_form.html" %}
+
+{% block form_content %}
+<h3 class="font-title text-xl font-semibold text-gray-900 mb-4">Documents</h3>
+
+<p class="text-sm text-gray-600 mb-6">
+    Upload the required documents below. Accepted formats: PDF, JPG, PNG (max 10 MB each).
+</p>
+
+{% if error %}
+<div class="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
+    <p class="text-sm text-red-700">{{ error }}</p>
+</div>
+{% endif %}
+
+<!-- Required Documents -->
+<h4 class="font-title text-lg font-semibold text-gray-800 mb-3">Required</h4>
+<div class="space-y-6 mb-8">
+    {% for doc_type in required_docs %}
+    <div class="p-4 border {% if uploaded and doc_type in uploaded %}border-gclba-300 bg-gclba-50{% else %}border-gray-200{% endif %} rounded-lg">
+        <label class="block text-sm font-medium text-gray-900 mb-1">
+            {% if doc_type == "photo_id" %}Valid Photo ID
+            {% elif doc_type == "proof_of_funds" %}Proof of Funds (Equity Portion)
+            {% endif %}
+            <span class="text-red-500">*</span>
+        </label>
+
+        {% if doc_type == "photo_id" %}
+        <p class="text-xs text-gray-500 mb-2">State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted.</p>
+        {% elif doc_type == "proof_of_funds" %}
+        <p class="text-xs text-gray-500 mb-2">Bank statement or documentation showing available funds for the equity portion of your purchase.</p>
+        {% endif %}
+
+        {% if uploaded and doc_type in uploaded %}
+        <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-gclba-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm text-gclba-700">Uploaded</span>
+        </div>
+        {% endif %}
+
+        <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
+               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gclba-50 file:text-gclba-700 hover:file:bg-gclba-100">
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Optional Documents -->
+{% if optional_docs %}
+<h4 class="font-title text-lg font-semibold text-gray-800 mb-3">Optional Supporting Documents</h4>
+<p class="text-sm text-gray-500 mb-4">
+    These documents strengthen your proposal but are not required to submit.
+</p>
+<div class="space-y-6">
+    {% for doc_type in optional_docs %}
+    <div class="p-4 border {% if uploaded and doc_type in uploaded %}border-gclba-300 bg-gclba-50{% else %}border-gray-200{% endif %} rounded-lg">
+        <label class="block text-sm font-medium text-gray-900 mb-1">
+            {% if doc_type == "vip_preapproval" %}Pre-Approval Letter (Construction Financing)
+            {% elif doc_type == "vip_portfolio_photo" %}Portfolio Photos (Past Renovations)
+            {% elif doc_type == "vip_support_letter" %}Letters of Support
+            {% endif %}
+        </label>
+
+        {% if doc_type == "vip_preapproval" %}
+        <p class="text-xs text-gray-500 mb-2">If using construction financing, include your pre-approval letter.</p>
+        {% elif doc_type == "vip_portfolio_photo" %}
+        <p class="text-xs text-gray-500 mb-2">Before/after photos of previously renovated properties. You may upload multiple files.</p>
+        {% elif doc_type == "vip_support_letter" %}
+        <p class="text-xs text-gray-500 mb-2">Letters of support, references, or community endorsements. You may upload multiple files.</p>
+        {% endif %}
+
+        {% if uploaded and doc_type in uploaded %}
+        <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-gclba-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm text-gclba-700">Uploaded</span>
+        </div>
+        {% endif %}
+
+        <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
+               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gclba-50 file:text-gclba-700 hover:file:bg-gclba-100">
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

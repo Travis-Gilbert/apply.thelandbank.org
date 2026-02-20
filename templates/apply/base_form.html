@@ -45,8 +45,8 @@
         <!-- Navigation Buttons -->
         <div class="flex items-center justify-between pt-6 border-t border-gray-200">
             <div>
-                {% if current_step > 1 %}
-                <a href="{% block prev_url %}{% endblock %}"
+                {% if prev_url %}
+                <a href="{{ prev_url }}"
                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
                     &larr; Previous
                 </a>
@@ -56,7 +56,7 @@
                 {% block save_button %}
                 <button type="button" id="save-progress-btn"
                         class="inline-flex items-center px-4 py-2 text-sm font-medium text-gclba-700 bg-gclba-50 border border-gclba-200 rounded-md hover:bg-gclba-100 transition-colors"
-                        hx-post="{% block save_url %}/apply/save/{% endblock %}"
+                        hx-post="/apply/save/"
                         hx-target="#save-feedback"
                         hx-indicator="#save-spinner">
                     <span id="save-spinner" class="htmx-indicator mr-2">
@@ -71,7 +71,7 @@
                 <button type="submit"
                         class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-gclba-600 rounded-md hover:bg-gclba-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gclba-500"
                         hx-disabled-elt="this">
-                    {% block submit_label %}Continue &rarr;{% endblock %}
+                    {% if is_last_step %}Submit Application{% else %}Continue &rarr;{% endif %}
                 </button>
             </div>
         </div>

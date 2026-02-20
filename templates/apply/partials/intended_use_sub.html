@@ -1,0 +1,15 @@
+{% if show_sub_question %}
+<div class="p-4 border border-gray-200 rounded-lg">
+    <label for="id_first_home_or_moving" class="block text-sm font-medium text-gray-700 mb-2">
+        Which best describes your situation? <span class="text-red-500">*</span>
+    </label>
+    <select name="first_home_or_moving" id="id_first_home_or_moving"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm"
+            required>
+        <option value="">— Select —</option>
+        <option value="first_home" {% if first_home_value == "first_home" %}selected{% endif %}>This is my first home purchase</option>
+        <option value="moving_to_mi" {% if first_home_value == "moving_to_mi" %}selected{% endif %}>I am moving to Michigan from another state</option>
+        <option value="neither" {% if first_home_value == "neither" %}selected{% endif %}>Neither</option>
+    </select>
+</div>
+{% endif %}
