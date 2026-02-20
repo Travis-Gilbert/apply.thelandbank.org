@@ -1,0 +1,7 @@
+{# {% include "apply/_section_label.html" with text="Personal Details" %} #}
+{# Add blue=True for blue variant: {% include "apply/_section_label.html" with text="Mailing Address" blue=True %} #}
+<div class="flex items-center gap-3 mb-5">
+    <p class="text-[11px] font-semibold uppercase tracking-widest font-mono
+        {% if blue %}text-civic-blue-600{% else %}text-civic-green-700{% endif %}">{{ text }}</p>
+    <div class="flex-1 h-px {% if blue %}bg-civic-blue-200{% else %}bg-warm-300/50{% endif %}"></div>
+</div>

@@ -1,29 +1,54 @@
 {% extends "base.html" %}
 
-{% block title %}Link Expired — GCLBA Application{% endblock %}
+{% block title %}Link Expired{% endblock %}
 
 {% block content %}
-<div class="max-w-lg mx-auto text-center py-12">
-    <div class="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6">
-        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="max-w-lg mx-auto text-center py-12 px-4">
+    <!-- Clock Icon -->
+    <div class="mx-auto w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
     </div>
 
-    <h2 class="font-title text-3xl font-bold text-gray-900 mb-4">Link Expired</h2>
+    <h2 class="font-title text-3xl font-bold text-warm-900 mb-4">Link Expired</h2>
 
-    <p class="text-gray-600 mb-6">
-        This application resume link has expired. Links are valid for <span class="font-mono">14 days</span> after they are created.
+    <p class="text-warm-600 mb-6">
+        This application link is no longer valid. Draft applications expire after
+        <strong class="text-warm-900">14 days</strong>.
     </p>
 
-    <div class="space-y-4">
-        <a href="/apply/"
-           class="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-gclba-600 rounded-md hover:bg-gclba-700 transition-colors">
-            Start a New Application
-        </a>
-        <p class="text-sm text-gray-500">
-            If you need help, contact us at <span class="font-mono">(810) 257-3088</span> or
-            <a href="mailto:offers@thelandbank.org" class="font-mono text-gclba-600 hover:underline">offers@thelandbank.org</a>
+    <!-- Options -->
+    <div class="section-card p-6 text-left space-y-4 mb-8">
+        <h3 class="font-title text-lg font-semibold text-warm-900">What can I do?</h3>
+        <ul class="text-sm text-warm-600 space-y-2">
+            <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-civic-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                <span><strong>Start a new application</strong> — your previous draft data cannot be recovered.</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-civic-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                <span><strong>Contact our office</strong> if you need assistance or have questions.</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- CTA -->
+    <a href="{% url 'applications:step_identity' %}"
+       class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all
+              bg-civic-green-700 hover:bg-civic-green-800 shadow-sm hover:shadow-md">
+        Start New Application
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+    </a>
+
+    <!-- Contact -->
+    <div class="mt-8 space-y-1">
+        <p class="text-sm text-warm-500">Questions?</p>
+        <p class="text-warm-600">
+            <span class="font-mono text-sm">(810) 257-3088</span> &middot;
+            <a href="mailto:offers@thelandbank.org" class="font-mono text-sm text-civic-green-700 hover:underline">
+                offers@thelandbank.org
+            </a>
         </p>
     </div>
 </div>

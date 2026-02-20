@@ -1,83 +1,75 @@
 {% extends "apply/base_form.html" %}
 
+{% block step_subtitle %}Which property are you interested in, and which program applies?{% endblock %}
+
 {% block form_content %}
-<h3 class="font-title text-xl font-semibold text-gray-900 mb-4">Property Information</h3>
+<!-- Property Identification -->
+<div class="section-card p-6 sm:p-8 space-y-5">
+    {% include "apply/_section_label.html" with text="Property Identification" %}
 
-<!-- Property Address -->
-<div>
-    <label for="{{ form.property_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-        Property Address <span class="text-red-500">*</span>
-    </label>
-    <input type="text" name="{{ form.property_address.html_name }}" id="{{ form.property_address.id_for_label }}"
-           value="{{ form.property_address.value|default:'' }}"
-           placeholder="e.g., 123 Main St, Flint, MI"
-           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-           {% if form.property_address.errors %}border-red-300{% endif %}" required>
-    {% if form.property_address.errors %}
-    <p class="mt-1 text-sm text-red-600">{{ form.property_address.errors.0 }}</p>
-    {% endif %}
-</div>
-
-<!-- Parcel ID -->
-<div>
-    <label for="{{ form.parcel_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-        Parcel ID <span class="text-gray-400">(if known)</span>
-    </label>
-    <input type="text" name="{{ form.parcel_id.html_name }}" id="{{ form.parcel_id.id_for_label }}"
-           value="{{ form.parcel_id.value|default:'' }}"
-           placeholder="e.g., 40-12-345-678"
-           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
+    {% include "apply/_field.html" with field=form.property_address label="Property Address" required=True placeholder="123 Main St, Flint, MI" %}
+    {% include "apply/_field.html" with field=form.parcel_id label="Parcel ID" placeholder="e.g., 40-12-345-678" hint="Optional. Found on the property listing or county records." %}
 </div>
 
 <!-- Program Type -->
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-2">
-        Which program are you applying for? <span class="text-red-500">*</span>
-    </label>
-    <div class="space-y-3">
+<div class="section-card p-6 sm:p-8 space-y-5 mt-5">
+    {% include "apply/_section_label.html" with text="Program Type" blue=True %}
+
+    <p class="text-sm text-warm-600 -mt-2 mb-4">Select the program that matches the property you're applying for. <span class="text-red-500">*</span></p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {% for value, label in form.program_type.field.choices %}
-        <label class="flex items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors
-            {% if form.program_type.value == value %}border-gclba-500 bg-gclba-50{% else %}border-gray-200{% endif %}">
+        <label class="relative cursor-pointer group">
             <input type="radio" name="{{ form.program_type.html_name }}" value="{{ value }}"
                    {% if form.program_type.value == value %}checked{% endif %}
-                   class="mt-0.5 text-gclba-600 focus:ring-gclba-500">
-            <div>
-                <span class="font-medium text-gray-900">{{ label }}</span>
-                {% if value == "featured_homes" %}
-                <p class="text-sm text-gray-500">Move-in ready or light-rehab homes. Cash or land contract purchase options.</p>
-                {% elif value == "ready_for_rehab" %}
-                <p class="text-sm text-gray-500">Properties needing significant renovation. Cash only. Detailed renovation cost estimate required.</p>
-                {% elif value == "vip_spotlight" %}
-                <p class="text-sm text-gray-500">Unique or historically significant properties. Proposal-based selection — evaluated on price, experience, and project feasibility.</p>
-                {% elif value == "vacant_lot" %}
-                <p class="text-sm text-gray-500">Vacant land parcels. Coming soon — not available for applications at this time.</p>
-                {% endif %}
+                   class="peer sr-only"
+                   {% if value == "vacant_lot" %}disabled{% endif %}>
+            <div class="p-4 rounded-xl border-2 transition-all duration-200
+                peer-checked:border-civic-green-600 peer-checked:bg-civic-green-50/50
+                {% if value == 'vacant_lot' %}border-warm-200 opacity-50 cursor-not-allowed{% else %}border-warm-300/60 hover:border-warm-400 hover:bg-white/60{% endif %}">
+                <div class="flex items-start gap-3">
+                    <div class="w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
+                        peer-checked:border-civic-green-600 border-warm-400">
+                        <div class="w-2.5 h-2.5 rounded-full bg-civic-green-600 scale-0 peer-checked:scale-100 transition-transform"></div>
+                    </div>
+                    <div>
+                        <span class="font-semibold text-warm-900 text-sm">{{ label }}</span>
+                        {% if value == "featured_homes" %}
+                        <p class="text-xs text-warm-500 mt-1 leading-relaxed">Move-in ready or light-rehab homes. Cash or land contract options.</p>
+                        {% elif value == "ready_for_rehab" %}
+                        <p class="text-xs text-warm-500 mt-1 leading-relaxed">Properties needing significant renovation. Cash only. Detailed cost estimate required.</p>
+                        {% elif value == "vip_spotlight" %}
+                        <p class="text-xs text-warm-500 mt-1 leading-relaxed">Unique or historically significant properties. Proposal-based evaluation.</p>
+                        {% elif value == "vacant_lot" %}
+                        <p class="text-xs text-warm-500 mt-1 leading-relaxed">Coming soon — not available for applications at this time.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </label>
         {% endfor %}
     </div>
     {% if form.program_type.errors %}
-    <p class="mt-1 text-sm text-red-600">{{ form.program_type.errors.0 }}</p>
+    <p class="text-xs text-red-600 font-medium">{{ form.program_type.errors.0 }}</p>
     {% endif %}
-</div>
 
-<!-- Open House -->
-<div>
-    <label class="flex items-center gap-2">
-        <input type="checkbox" name="{{ form.attended_open_house.html_name }}"
-               {% if form.attended_open_house.value %}checked{% endif %}
-               class="rounded text-gclba-600 focus:ring-gclba-500">
-        <span class="text-sm text-gray-700">I have attended an open house or visited this property</span>
-    </label>
-</div>
+    <!-- Open House -->
+    <div class="mt-5 pt-5 border-t border-warm-200/60 space-y-4">
+        <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="{{ form.attended_open_house.html_name }}"
+                   {% if form.attended_open_house.value %}checked{% endif %}
+                   class="w-5 h-5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
+            <span class="text-sm text-warm-900">I have attended an open house or visited this property</span>
+        </label>
 
-<!-- Open House Date -->
-<div>
-    <label for="{{ form.open_house_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-        Date of visit <span class="text-gray-400">(if applicable)</span>
-    </label>
-    <input type="date" name="{{ form.open_house_date.html_name }}" id="{{ form.open_house_date.id_for_label }}"
-           value="{{ form.open_house_date.value|default:'' }}"
-           class="block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
+        <div class="space-y-1.5">
+            <label for="{{ form.open_house_date.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                Date of visit <span class="text-warm-400">(if applicable)</span>
+            </label>
+            <input type="date" name="{{ form.open_house_date.html_name }}" id="{{ form.open_house_date.id_for_label }}"
+                   value="{{ form.open_house_date.value|default:'' }}"
+                   class="gclba-input sm:w-auto">
+        </div>
+    </div>
 </div>
 {% endblock %}

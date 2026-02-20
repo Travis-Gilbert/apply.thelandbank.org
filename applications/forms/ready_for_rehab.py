@@ -227,11 +227,19 @@ class R4RRenovationNarrativeForm(forms.Form):
     """
     Renovation narrative for Ready for Rehab.
 
-    Same four questions as Featured Homes. Defined separately rather than
-    inheriting so each can evolve independently if program requirements
-    diverge in the future.
+    Intended use + sub-question, then four open-ended questions.
+    Defined separately from FH so each program can evolve independently.
     """
 
+    intended_use = forms.ChoiceField(
+        choices=Application.IntendedUse.choices,
+        label="How do you plan to use this property?",
+    )
+    first_home_or_moving = forms.ChoiceField(
+        choices=[("", "— Select —")] + list(Application.FirstHomeOrMoving.choices),
+        required=False,
+        label="Is this your first home purchase, or are you moving to Michigan?",
+    )
     renovation_description = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 4}),
         label="What renovations will you be making?",
@@ -248,6 +256,21 @@ class R4RRenovationNarrativeForm(forms.Form):
         widget=forms.Textarea(attrs={"rows": 3}),
         label="How will you pay for the purchase and renovations?",
     )
+
+    def clean(self):
+        cleaned = super().clean()
+        intended_use = cleaned.get("intended_use")
+
+        if (
+            intended_use == Application.IntendedUse.RENOVATE_MOVE_IN
+            and not cleaned.get("first_home_or_moving")
+        ):
+            self.add_error(
+                "first_home_or_moving",
+                "Please indicate if this is a first home purchase or relocation.",
+            )
+
+        return cleaned
 
 
 class R4RAcknowledgmentsForm(forms.Form):

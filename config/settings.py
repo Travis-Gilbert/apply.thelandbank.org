@@ -175,33 +175,23 @@ STAFF_NOTIFICATION_EMAIL = os.getenv("STAFF_NOTIFICATION_EMAIL", "offers@theland
 # ---------------------------------------------------------------------------
 
 UNFOLD = {
-    "SITE_TITLE": "GCLBA",
-    "SITE_HEADER": "GCLBA",
-    "SITE_SUBHEADER": "Application Portal",
-    "SITE_URL": "/",
+    "SITE_TITLE": "GCLBA Application Portal",
+    "SITE_HEADER": "Genesee County Land Bank",
+    "SITE_SUBHEADER": "Application Management",
+    "SITE_SYMBOL": "home_work",
     "SHOW_HISTORY": True,
-    "SHOW_VIEW_ON_SITE": True,
-    "ENVIRONMENT": "config.utils.environment_callback",
-    "STYLES": [],
-    "SCRIPTS": [],
-    "COLORS": {
-        "primary": {
-            "50": "#f0fdf4",
-            "100": "#dcfce7",
-            "200": "#bbf7d0",
-            "300": "#86efac",
-            "400": "#4ade80",
-            "500": "#22c55e",
-            "600": "#16a34a",
-            "700": "#15803d",
-            "800": "#166534",
-            "900": "#14532d",
-            "950": "#052e16",
-        },
-    },
+    "SHOW_VIEW_ON_SITE": False,
+
+    # Environment indicator (shows "Development" or "Production" badge in header)
+    "ENVIRONMENT": "applications.admin_utils.environment_callback",
+
+    # Dashboard stat cards (shown on admin index page)
+    "DASHBOARD_CALLBACK": "applications.admin_utils.dashboard_callback",
+
+    # Sidebar navigation with quick filters
     "SIDEBAR": {
         "show_search": True,
-        "show_all_applications": True,
+        "show_all_applications": False,
         "navigation": [
             {
                 "title": "Applications",
@@ -212,31 +202,76 @@ UNFOLD = {
                         "title": "All Applications",
                         "icon": "description",
                         "link": reverse_lazy("admin:applications_application_changelist"),
+                        "badge": "applications.admin_utils.pending_count_badge",
                     },
                     {
-                        "title": "Drafts",
+                        "title": "Drafts (In Progress)",
                         "icon": "edit_note",
                         "link": reverse_lazy("admin:applications_applicationdraft_changelist"),
                     },
                 ],
             },
             {
-                "title": "Team",
+                "title": "Quick Filters",
                 "separator": True,
-                "collapsible": False,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Needs Review",
+                        "icon": "pending_actions",
+                        "link": "/admin/applications/application/?status__exact=received",
+                    },
+                    {
+                        "title": "Under Review",
+                        "icon": "rate_review",
+                        "link": "/admin/applications/application/?status__exact=under_review",
+                    },
+                    {
+                        "title": "Needs More Info",
+                        "icon": "upload_file",
+                        "link": "/admin/applications/application/?status__exact=needs_more_info",
+                    },
+                    {
+                        "title": "Approved",
+                        "icon": "check_circle",
+                        "link": "/admin/applications/application/?status__exact=approved",
+                    },
+                    {
+                        "title": "Declined",
+                        "icon": "cancel",
+                        "link": "/admin/applications/application/?status__exact=declined",
+                    },
+                ],
+            },
+            {
+                "title": "System",
+                "separator": True,
+                "collapsible": True,
                 "items": [
                     {
                         "title": "Users",
                         "icon": "people",
                         "link": reverse_lazy("admin:auth_user_changelist"),
                     },
-                    {
-                        "title": "Groups",
-                        "icon": "group_work",
-                        "link": reverse_lazy("admin:auth_group_changelist"),
-                    },
                 ],
             },
         ],
+    },
+
+    # Theme: civic green primary with blue accents
+    "COLORS": {
+        "primary": {
+            "50": "#f0f7f1",
+            "100": "#dceede",
+            "200": "#b8ddb9",
+            "300": "#8bc98d",
+            "400": "#5ab35d",
+            "500": "#3a9a3e",
+            "600": "#2e7d32",
+            "700": "#256929",
+            "800": "#1b5e20",
+            "900": "#0d3311",
+            "950": "#071a09",
+        },
     },
 }

@@ -1,174 +1,66 @@
 {% extends "apply/base_form.html" %}
 
+{% block step_subtitle %}Tell us about yourself so we can process your application.{% endblock %}
+
 {% block form_content %}
-<h3 class="font-title text-xl font-semibold text-gray-900 mb-4">Your Information</h3>
+<!-- Personal Details -->
+<div class="section-card p-6 sm:p-8 space-y-5">
+    {% include "apply/_section_label.html" with text="Personal Details" %}
 
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <!-- First Name -->
-    <div>
-        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            First Name <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="{{ form.first_name.html_name }}" id="{{ form.first_name.id_for_label }}"
-               value="{{ form.first_name.value|default:'' }}"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-               {% if form.first_name.errors %}border-red-300 text-red-900{% endif %}"
-               required>
-        {% if form.first_name.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
-        {% endif %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {% include "apply/_field.html" with field=form.first_name label="First Name" required=True placeholder="John" %}
+        {% include "apply/_field.html" with field=form.last_name label="Last Name" required=True placeholder="Smith" %}
     </div>
 
-    <!-- Last Name -->
-    <div>
-        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            Last Name <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="{{ form.last_name.html_name }}" id="{{ form.last_name.id_for_label }}"
-               value="{{ form.last_name.value|default:'' }}"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-               {% if form.last_name.errors %}border-red-300 text-red-900{% endif %}"
-               required>
-        {% if form.last_name.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
-        {% endif %}
-    </div>
-</div>
+    {% include "apply/_field.html" with field=form.email label="Email Address" type="email" required=True placeholder="john@example.com" hint="We'll send your confirmation and magic link to this address." %}
 
-<!-- Email -->
-<div>
-    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-        Email Address <span class="text-red-500">*</span>
-    </label>
-    <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}"
-           value="{{ form.email.value|default:'' }}"
-           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-           {% if form.email.errors %}border-red-300 text-red-900{% endif %}"
-           required>
-    {% if form.email.errors %}
-    <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
-    {% endif %}
-</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {% include "apply/_field.html" with field=form.phone label="Phone Number" type="tel" required=True placeholder="(810) 555-0100" %}
 
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <!-- Phone -->
-    <div>
-        <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            Phone Number <span class="text-red-500">*</span>
-        </label>
-        <input type="tel" name="{{ form.phone.html_name }}" id="{{ form.phone.id_for_label }}"
-               value="{{ form.phone.value|default:'' }}"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-               {% if form.phone.errors %}border-red-300 text-red-900{% endif %}"
-               required>
-        {% if form.phone.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
-        {% endif %}
-    </div>
-
-    <!-- Preferred Contact -->
-    <div>
-        <label for="{{ form.preferred_contact.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            Preferred Contact Method
-        </label>
-        <select name="{{ form.preferred_contact.html_name }}" id="{{ form.preferred_contact.id_for_label }}"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
-            {% for value, label in form.preferred_contact.field.choices %}
-            <option value="{{ value }}" {% if form.preferred_contact.value == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
+        <!-- Preferred Contact (radio pills) -->
+        <div class="space-y-1.5">
+            <label class="block text-sm font-medium text-warm-900">Preferred Contact Method</label>
+            <div class="flex gap-2 flex-wrap">
+                {% for value, label in form.preferred_contact.field.choices %}
+                <label class="cursor-pointer">
+                    <input type="radio" name="{{ form.preferred_contact.html_name }}" value="{{ value }}"
+                           {% if form.preferred_contact.value == value %}checked{% endif %}
+                           class="peer sr-only">
+                    <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border transition-all
+                        peer-checked:bg-civic-green-50 peer-checked:border-civic-green-600 peer-checked:text-civic-green-800
+                        border-warm-300 text-warm-600 hover:bg-warm-100">
+                        {{ label }}
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
-
-<h3 class="font-title text-xl font-semibold text-gray-900 mt-6 mb-4">Current Address</h3>
 
 <!-- Mailing Address -->
-<div>
-    <label for="{{ form.mailing_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-        Street Address <span class="text-red-500">*</span>
-    </label>
-    <input type="text" name="{{ form.mailing_address.html_name }}" id="{{ form.mailing_address.id_for_label }}"
-           value="{{ form.mailing_address.value|default:'' }}"
-           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-           {% if form.mailing_address.errors %}border-red-300 text-red-900{% endif %}"
-           required>
-    {% if form.mailing_address.errors %}
-    <p class="mt-1 text-sm text-red-600">{{ form.mailing_address.errors.0 }}</p>
-    {% endif %}
-</div>
+<div class="section-card p-6 sm:p-8 space-y-5 mt-5">
+    {% include "apply/_section_label.html" with text="Current Mailing Address" blue=True %}
 
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-    <!-- City -->
-    <div class="col-span-2">
-        <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            City <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="{{ form.city.html_name }}" id="{{ form.city.id_for_label }}"
-               value="{{ form.city.value|default:'' }}"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-               {% if form.city.errors %}border-red-300 text-red-900{% endif %}"
-               required>
-        {% if form.city.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.city.errors.0 }}</p>
-        {% endif %}
-    </div>
+    {% include "apply/_field.html" with field=form.mailing_address label="Street Address" required=True placeholder="123 Main St" %}
 
-    <!-- State -->
-    <div>
-        <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            State <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}"
-               value="{{ form.state.value|default:'MI' }}" maxlength="2"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-               {% if form.state.errors %}border-red-300 text-red-900{% endif %}"
-               required>
-        {% if form.state.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.state.errors.0 }}</p>
-        {% endif %}
-    </div>
-
-    <!-- Zip Code -->
-    <div>
-        <label for="{{ form.zip_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            ZIP Code <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="{{ form.zip_code.html_name }}" id="{{ form.zip_code.id_for_label }}"
-               value="{{ form.zip_code.value|default:'' }}" maxlength="10"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
-               {% if form.zip_code.errors %}border-red-300 text-red-900{% endif %}"
-               required>
-        {% if form.zip_code.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.zip_code.errors.0 }}</p>
-        {% endif %}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="col-span-2">
+            {% include "apply/_field.html" with field=form.city label="City" required=True placeholder="Flint" %}
+        </div>
+        {% include "apply/_field.html" with field=form.state label="State" required=True maxlength="2" %}
+        {% include "apply/_field.html" with field=form.zip_code label="ZIP Code" required=True maxlength="10" placeholder="48502" %}
     </div>
 </div>
 
 <!-- Purchasing Entity (optional) -->
-<h3 class="font-title text-xl font-semibold text-gray-900 mt-6 mb-4">Purchasing Entity <span class="text-sm font-normal text-gray-400">(optional)</span></h3>
+<div class="section-card p-6 sm:p-8 space-y-5 mt-5">
+    {% include "apply/_section_label.html" with text="Purchasing Entity" blue=True %}
+    <p class="text-xs text-warm-500 -mt-3">If purchasing on behalf of an LLC, trust, or other entity, provide details below. Otherwise skip this section.</p>
 
-<p class="text-sm text-gray-500 mb-4">
-    If you are purchasing on behalf of an LLC, trust, or other entity, provide the details below.
-</p>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div>
-        <label for="{{ form.purchasing_entity_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            Entity Name
-        </label>
-        <input type="text" name="{{ form.purchasing_entity_name.html_name }}" id="{{ form.purchasing_entity_name.id_for_label }}"
-               value="{{ form.purchasing_entity_name.value|default:'' }}"
-               placeholder="e.g., Smith Family Trust"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
-    </div>
-
-    <div>
-        <label for="{{ form.contact_name_different.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-            Contact Name (if different from above)
-        </label>
-        <input type="text" name="{{ form.contact_name_different.html_name }}" id="{{ form.contact_name_different.id_for_label }}"
-               value="{{ form.contact_name_different.value|default:'' }}"
-               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {% include "apply/_field.html" with field=form.purchasing_entity_name label="Entity Name" placeholder="e.g., Smith Family Trust" %}
+        {% include "apply/_field.html" with field=form.contact_name_different label="Contact Name (if different)" placeholder="Jane Smith" %}
     </div>
 </div>
 {% endblock %}

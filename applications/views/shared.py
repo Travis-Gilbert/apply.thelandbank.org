@@ -189,7 +189,7 @@ def save_progress(request):
     )
 
     return HttpResponse(
-        '<span class="text-gclba-600">'
+        '<span class="text-civic-green-700 font-medium">'
         "&#10003; Progress saved! Check your email for a resume link.</span>"
     )
 

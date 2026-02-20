@@ -3,54 +3,59 @@
 {% block title %}Application Submitted — {{ application.reference_number }}{% endblock %}
 
 {% block content %}
-<div class="max-w-lg mx-auto text-center py-12">
-    <div class="mx-auto w-16 h-16 bg-gclba-100 rounded-full flex items-center justify-center mb-6">
-        <svg class="w-8 h-8 text-gclba-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="max-w-lg mx-auto text-center py-12 px-4">
+    <!-- Success Icon -->
+    <div class="mx-auto w-20 h-20 bg-civic-green-100 rounded-full flex items-center justify-center mb-6 animate-scale-in">
+        <svg class="w-10 h-10 text-civic-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
         </svg>
     </div>
 
-    <h2 class="font-title text-3xl font-bold text-gray-900 mb-2">Application Submitted!</h2>
-    <p class="text-lg text-gclba-700 font-mono font-bold mb-4">{{ application.reference_number }}</p>
+    <h2 class="font-title text-3xl font-bold text-warm-900 mb-2">Application Submitted!</h2>
+    <p class="text-lg text-civic-green-700 font-mono font-bold mb-4">{{ application.reference_number }}</p>
 
-    <p class="text-gray-600 mb-8">
+    <p class="text-warm-600 mb-8">
         Thank you, {{ application.first_name }}. Your application has been received and
-        a confirmation email has been sent to <strong>{{ application.email }}</strong>.
+        a confirmation email has been sent to <strong class="text-warm-900">{{ application.email }}</strong>.
     </p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-left space-y-3 mb-8">
-        <h3 class="font-title text-lg font-semibold text-gray-900">What happens next?</h3>
-        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-2">
-            <li>Our team will review your application within <strong class="font-mono">5–7 business days</strong>.</li>
+    <!-- What Happens Next -->
+    <div class="section-card p-6 text-left space-y-3 mb-6">
+        <h3 class="font-title text-lg font-semibold text-warm-900">What happens next?</h3>
+        <ol class="list-decimal list-inside text-sm text-warm-600 space-y-2">
+            <li>Our team will review your application within <strong class="font-mono text-warm-900">5-7 business days</strong>.</li>
             <li>We may contact you if additional documents are needed.</li>
             <li>You'll receive an email when a decision has been made.</li>
             {% if application.program_type == "vip_spotlight" %}
             <li>VIP proposals are evaluated on price, feasibility, experience, financing, and neighborhood benefit.</li>
             {% else %}
-            <li>If approved, you'll have <strong class="font-mono">30 days to close</strong> on the property.</li>
+            <li>If approved, you'll have <strong class="font-mono text-warm-900">30 days to close</strong> on the property.</li>
             {% endif %}
         </ol>
     </div>
 
-    <div class="bg-gclba-50 border border-gclba-200 rounded-lg p-4 mb-8">
-        <h3 class="font-title text-lg font-semibold text-gray-900 mb-1">Your Application Summary</h3>
-        <div class="text-sm text-gray-600 space-y-1">
-            <p>Property: {{ application.property_address }}</p>
-            <p>Program: {{ application.get_program_type_display }}</p>
+    <!-- Application Summary -->
+    <div class="section-card p-6 text-left mb-8" style="border-left: 4px solid #2e7d32;">
+        <h3 class="font-title text-lg font-semibold text-warm-900 mb-3">Your Application Summary</h3>
+        <div class="text-sm text-warm-600 space-y-1.5">
+            <p>Property: <span class="text-warm-900">{{ application.property_address }}</span></p>
+            <p>Program: <span class="text-warm-900">{{ application.get_program_type_display }}</span></p>
             {% if application.offer_amount %}
-            <p>Offer: <span class="font-mono">${{ application.offer_amount|floatformat:2 }}</span></p>
+            <p>Offer: <span class="font-mono font-semibold text-warm-900">${{ application.offer_amount|floatformat:2 }}</span></p>
             {% endif %}
             {% if application.purchase_type == "land_contract" %}
-            <p>Purchase Type: Land Contract</p>
-            <p>Down Payment: <span class="font-mono">${{ application.down_payment_amount|floatformat:2 }}</span></p>
+            <p>Purchase Type: <span class="text-warm-900">Land Contract</span></p>
+            <p>Down Payment: <span class="font-mono font-semibold text-warm-900">${{ application.down_payment_amount|floatformat:2 }}</span></p>
             {% endif %}
         </div>
     </div>
 
+    <!-- Contact -->
     <div class="space-y-2">
-        <p class="text-sm text-gray-500">Questions? Contact us:</p>
-        <p class="text-gray-600"><span class="font-mono">(810) 257-3088</span> &middot;
-            <a href="mailto:offers@thelandbank.org" class="font-mono text-gclba-600 hover:underline">
+        <p class="text-sm text-warm-500">Questions? Contact us:</p>
+        <p class="text-warm-600">
+            <span class="font-mono">(810) 257-3088</span> &middot;
+            <a href="mailto:offers@thelandbank.org" class="font-mono text-civic-green-700 hover:underline">
                 offers@thelandbank.org
             </a>
         </p>

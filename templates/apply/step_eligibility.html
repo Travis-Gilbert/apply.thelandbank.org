@@ -1,59 +1,80 @@
 {% extends "apply/base_form.html" %}
 
-{% block form_content %}
-<h3 class="font-title text-xl font-semibold text-gray-900 mb-2">Eligibility</h3>
-<p class="text-sm text-gray-600 mb-6">
-    Please answer the following questions honestly. Providing false information may result in
-    disqualification or cancellation of your purchase agreement.
-</p>
+{% block step_subtitle %}Please answer honestly. Providing false information may result in disqualification.{% endblock %}
 
-<div class="space-y-6">
+{% block form_content %}
+<div class="section-card p-6 sm:p-8 space-y-6">
+    {% include "apply/_section_label.html" with text="Eligibility Questions" %}
+
     <!-- Delinquent Taxes -->
-    <div class="p-4 border border-gray-200 rounded-lg">
-        <label class="block text-sm font-medium text-gray-900 mb-3">
+    <div>
+        <p class="text-sm font-medium text-warm-900 mb-4">
             Do you currently owe delinquent property taxes in Genesee County? <span class="text-red-500">*</span>
-        </label>
-        <div class="flex gap-6">
+        </p>
+        <div class="grid grid-cols-2 gap-3">
             {% for value, label in form.has_delinquent_taxes.field.choices %}
-            <label class="flex items-center gap-2 cursor-pointer">
+            <label class="cursor-pointer">
                 <input type="radio" name="{{ form.has_delinquent_taxes.html_name }}" value="{{ value }}"
                        {% if form.has_delinquent_taxes.value == value %}checked{% endif %}
-                       class="text-gclba-600 focus:ring-gclba-500">
-                <span class="text-sm text-gray-700">{{ label }}</span>
+                       class="peer sr-only">
+                <div class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all duration-200 text-sm font-medium
+                    {% if value == 'False' %}
+                    peer-checked:border-civic-green-600 peer-checked:bg-civic-green-50 peer-checked:text-civic-green-800
+                    {% else %}
+                    peer-checked:border-red-400 peer-checked:bg-red-50 peer-checked:text-red-800
+                    {% endif %}
+                    border-warm-300/60 text-warm-600 hover:border-warm-400">
+                    {% if value == 'False' %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="opacity-0 peer-checked:opacity-100"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {% endif %}
+                    {{ label }}
+                </div>
             </label>
             {% endfor %}
         </div>
         {% if form.has_delinquent_taxes.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.has_delinquent_taxes.errors.0 }}</p>
+        <p class="mt-2 text-xs text-red-600 font-medium">{{ form.has_delinquent_taxes.errors.0 }}</p>
         {% endif %}
     </div>
 
     <!-- Tax Foreclosure -->
-    <div class="p-4 border border-gray-200 rounded-lg">
-        <label class="block text-sm font-medium text-gray-900 mb-3">
+    <div>
+        <p class="text-sm font-medium text-warm-900 mb-4">
             Have you ever lost property to tax foreclosure in Genesee County? <span class="text-red-500">*</span>
-        </label>
-        <div class="flex gap-6">
+        </p>
+        <div class="grid grid-cols-2 gap-3">
             {% for value, label in form.has_tax_foreclosure.field.choices %}
-            <label class="flex items-center gap-2 cursor-pointer">
+            <label class="cursor-pointer">
                 <input type="radio" name="{{ form.has_tax_foreclosure.html_name }}" value="{{ value }}"
                        {% if form.has_tax_foreclosure.value == value %}checked{% endif %}
-                       class="text-gclba-600 focus:ring-gclba-500">
-                <span class="text-sm text-gray-700">{{ label }}</span>
+                       class="peer sr-only">
+                <div class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all duration-200 text-sm font-medium
+                    {% if value == 'False' %}
+                    peer-checked:border-civic-green-600 peer-checked:bg-civic-green-50 peer-checked:text-civic-green-800
+                    {% else %}
+                    peer-checked:border-red-400 peer-checked:bg-red-50 peer-checked:text-red-800
+                    {% endif %}
+                    border-warm-300/60 text-warm-600 hover:border-warm-400">
+                    {% if value == 'False' %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="opacity-0 peer-checked:opacity-100"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {% endif %}
+                    {{ label }}
+                </div>
             </label>
             {% endfor %}
         </div>
         {% if form.has_tax_foreclosure.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ form.has_tax_foreclosure.errors.0 }}</p>
+        <p class="mt-2 text-xs text-red-600 font-medium">{{ form.has_tax_foreclosure.errors.0 }}</p>
         {% endif %}
     </div>
-</div>
 
-<div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
-    <p class="text-sm text-amber-800">
-        <strong>Note:</strong> Answering "Yes" to either question above will disqualify you
-        from purchasing property through the Genesee County Land Bank. If you believe there
-        is an error, please contact us at (810) 257-3088.
-    </p>
+    <!-- Disclaimer -->
+    <div class="flex items-start gap-3 p-4 rounded-xl bg-warm-100/70 border border-warm-200/60">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-warm-500 flex-shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <p class="text-xs leading-relaxed text-warm-600">
+            Answering "Yes" to either question will disqualify you from purchasing through the Land Bank.
+            If you believe there is an error, please contact us at <span class="font-mono text-[11px]">(810) 257-3088</span>.
+        </p>
+    </div>
 </div>
 {% endblock %}

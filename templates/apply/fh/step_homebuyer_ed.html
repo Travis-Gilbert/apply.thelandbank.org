@@ -1,64 +1,77 @@
 {% extends "apply/base_form.html" %}
 
+{% block step_subtitle %}Land contract buyers must complete a homebuyer education course before closing.{% endblock %}
+
 {% block form_content %}
-<h3 class="font-title text-xl font-semibold text-gray-900 mb-4">Homebuyer Education</h3>
+<div class="section-card p-6 sm:p-8 space-y-5">
+    {% include "apply/_section_label.html" with text="Homebuyer Education" %}
 
-<div class="p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
-    <p class="text-sm text-blue-800">
-        <strong>Land contract buyers must complete a homebuyer education course before closing.</strong>
-        If you haven't completed one yet, please contact one of the agencies listed below to enroll.
-    </p>
-</div>
+    <div class="p-4 rounded-xl bg-civic-blue-50 border border-civic-blue-100">
+        <p class="text-sm text-civic-blue-800">
+            <strong>Required for land contract purchases.</strong>
+            If you haven't completed one yet, contact one of the agencies listed below to enroll.
+        </p>
+    </div>
 
-<!-- Completed -->
-<div class="p-4 border border-gray-200 rounded-lg">
-    <label class="flex items-center gap-2">
+    <!-- Completed Checkbox -->
+    <label class="flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer border-warm-300/60 hover:border-warm-400 has-[input:checked]:border-civic-green-600 has-[input:checked]:bg-civic-green-50/50">
         <input type="checkbox" name="{{ form.homebuyer_ed_completed.html_name }}"
                {% if form.homebuyer_ed_completed.value %}checked{% endif %}
-               class="rounded text-gclba-600 focus:ring-gclba-500">
-        <span class="text-sm font-medium text-gray-900">I have already completed a homebuyer education course</span>
+               class="w-5 h-5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
+        <span class="text-sm font-medium text-warm-900">I have already completed a homebuyer education course</span>
     </label>
+
+    <!-- Agency Selection -->
+    <div class="space-y-1.5">
+        <label for="{{ form.homebuyer_ed_agency.id_for_label }}" class="block text-sm font-medium text-warm-900">
+            Which agency did you complete the course through?
+        </label>
+        <select name="{{ form.homebuyer_ed_agency.html_name }}" id="{{ form.homebuyer_ed_agency.id_for_label }}"
+                class="gclba-input gclba-select">
+            {% for value, label in form.homebuyer_ed_agency.field.choices %}
+            <option value="{{ value }}" {% if form.homebuyer_ed_agency.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Other Agency -->
+    {% include "apply/_field.html" with field=form.homebuyer_ed_other label="Other agency name" placeholder="Agency name" %}
 </div>
 
-<!-- Agency -->
-<div>
-    <label for="{{ form.homebuyer_ed_agency.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-        Which agency did you complete the course through?
-    </label>
-    <select name="{{ form.homebuyer_ed_agency.html_name }}" id="{{ form.homebuyer_ed_agency.id_for_label }}"
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
-        {% for value, label in form.homebuyer_ed_agency.field.choices %}
-        <option value="{{ value }}" {% if form.homebuyer_ed_agency.value == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-    </select>
-</div>
+<!-- Approved Providers -->
+<div class="section-card p-6 sm:p-8 space-y-4 mt-5">
+    {% include "apply/_section_label.html" with text="Approved Providers" blue=True %}
 
-<!-- Other Agency -->
-<div>
-    <label for="{{ form.homebuyer_ed_other.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-        Other agency name
-    </label>
-    <input type="text" name="{{ form.homebuyer_ed_other.html_name }}" id="{{ form.homebuyer_ed_other.id_for_label }}"
-           value="{{ form.homebuyer_ed_other.value|default:'' }}"
-           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
-</div>
-
-<div class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
-    <h4 class="text-sm font-semibold text-gray-900 mb-2">Approved Homebuyer Education Providers</h4>
-    <ul class="text-sm text-gray-600 space-y-2">
-        <li>
-            <strong>Metro Community Development</strong><br>
-            <span class="font-mono">(810) 767-4622</span>
-        </li>
-        <li>
-            <strong>Genesee County Habitat for Humanity</strong><br>
-            <span class="font-mono">(810) 766-9089</span>
-        </li>
-        <li>
-            <strong>Fannie Mae HomeView</strong> (online, free, 3–4 hours)<br>
-            <a href="https://homeview.fanniemae.com" target="_blank" rel="noopener"
-               class="text-gclba-600 hover:underline">homeview.fanniemae.com</a>
-        </li>
-    </ul>
+    <div class="space-y-3">
+        <div class="flex items-start gap-3 p-3 rounded-lg bg-warm-100/50">
+            <div class="w-8 h-8 rounded-full bg-civic-green-100 flex items-center justify-center flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-civic-green-700"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke-linejoin="round"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-warm-900">Metro Community Development</p>
+                <p class="text-xs text-warm-500 font-mono">(810) 767-4622</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3 p-3 rounded-lg bg-warm-100/50">
+            <div class="w-8 h-8 rounded-full bg-civic-green-100 flex items-center justify-center flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-civic-green-700"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke-linejoin="round"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-warm-900">Genesee County Habitat for Humanity</p>
+                <p class="text-xs text-warm-500 font-mono">(810) 766-9089</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3 p-3 rounded-lg bg-warm-100/50">
+            <div class="w-8 h-8 rounded-full bg-civic-blue-100 flex items-center justify-center flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-civic-blue-700"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-warm-900">Fannie Mae HomeView</p>
+                <p class="text-xs text-warm-500">Online, free, 3-4 hours</p>
+                <a href="https://homeview.fanniemae.com" target="_blank" rel="noopener"
+                   class="text-xs text-civic-blue-600 underline underline-offset-2">homeview.fanniemae.com</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
