@@ -12,7 +12,7 @@
         {% include "apply/_field.html" with field=form.last_name label="Last Name" required=True placeholder="Smith" %}
     </div>
 
-    {% include "apply/_field.html" with field=form.email label="Email Address" type="email" required=True placeholder="john@example.com" hint="We'll send your confirmation and magic link to this address." %}
+    {% include "apply/_field.html" with field=form.email label="Email Address" type="email" required=True placeholder="john@example.com" hint="We'll send your confirmation and a link to resume your application." %}
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {% include "apply/_field.html" with field=form.phone label="Phone Number" type="tel" required=True placeholder="(810) 555-0100" %}

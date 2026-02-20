@@ -8,14 +8,14 @@
      style="background: linear-gradient(180deg, #F2EDE6 0%, rgba(242,237,230,0.95) 100%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0,0,0,0.06);">
     <div class="flex items-center gap-3">
         <div class="flex items-center gap-2 flex-shrink-0">
-            <span class="w-7 h-7 rounded-full bg-civic-green-700 text-white flex items-center justify-center text-xs font-bold font-mono">{{ current_step }}</span>
+            <span class="w-7 h-7 rounded-full bg-civic-green-700 text-white flex items-center justify-center text-xs font-bold">{{ current_step }}</span>
             <span class="text-sm font-semibold text-warm-900 truncate">{{ step_title }}</span>
         </div>
         <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:rgba(0,0,0,0.06)">
             <div class="h-full rounded-full transition-all duration-500 ease-out bg-civic-green-600"
                  style="width: {% widthratio current_step total_steps 100 %}%"></div>
         </div>
-        <span id="step-count" class="text-[11px] font-mono text-warm-500 flex-shrink-0">{{ current_step }}/{{ total_steps }}</span>
+        <span id="step-count" class="text-[11px] text-warm-500 flex-shrink-0">{{ current_step }}/{{ total_steps }}</span>
     </div>
 </div>
 
@@ -23,7 +23,7 @@
     <!-- Desktop sidebar progress -->
     <div class="hidden lg:block w-56 flex-shrink-0">
         <div class="sticky top-8">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-civic-blue-600 font-mono mb-4">Application Progress</p>
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-civic-blue-600 mb-4">Application Progress</p>
             <div class="space-y-1">
                 {% for step in steps %}
                 <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
@@ -39,10 +39,10 @@
                     </div>
                     {% elif forloop.counter == current_step %}
                     <!-- Active step -->
-                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-700 text-white text-xs font-bold font-mono">{{ forloop.counter }}</div>
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-700 text-white text-xs font-bold">{{ forloop.counter }}</div>
                     {% else %}
                     <!-- Future step -->
-                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold font-mono" style="background:#e7e2dc; color:#a09890">{{ forloop.counter }}</div>
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#e7e2dc; color:#a09890">{{ forloop.counter }}</div>
                     {% endif %}
 
                     <span class="text-sm
@@ -57,9 +57,9 @@
 
             <!-- Sidebar help card -->
             <div class="mt-7 p-4 rounded-xl bg-civic-blue-50 border border-civic-blue-100">
-                <p class="text-[11px] font-semibold uppercase tracking-wider text-civic-blue-600 font-mono mb-2">Need Help?</p>
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-civic-blue-600 mb-2">Need Help?</p>
                 <p class="text-xs leading-relaxed text-civic-blue-700">
-                    Call <span class="font-mono">(810) 257-3088</span> or visit
+                    Call (810) 257-3088 or visit
                     <a href="https://www.thelandbank.org" class="underline underline-offset-2" target="_blank" rel="noopener">thelandbank.org</a>
                 </p>
             </div>
@@ -71,7 +71,7 @@
         <!-- Step header -->
         <div class="mb-5 sm:mb-7">
             <div class="flex items-center gap-2.5 sm:gap-3 mb-2">
-                <span class="hidden lg:inline-flex items-center justify-center w-8 h-8 rounded-full bg-civic-green-700 text-white text-xs font-bold font-mono">{{ current_step }}</span>
+                <span class="hidden lg:inline-flex items-center justify-center w-8 h-8 rounded-full bg-civic-green-700 text-white text-xs font-bold">{{ current_step }}</span>
                 <h2 class="text-xl sm:text-2xl lg:text-[28px] font-bold font-heading text-warm-900">{{ step_title }}</h2>
             </div>
             <p class="text-sm leading-relaxed text-warm-600 lg:pl-11">{% block step_subtitle %}{% endblock %}</p>
@@ -119,8 +119,8 @@
         <!-- Help text -->
         <div class="mt-5 text-center">
             <p class="text-xs text-warm-500" style="opacity:0.7">
-                Need help? Call <span class="font-mono text-[11px]">(810) 257-3088</span>
-                or email <a href="mailto:offers@thelandbank.org" class="font-mono text-[11px] text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
+                Need help? Call (810) 257-3088
+                or email <a href="mailto:offers@thelandbank.org" class="text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
             </p>
         </div>
     </div>
