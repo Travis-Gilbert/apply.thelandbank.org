@@ -1,0 +1,125 @@
+{# Contact information — expanded section #}
+<div class="section-card-v2" style="border-left: 3px solid {{ program_color|default:'#2E7D32' }}">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color|default:'#2E7D32' }}">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-5">
+            {# Name row #}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        First Name <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <input type="text" name="{{ form.first_name.html_name }}" id="{{ form.first_name.id_for_label }}"
+                           value="{{ form.first_name.value|default:'' }}" required
+                           placeholder="First name" class="gclba-input{% if form.first_name.errors %} has-error{% endif %}">
+                    {% if form.first_name.errors %}<p class="text-xs text-red-600 font-medium">{{ form.first_name.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="space-y-1.5">
+                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        Last Name <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <input type="text" name="{{ form.last_name.html_name }}" id="{{ form.last_name.id_for_label }}"
+                           value="{{ form.last_name.value|default:'' }}" required
+                           placeholder="Last name" class="gclba-input{% if form.last_name.errors %} has-error{% endif %}">
+                    {% if form.last_name.errors %}<p class="text-xs text-red-600 font-medium">{{ form.last_name.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            {# Email + phone #}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        Email <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}"
+                           value="{{ form.email.value|default:'' }}" required
+                           placeholder="you@example.com" class="gclba-input{% if form.email.errors %} has-error{% endif %}">
+                    {% if form.email.errors %}<p class="text-xs text-red-600 font-medium">{{ form.email.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="space-y-1.5">
+                    <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        Phone <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <input type="tel" name="{{ form.phone.html_name }}" id="{{ form.phone.id_for_label }}"
+                           value="{{ form.phone.value|default:'' }}" required
+                           placeholder="(810) 555-0123" class="gclba-input{% if form.phone.errors %} has-error{% endif %}">
+                    {% if form.phone.errors %}<p class="text-xs text-red-600 font-medium">{{ form.phone.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            {# Preferred contact method #}
+            <div class="space-y-1.5">
+                <label for="{{ form.preferred_contact.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    Preferred Contact Method <span class="text-red-500 text-xs">*</span>
+                </label>
+                <select name="{{ form.preferred_contact.html_name }}" id="{{ form.preferred_contact.id_for_label }}"
+                        class="gclba-input gclba-select">
+                    {% for value, label in form.preferred_contact.field.choices %}
+                    <option value="{{ value }}" {% if form.preferred_contact.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# Mailing address #}
+            <div class="space-y-1.5">
+                <label for="{{ form.mailing_address.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    Mailing Address <span class="text-red-500 text-xs">*</span>
+                </label>
+                <input type="text" name="{{ form.mailing_address.html_name }}" id="{{ form.mailing_address.id_for_label }}"
+                       value="{{ form.mailing_address.value|default:'' }}" required
+                       placeholder="123 Main Street" class="gclba-input{% if form.mailing_address.errors %} has-error{% endif %}">
+                {% if form.mailing_address.errors %}<p class="text-xs text-red-600 font-medium">{{ form.mailing_address.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# City / State / ZIP #}
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="col-span-2 sm:col-span-2 space-y-1.5">
+                    <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        City <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <input type="text" name="{{ form.city.html_name }}" id="{{ form.city.id_for_label }}"
+                           value="{{ form.city.value|default:'' }}" required
+                           placeholder="Flint" class="gclba-input{% if form.city.errors %} has-error{% endif %}">
+                </div>
+                <div class="space-y-1.5">
+                    <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        State <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <input type="text" name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}"
+                           value="{{ form.state.value|default:'MI' }}" required maxlength="2"
+                           class="gclba-input{% if form.state.errors %} has-error{% endif %}">
+                </div>
+                <div class="space-y-1.5">
+                    <label for="{{ form.zip_code.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        ZIP <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <input type="text" name="{{ form.zip_code.html_name }}" id="{{ form.zip_code.id_for_label }}"
+                           value="{{ form.zip_code.value|default:'' }}" required maxlength="10"
+                           placeholder="48502" class="gclba-input{% if form.zip_code.errors %} has-error{% endif %}">
+                </div>
+            </div>
+
+            {# Entity dropdown #}
+            {% include "apply/v2/_entity_dropdown.html" with form=form %}
+
+            {# Continue button #}
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+{# Ready for Rehab documents — expanded #}
+<div class="section-card-v2" style="border-left: 3px solid {{ program_color }}">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color }}">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-6">
+            {% if errors %}
+            <div class="p-4 rounded-xl border border-red-200 bg-red-50/60">
+                {% for error in errors %}
+                <p class="text-sm text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# Photo ID #}
+            {% include "apply/v2/_document_capture.html" with field_name="photo_id" label="Photo ID" required=True hint="State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted." existing_file=uploaded.photo_id %}
+
+            {# Proof of funds for offer amount #}
+            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds — Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds %}
+
+            {# Proof of funds OR financing for renovation costs #}
+            {% include "apply/v2/_document_capture.html" with field_name="proof_of_reno_funds" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.proof_of_reno_funds %}
+
+            {# Prior GCLBA investment proof (conditional) #}
+            {% if form_data.has_prior_gclba_purchase %}
+            <div class="animate-step">
+                {% include "apply/v2/_document_capture.html" with field_name="proof_of_prior_investment" label="Proof of Prior GCLBA Investment" required=True hint="Photos, receipts, or other documentation showing investment in your previously purchased GCLBA property." existing_file=uploaded.proof_of_prior_investment %}
+            </div>
+            {% endif %}
+
+            {# Continue button #}
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-encoding="multipart/form-data"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+{# Program selector — 3-card grid #}
+<div class="section-card-v2" style="border-left: 3px solid #2E7D32">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 bg-civic-green-700">1</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">Select a Program</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6">
+            <p class="text-sm text-warm-600 mb-5">Choose the program that best fits the property you're interested in. Each program has different requirements and processes.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {# Featured Homes #}
+                <button type="button"
+                        hx-post="{% url 'applications:section_program_select' %}"
+                        hx-target="#accordion-container"
+                        hx-swap="innerHTML"
+                        hx-vals='{"program": "featured_homes"}'
+                        hx-include="#accordion-form"
+                        hx-disabled-elt="this"
+                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer{% if program_type == 'featured_homes' %} ring-2 ring-offset-1{% endif %}"
+                        style="border-color: rgba(0,0,0,0.08);"
+                        onmouseover="this.style.borderColor='#2E7D32'"
+                        onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
+                    <div class="flex flex-col gap-2">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base" style="background: #2E7D3215">&#127968;</div>
+                        <h4 class="text-sm font-bold font-heading text-warm-900">Featured Homes</h4>
+                        <p class="text-xs text-warm-500 leading-relaxed">Move-in ready homes at affordable prices</p>
+                        <div class="flex items-center gap-1.5 mt-1">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span class="text-[11px] text-warm-400">10-15 minutes</span>
+                        </div>
+                    </div>
+                </button>
+
+                {# Ready for Rehab #}
+                <button type="button"
+                        hx-post="{% url 'applications:section_program_select' %}"
+                        hx-target="#accordion-container"
+                        hx-swap="innerHTML"
+                        hx-vals='{"program": "ready_for_rehab"}'
+                        hx-include="#accordion-form"
+                        hx-disabled-elt="this"
+                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer{% if program_type == 'ready_for_rehab' %} ring-2 ring-offset-1{% endif %}"
+                        style="border-color: rgba(0,0,0,0.08);"
+                        onmouseover="this.style.borderColor='#F57C00'"
+                        onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
+                    <div class="flex flex-col gap-2">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base" style="background: #F57C0015">&#128296;</div>
+                        <h4 class="text-sm font-bold font-heading text-warm-900">Ready for Rehab</h4>
+                        <p class="text-xs text-warm-500 leading-relaxed">Homes that need renovation at lower costs</p>
+                        <div class="flex items-center gap-1.5 mt-1">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span class="text-[11px] text-warm-400">15-20 minutes</span>
+                        </div>
+                    </div>
+                </button>
+
+                {# VIP Spotlight #}
+                <button type="button"
+                        hx-post="{% url 'applications:section_program_select' %}"
+                        hx-target="#accordion-container"
+                        hx-swap="innerHTML"
+                        hx-vals='{"program": "vip_spotlight"}'
+                        hx-include="#accordion-form"
+                        hx-disabled-elt="this"
+                        class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer{% if program_type == 'vip_spotlight' %} ring-2 ring-offset-1{% endif %}"
+                        style="border-color: rgba(0,0,0,0.08);"
+                        onmouseover="this.style.borderColor='#1565C0'"
+                        onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
+                    <div class="flex flex-col gap-2">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base" style="background: #1565C015">&#11088;</div>
+                        <h4 class="text-sm font-bold font-heading text-warm-900">VIP Spotlight</h4>
+                        <p class="text-xs text-warm-500 leading-relaxed">Unique properties evaluated by proposal</p>
+                        <div class="flex items-center gap-1.5 mt-1">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span class="text-[11px] text-warm-400">20-30 minutes</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Apply - GCLBA Property Purchase Portal{% endblock %}
+
+{% block content %}
+{# Progress bar — sticky at top, updates via hx-swap-oob #}
+<div id="progress-bar">
+    {% include "apply/v2/_progress_bar.html" with completed_count=completed_count total_count=total_sections program_color=program_color program_name=program_name %}
+</div>
+
+{# Accordion container — all sections rendered here #}
+<form method="post" enctype="multipart/form-data" id="accordion-form">
+    {% csrf_token %}
+    <div id="accordion-container" class="mt-4 space-y-0">
+        {% for section in sections %}
+            {% if section.state == "collapsed" %}
+                {# Collapsed summary bar #}
+                <div id="section-{{ section.id }}" class="accordion-section accordion-gap">
+                    <div class="summary-bar">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                             style="background: {{ program_color }}15">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ program_color }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 6L9 17l-5-5"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-sm font-semibold text-warm-800">{{ section.title }}</span>
+                            {% if section.summary %}
+                            <span class="text-warm-500 mx-1.5">&middot;</span>
+                            <span class="text-sm text-warm-500 truncate">{{ section.summary }}</span>
+                            {% endif %}
+                        </div>
+                        <button type="button"
+                                hx-get="{{ section.edit_url }}"
+                                hx-target="#section-{{ section.id }}"
+                                hx-swap="outerHTML"
+                                class="text-xs font-medium flex-shrink-0 px-2.5 py-1 rounded-md transition-colors hover:bg-warm-100"
+                                style="color: {{ program_color }}">
+                            Edit
+                        </button>
+                    </div>
+                </div>
+
+            {% elif section.state == "expanded" %}
+                {# Active expanded section #}
+                <div id="section-{{ section.id }}" class="accordion-section {% if not forloop.first %}accordion-gap-active{% endif %}">
+                    {% include section.template with section_id=section.id section_number=section.number section_title=section.title program_color=program_color form=section.form validate_url=section.validate_url %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</form>
+
+{# Help text #}
+<div class="mt-6 text-center">
+    <p class="text-xs text-warm-500" style="opacity:0.7">
+        Need help? Call (810) 257-3088
+        or email <a href="mailto:offers@thelandbank.org" class="text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
+    </p>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    // ── Accordion Controller ────────────────────────────────────
+
+    // Smooth scroll to a section after HTMX swap
+    function scrollToSection(sectionId) {
+        var el = document.getElementById(sectionId);
+        if (el) {
+            setTimeout(function() {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }
+
+    // Listen for HX-Trigger scrollToSection event
+    document.body.addEventListener('scrollToSection', function(evt) {
+        var sectionId = evt.detail.value || evt.detail;
+        scrollToSection(sectionId);
+    });
+
+    // Also handle htmx:afterSwap for general scroll behavior
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        var target = evt.detail.target;
+        if (target && target.classList && target.classList.contains('accordion-gap-active')) {
+            scrollToSection(target.id);
+        }
+    });
+
+    // ── Document capture JS ────────────────────────────────────
+
+    window.handleDocCapture = function(input, fieldName) {
+        if (input.files && input.files[0]) {
+            var file = input.files[0];
+            var preview = document.getElementById('preview-' + fieldName);
+            var buttons = document.getElementById('buttons-' + fieldName);
+            var filenameEl = document.getElementById('filename-' + fieldName);
+
+            if (filenameEl) filenameEl.textContent = file.name;
+            if (preview) preview.classList.remove('hidden');
+            if (buttons) buttons.classList.add('hidden');
+        }
+    };
+
+    window.removeDoc = function(fieldName) {
+        var preview = document.getElementById('preview-' + fieldName);
+        var buttons = document.getElementById('buttons-' + fieldName);
+
+        if (preview) preview.classList.add('hidden');
+        if (buttons) buttons.classList.remove('hidden');
+
+        // Clear the file inputs
+        var inputs = buttons.querySelectorAll('input[type=file]');
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].value = '';
+        }
+    };
+
+    // ── File list handler ──────────────────────────────────────
+
+    window.handleFileList = function(input, fieldName) {
+        var listEl = document.getElementById('filelist-' + fieldName);
+        if (!listEl || !input.files) return;
+
+        // Clear existing list safely
+        while (listEl.firstChild) {
+            listEl.removeChild(listEl.firstChild);
+        }
+
+        for (var i = 0; i < input.files.length; i++) {
+            var file = input.files[i];
+            var div = document.createElement('div');
+            div.className = 'flex items-center gap-2 p-2 rounded-lg bg-civic-green-50 border border-civic-green-200';
+
+            // Checkmark SVG
+            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '14');
+            svg.setAttribute('height', '14');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', '#2E7D32');
+            svg.setAttribute('stroke-width', '2');
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M20 6L9 17l-5-5');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
+            svg.appendChild(path);
+            div.appendChild(svg);
+
+            // File name
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'text-sm text-civic-green-800 truncate flex-1';
+            nameSpan.textContent = file.name;
+            div.appendChild(nameSpan);
+
+            // File size
+            var sizeSpan = document.createElement('span');
+            sizeSpan.className = 'text-xs text-warm-400';
+            sizeSpan.textContent = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+            div.appendChild(sizeSpan);
+
+            listEl.appendChild(div);
+        }
+    };
+})();
+</script>
+{% endblock %}

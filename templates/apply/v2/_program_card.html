@@ -1,0 +1,37 @@
+{# Individual program card — icon, name, tagline, time estimate #}
+{# Include with: program_key, program_name, program_icon, program_tagline, program_time, program_color, select_url #}
+<button type="button"
+        hx-post="{{ select_url }}"
+        hx-target="#accordion-container"
+        hx-swap="innerHTML"
+        hx-vals='{"program": "{{ program_key }}"}'
+        hx-disabled-elt="this"
+        class="group w-full text-left p-5 rounded-xl border-2 border-warm-200 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer"
+        style="border-color: rgba(0,0,0,0.08);"
+        onmouseover="this.style.borderColor='{{ program_color }}'"
+        onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
+    <div class="flex items-start gap-4">
+        {# Program icon #}
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-lg"
+             style="background: {{ program_color }}15">
+            {{ program_icon }}
+        </div>
+
+        <div class="flex-1 min-w-0">
+            <h3 class="text-base font-bold font-heading text-warm-900">{{ program_name }}</h3>
+            <p class="text-sm text-warm-500 mt-0.5 leading-relaxed">{{ program_tagline }}</p>
+            <div class="flex items-center gap-1.5 mt-2">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span class="text-xs text-warm-400">{{ program_time }}</span>
+            </div>
+        </div>
+
+        {# Arrow #}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-300 group-hover:text-warm-500 transition-colors flex-shrink-0 mt-1">
+            <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+</button>

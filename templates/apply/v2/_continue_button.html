@@ -1,0 +1,30 @@
+{# Continue button — outlined in program accent color #}
+{# Include with: program_color (hex), section_id, validate_url #}
+{# For final section (acks): use is_submit=True for a filled Submit button #}
+<div class="flex justify-end pt-4">
+    {% if is_submit %}
+    <button type="submit"
+            formaction="{{ validate_url }}"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white transition-all duration-200"
+            style="background: {{ program_color|default:'#2E7D32' }}"
+            hx-disabled-elt="this">
+        Submit Application
+    </button>
+    {% else %}
+    <button type="submit"
+            formaction="{{ validate_url }}"
+            class="continue-btn"
+            style="color: {{ program_color|default:'#2E7D32' }}; border-color: {{ program_color|default:'#2E7D32' }}"
+            hx-post="{{ validate_url }}"
+            hx-target="#section-{{ section_id }}"
+            hx-swap="outerHTML"
+            hx-disabled-elt="this"
+            hx-indicator="#spinner-{{ section_id }}">
+        Continue
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        <span id="spinner-{{ section_id }}" class="htmx-indicator">
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </span>
+    </button>
+    {% endif %}
+</div>

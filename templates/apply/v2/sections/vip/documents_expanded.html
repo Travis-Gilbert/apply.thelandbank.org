@@ -1,0 +1,61 @@
+{# VIP Spotlight documents — expanded #}
+<div class="section-card-v2" style="border-left: 3px solid {{ program_color }}">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color }}">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-6">
+            {% if errors %}
+            <div class="p-4 rounded-xl border border-red-200 bg-red-50/60">
+                {% for error in errors %}
+                <p class="text-sm text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# Required documents #}
+            <div class="space-y-1">
+                <p class="text-xs font-semibold text-warm-500 uppercase tracking-wider">Required</p>
+            </div>
+
+            {# Photo ID #}
+            {% include "apply/v2/_document_capture.html" with field_name="photo_id" label="Photo ID" required=True hint="State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted." existing_file=uploaded.photo_id %}
+
+            {# Proof of funds (equity portion) #}
+            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds" required=True hint="Bank statement, investment account, or documentation showing available funds for the equity portion of your proposal." existing_file=uploaded.proof_of_funds %}
+
+            {# Optional documents #}
+            <div class="space-y-1 pt-2">
+                <p class="text-xs font-semibold text-warm-500 uppercase tracking-wider">Optional</p>
+                <p class="text-xs text-warm-400">These documents strengthen your proposal but are not required</p>
+            </div>
+
+            {# Pre-approval letter (if using construction financing) #}
+            {% include "apply/v2/_document_capture.html" with field_name="pre_approval_letter" label="Construction Loan Pre-Approval" required=False hint="Pre-approval letter from your lender if using construction financing." existing_file=uploaded.pre_approval_letter %}
+
+            {# Portfolio photos #}
+            {% include "apply/v2/_file_upload.html" with field_name="portfolio_photos" label="Portfolio — Renovation Photos" hint="Before/after photos of previous renovation projects. You may upload multiple files." existing_file=uploaded.portfolio_photos %}
+
+            {# Letters of support #}
+            {% include "apply/v2/_file_upload.html" with field_name="letters_of_support" label="Letters of Support" hint="Letters from community organizations, neighbors, or references. You may upload multiple files." existing_file=uploaded.letters_of_support %}
+
+            {# Continue button #}
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-encoding="multipart/form-data"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

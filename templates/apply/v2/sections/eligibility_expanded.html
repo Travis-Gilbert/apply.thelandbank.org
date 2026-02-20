@@ -1,0 +1,82 @@
+{# Eligibility gate — expanded section #}
+<div class="section-card-v2" style="border-left: 3px solid {{ program_color|default:'#2E7D32' }}">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color|default:'#2E7D32' }}">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-5">
+            {# Warning callout #}
+            <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/60">
+                <div class="flex items-start gap-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" class="flex-shrink-0 mt-0.5">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-amber-900">Important</p>
+                        <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                            The Land Bank cannot sell to you if you have delinquent property taxes or
+                            if you have been through tax foreclosure with the Genesee County Treasurer
+                            in the last five years.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {# Delinquent taxes question #}
+            <div class="space-y-2">
+                <p class="text-sm font-medium text-warm-900">
+                    Do you currently owe delinquent property taxes in Genesee County? <span class="text-red-500 text-xs">*</span>
+                </p>
+                <div class="flex gap-4">
+                    {% for value, label in form.has_delinquent_taxes.field.widget.choices %}
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="{{ form.has_delinquent_taxes.html_name }}" value="{{ value }}"
+                               {% if form.has_delinquent_taxes.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
+                               class="w-4 h-4 border-warm-300 text-civic-green-600 focus:ring-civic-green-200" required>
+                        <span class="text-sm text-warm-800">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.has_delinquent_taxes.errors %}<p class="text-xs text-red-600 font-medium">{{ form.has_delinquent_taxes.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Tax foreclosure question #}
+            <div class="space-y-2">
+                <p class="text-sm font-medium text-warm-900">
+                    Have you lost property to tax foreclosure with the Genesee County
+                    Treasurer in the last five years? <span class="text-red-500 text-xs">*</span>
+                </p>
+                <div class="flex gap-4">
+                    {% for value, label in form.has_tax_foreclosure.field.widget.choices %}
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="{{ form.has_tax_foreclosure.html_name }}" value="{{ value }}"
+                               {% if form.has_tax_foreclosure.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
+                               class="w-4 h-4 border-warm-300 text-civic-green-600 focus:ring-civic-green-200" required>
+                        <span class="text-sm text-warm-800">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.has_tax_foreclosure.errors %}<p class="text-xs text-red-600 font-medium">{{ form.has_tax_foreclosure.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Continue button #}
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

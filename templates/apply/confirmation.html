@@ -5,14 +5,19 @@
 {% block content %}
 <div class="max-w-lg mx-auto text-center py-12 px-4">
     <!-- Success Icon -->
-    <div class="mx-auto w-20 h-20 bg-civic-green-100 rounded-full flex items-center justify-center mb-6 animate-scale-in">
-        <svg class="w-10 h-10 text-civic-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-6 animate-scale-in"
+         style="background: {{ program_color_light|default:'#E8F5E9' }}">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             style="color: {{ program_color|default:'#2E7D32' }}">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
         </svg>
     </div>
 
-    <h2 class="font-heading text-3xl font-bold text-warm-900 mb-2">Application Submitted!</h2>
-    <p class="text-lg text-civic-green-700 font-mono font-bold tracking-wide mb-4">{{ application.reference_number }}</p>
+    <h2 class="font-heading text-3xl font-bold text-warm-900 mb-2">
+        {% if application.program_type == "vip_spotlight" %}Proposal{% else %}Application{% endif %} Submitted!
+    </h2>
+    <p class="text-lg font-mono font-bold tracking-wide mb-4"
+       style="color: {{ program_color|default:'#2E7D32' }}">{{ application.reference_number }}</p>
 
     <p class="text-warm-600 mb-8">
         Thank you, {{ application.first_name }}. Your application has been received and
@@ -35,7 +40,7 @@
     </div>
 
     <!-- Application Summary -->
-    <div class="section-card p-6 text-left mb-8" style="border-left: 4px solid #2e7d32;">
+    <div class="section-card p-6 text-left mb-8" style="border-left: 4px solid {{ program_color|default:'#2e7d32' }};">
         <h3 class="font-heading text-lg font-semibold text-warm-900 mb-3">Your Application Summary</h3>
         <div class="text-sm text-warm-600 space-y-1.5">
             <p>Property: <span class="text-warm-900">{{ application.property_address }}</span></p>
@@ -47,6 +52,9 @@
             <p>Purchase Type: <span class="text-warm-900">Land Contract</span></p>
             <p>Down Payment: <span class="font-mono font-semibold text-warm-900">${{ application.down_payment_amount|floatformat:2 }}</span></p>
             {% endif %}
+            {% if application.reno_total %}
+            <p>Renovation Estimate: <span class="font-mono font-semibold text-warm-900">${{ application.reno_total|floatformat:2 }}</span></p>
+            {% endif %}
         </div>
     </div>
 
@@ -55,7 +63,7 @@
         <p class="text-sm text-warm-500">Questions? Contact us:</p>
         <p class="text-warm-600">
             (810) 257-3088 &middot;
-            <a href="mailto:offers@thelandbank.org" class="text-civic-green-700 hover:underline">
+            <a href="mailto:offers@thelandbank.org" class="hover:underline" style="color: {{ program_color|default:'#2E7D32' }}">
                 offers@thelandbank.org
             </a>
         </p>

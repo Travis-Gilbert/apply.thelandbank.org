@@ -1,0 +1,69 @@
+{# Document capture: square camera + file buttons with preview #}
+{# Include with: field_name, label, required (bool), hint (optional), accept (e.g. "image/*,.pdf") #}
+{# existing_file (optional, for resume state) #}
+<div class="space-y-2">
+    <div class="flex items-baseline justify-between gap-2">
+        <label class="block text-sm font-medium text-warm-900">
+            {{ label }}{% if required %} <span class="text-red-500 text-xs">*</span>{% endif %}
+        </label>
+    </div>
+
+    {# Preview area (shown when file selected) #}
+    <div id="preview-{{ field_name }}" class="{% if not existing_file %}hidden{% endif %}">
+        {% if existing_file %}
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-civic-green-50 border border-civic-green-200">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
+                <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="text-sm text-civic-green-800 truncate flex-1">{{ existing_file.name }}</span>
+            <button type="button" onclick="removeDoc('{{ field_name }}')" class="text-xs text-red-500 hover:text-red-700 font-medium">Remove</button>
+        </div>
+        {% else %}
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-civic-green-50 border border-civic-green-200">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
+                <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="filename-{{ field_name }}" class="text-sm text-civic-green-800 truncate flex-1"></span>
+            <button type="button" onclick="removeDoc('{{ field_name }}')" class="text-xs text-red-500 hover:text-red-700 font-medium">Remove</button>
+        </div>
+        {% endif %}
+    </div>
+
+    {# Capture buttons — square aspect ratio #}
+    <div id="buttons-{{ field_name }}" class="flex gap-3 {% if existing_file %}hidden{% endif %}">
+        {# Camera button (mobile) #}
+        <label class="doc-capture-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-warm-500">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span class="text-xs font-medium text-warm-500">Camera</span>
+            <input type="file"
+                   name="{{ field_name }}"
+                   accept="{{ accept|default:'image/*,.pdf' }}"
+                   capture="environment"
+                   class="hidden"
+                   onchange="handleDocCapture(this, '{{ field_name }}')">
+        </label>
+
+        {# File picker button #}
+        <label class="doc-capture-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-warm-500">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            <span class="text-xs font-medium text-warm-500">File</span>
+            <input type="file"
+                   name="{{ field_name }}"
+                   accept="{{ accept|default:'image/*,.pdf' }}"
+                   class="hidden"
+                   onchange="handleDocCapture(this, '{{ field_name }}')">
+        </label>
+    </div>
+
+    {% if hint %}
+    <p class="text-xs text-warm-400 leading-relaxed">{{ hint }}</p>
+    {% endif %}
+</div>
