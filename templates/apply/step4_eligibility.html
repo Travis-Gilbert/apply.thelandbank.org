@@ -1,0 +1,61 @@
+{% extends "apply/base_form.html" %}
+
+{% block form_content %}
+<h3 class="text-lg font-semibold text-gray-900 mb-2">Eligibility</h3>
+<p class="text-sm text-gray-600 mb-6">
+    Please answer the following questions honestly. Providing false information may result in
+    disqualification or cancellation of your purchase agreement.
+</p>
+
+<div class="space-y-6">
+    <!-- Delinquent Taxes -->
+    <div class="p-4 border border-gray-200 rounded-lg">
+        <label class="block text-sm font-medium text-gray-900 mb-3">
+            Do you currently owe delinquent property taxes in Genesee County? <span class="text-red-500">*</span>
+        </label>
+        <div class="flex gap-6">
+            {% for value, label in form.has_delinquent_taxes.field.choices %}
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="{{ form.has_delinquent_taxes.html_name }}" value="{{ value }}"
+                       {% if form.has_delinquent_taxes.value == value %}checked{% endif %}
+                       class="text-gclba-600 focus:ring-gclba-500">
+                <span class="text-sm text-gray-700">{{ label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {% if form.has_delinquent_taxes.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.has_delinquent_taxes.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Tax Foreclosure -->
+    <div class="p-4 border border-gray-200 rounded-lg">
+        <label class="block text-sm font-medium text-gray-900 mb-3">
+            Have you ever lost property to tax foreclosure in Genesee County? <span class="text-red-500">*</span>
+        </label>
+        <div class="flex gap-6">
+            {% for value, label in form.has_tax_foreclosure.field.choices %}
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="{{ form.has_tax_foreclosure.html_name }}" value="{{ value }}"
+                       {% if form.has_tax_foreclosure.value == value %}checked{% endif %}
+                       class="text-gclba-600 focus:ring-gclba-500">
+                <span class="text-sm text-gray-700">{{ label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {% if form.has_tax_foreclosure.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.has_tax_foreclosure.errors.0 }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+    <p class="text-sm text-amber-800">
+        <strong>Note:</strong> Answering "Yes" to either question above will disqualify you
+        from purchasing property through the Genesee County Land Bank. If you believe there
+        is an error, please contact us at (810) 257-3088.
+    </p>
+</div>
+{% endblock %}
+
+{% block prev_url %}/apply/step3/{% endblock %}

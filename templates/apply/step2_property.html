@@ -1,0 +1,81 @@
+{% extends "apply/base_form.html" %}
+
+{% block form_content %}
+<h3 class="text-lg font-semibold text-gray-900 mb-4">Property Information</h3>
+
+<!-- Property Address -->
+<div>
+    <label for="{{ form.property_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        Property Address <span class="text-red-500">*</span>
+    </label>
+    <input type="text" name="{{ form.property_address.html_name }}" id="{{ form.property_address.id_for_label }}"
+           value="{{ form.property_address.value|default:'' }}"
+           placeholder="e.g., 123 Main St, Flint, MI"
+           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm
+           {% if form.property_address.errors %}border-red-300{% endif %}" required>
+    {% if form.property_address.errors %}
+    <p class="mt-1 text-sm text-red-600">{{ form.property_address.errors.0 }}</p>
+    {% endif %}
+</div>
+
+<!-- Parcel ID -->
+<div>
+    <label for="{{ form.parcel_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        Parcel ID <span class="text-gray-400">(if known)</span>
+    </label>
+    <input type="text" name="{{ form.parcel_id.html_name }}" id="{{ form.parcel_id.id_for_label }}"
+           value="{{ form.parcel_id.value|default:'' }}"
+           placeholder="e.g., 40-12-345-678"
+           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
+</div>
+
+<!-- Program Type -->
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+        Which program are you applying for? <span class="text-red-500">*</span>
+    </label>
+    <div class="space-y-3">
+        {% for value, label in form.program_type.field.choices %}
+        <label class="flex items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors
+            {% if form.program_type.value == value %}border-gclba-500 bg-gclba-50{% else %}border-gray-200{% endif %}">
+            <input type="radio" name="{{ form.program_type.html_name }}" value="{{ value }}"
+                   {% if form.program_type.value == value %}checked{% endif %}
+                   class="mt-0.5 text-gclba-600 focus:ring-gclba-500">
+            <div>
+                <span class="font-medium text-gray-900">{{ label }}</span>
+                {% if value == "own_it_now" %}
+                <p class="text-sm text-gray-500">Purchase a move-in ready property</p>
+                {% elif value == "ready_for_rehab" %}
+                <p class="text-sm text-gray-500">Purchase a property that needs rehabilitation work</p>
+                {% endif %}
+            </div>
+        </label>
+        {% endfor %}
+    </div>
+    {% if form.program_type.errors %}
+    <p class="mt-1 text-sm text-red-600">{{ form.program_type.errors.0 }}</p>
+    {% endif %}
+</div>
+
+<!-- Open House -->
+<div>
+    <label class="flex items-center gap-2">
+        <input type="checkbox" name="{{ form.attended_open_house.html_name }}"
+               {% if form.attended_open_house.value %}checked{% endif %}
+               class="rounded text-gclba-600 focus:ring-gclba-500">
+        <span class="text-sm text-gray-700">I have attended an open house or visited this property</span>
+    </label>
+</div>
+
+<!-- Open House Date -->
+<div>
+    <label for="{{ form.open_house_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+        Date of visit <span class="text-gray-400">(if applicable)</span>
+    </label>
+    <input type="date" name="{{ form.open_house_date.html_name }}" id="{{ form.open_house_date.id_for_label }}"
+           value="{{ form.open_house_date.value|default:'' }}"
+           class="block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-gclba-500 focus:ring-gclba-500 sm:text-sm">
+</div>
+{% endblock %}
+
+{% block prev_url %}/apply/{% endblock %}

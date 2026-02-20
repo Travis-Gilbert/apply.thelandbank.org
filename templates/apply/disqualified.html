@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Application — Not Eligible{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-12">
+    <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">We're Sorry</h2>
+
+    <p class="text-gray-600 mb-6">
+        Based on your responses, you are not eligible to purchase property through the
+        Genesee County Land Bank at this time.
+    </p>
+
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-left mb-8">
+        <h3 class="font-semibold text-gray-900 mb-2">Why was I disqualified?</h3>
+        <p class="text-sm text-gray-600 mb-4">
+            Applicants who have delinquent property taxes in Genesee County or who have
+            previously lost property to tax foreclosure are not eligible to purchase
+            additional properties through the Land Bank.
+        </p>
+        <h3 class="font-semibold text-gray-900 mb-2">What can I do?</h3>
+        <p class="text-sm text-gray-600">
+            If you believe this determination was made in error, or if you have resolved
+            your tax obligations, please contact our office directly.
+        </p>
+    </div>
+
+    <div class="space-y-2">
+        <p class="text-gray-900 font-medium">Genesee County Land Bank Authority</p>
+        <p class="text-gray-600">452 S. Saginaw St., Flint, MI 48502</p>
+        <p class="text-gray-600">(810) 257-3088</p>
+        <p class="text-gray-600">
+            <a href="mailto:offers@thelandbank.org" class="text-gclba-600 hover:underline">
+                offers@thelandbank.org
+            </a>
+        </p>
+    </div>
+
+    <div class="mt-8">
+        <a href="https://www.thelandbank.org" class="text-gclba-600 hover:underline text-sm">
+            &larr; Return to thelandbank.org
+        </a>
+    </div>
+</div>
+{% endblock %}

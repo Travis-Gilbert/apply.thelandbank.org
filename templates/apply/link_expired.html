@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Link Expired — GCLBA Application{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-12">
+    <div class="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Link Expired</h2>
+
+    <p class="text-gray-600 mb-6">
+        This application resume link has expired. Links are valid for 14 days after they are created.
+    </p>
+
+    <div class="space-y-4">
+        <a href="/apply/"
+           class="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-gclba-600 rounded-md hover:bg-gclba-700 transition-colors">
+            Start a New Application
+        </a>
+        <p class="text-sm text-gray-500">
+            If you need help, contact us at (810) 257-3088 or
+            <a href="mailto:offers@thelandbank.org" class="text-gclba-600 hover:underline">offers@thelandbank.org</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
