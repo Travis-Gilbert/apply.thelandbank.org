@@ -1,8 +1,8 @@
 """
 URL patterns for the buyer-facing application form.
 
-V1 (wizard): Steps 1-3 have fixed URLs, steps 4+ use dispatcher.
-V2 (accordion): Single page at /apply/v2/ with HTMX section endpoints.
+V2 (accordion): Single page at /apply/ with HTMX section endpoints.
+V1 (wizard): Legacy multi-step flow preserved at /apply/v1/.
 HTMX endpoints are shared between both versions.
 """
 
@@ -13,30 +13,29 @@ from . import views
 app_name = "applications"
 
 urlpatterns = [
-    # ── V2 accordion flow ────────────────────────────────────────
-    path("v2/", views.apply_page, name="apply_page"),
+    # ── V2 accordion flow (primary) ──────────────────────────────
+    path("", views.apply_page, name="apply_page"),
     path(
-        "v2/section/<str:section_id>/validate/",
+        "section/<str:section_id>/validate/",
         views.section_validate,
         name="section_validate",
     ),
     path(
-        "v2/section/<str:section_id>/edit/",
+        "section/<str:section_id>/edit/",
         views.section_edit,
         name="section_edit",
     ),
     path(
-        "v2/section/program-select/",
+        "section/program-select/",
         views.section_program_select,
         name="section_program_select",
     ),
-    path("v2/disqualified/", views.disqualified, name="disqualified_v2"),
-    # ── V1 shared steps (1-3) ────────────────────────────────────
-    path("", views.step_identity, name="step_identity"),
-    path("property/", views.step_property, name="step_property"),
-    path("eligibility/", views.step_eligibility, name="step_eligibility"),
-    # ── V1 program-specific steps (4+) ───────────────────────────
-    path("step/<int:step_num>/", views.program_step, name="program_step"),
+    path("disqualified/", views.disqualified, name="disqualified_v2"),
+    # ── V1 wizard (legacy, kept for reference) ───────────────────
+    path("v1/", views.step_identity, name="step_identity"),
+    path("v1/property/", views.step_property, name="step_property"),
+    path("v1/eligibility/", views.step_eligibility, name="step_eligibility"),
+    path("v1/step/<int:step_num>/", views.program_step, name="program_step"),
     # ── HTMX partial endpoints (shared) ──────────────────────────
     path(
         "htmx/purchase-type-fields/",

@@ -412,6 +412,8 @@ Generated on final submission only. Example: GCLBA-2026-0001
 - Plain language labels throughout — no legal jargon
 - HTMX: conditional field reveal, renovation totals, step counter updates
 - Renovation line-item totals auto-calculate client-side as user types
+- Mobile: `inputmode="decimal"` on money fields, `inputmode="tel"` on phone, `inputmode="numeric"` on ZIP.
+  Viewport uses `maximum-scale=1` to prevent iOS auto-zoom. All interactive elements 44px min touch target.
 
 ### Staff Dashboard
 - django-unfold base theme, primary overridden to #2B6553
@@ -510,6 +512,17 @@ AWS_S3_REGION_NAME
     application" not "magic link". Say "reference number" not "token". The audience is Flint
     residents buying homes, not developers.
 
+15. **Accordion v2 template structure** — `templates/apply/v2/sections/` uses `{section}_expanded.html` +
+    `{section}_collapsed.html` pairs. Program-specific sections live in subdirs: `fh/`, `r4r/`, `vip/`.
+    Shared partials (entity dropdown, document capture, progress bar) are `_prefixed` in `templates/apply/v2/`.
+
+16. **Mobile CSS centralized in base.html** — touch targets (`.touch-label`), responsive buttons
+    (`.continue-btn`, `.doc-capture-btn-primary`), and breakpoint overrides live in the `<style>` block
+    in `base.html`, not scattered across section templates. Section templates just apply class names.
+
+17. **Git branch flow** — Admin → develop → main. Railway auto-deploys from `main`.
+    Push all three at once: `git push origin main develop Admin`.
+
 ---
 
 ## Phase 1 MVP Scope
@@ -550,11 +563,13 @@ AWS_S3_REGION_NAME
 
 ## Next Step
 
-Two critical-path items remain for end-to-end MVP:
+Accordion v2 UI and mobile optimization are deployed. Three critical-path items remain for end-to-end MVP:
 1. **Document uploads** — wire S3/Backblaze B2 storage backend via django-storages. File fields
    exist on models but no storage configured. Pre-signed URLs needed for staff viewing.
 2. **Email integration** — django-anymail with Resend is installed but not configured. Need
    save-and-resume email, submission confirmation, and staff notification templates.
+3. **Wire accordion views to models** — `applications/views/accordion.py` section validators
+   need to save validated data to `ApplicationDraft` and create `Application` on final submit.
 
 ---
 
@@ -566,6 +581,7 @@ Two critical-path items remain for end-to-end MVP:
 | Port 8199 for dev server | Avoids conflict with other local services | 2026-02-20 |
 | Civic design system (green #2e7d32, blue #2d6a8a) | Evolved from GCLBA brand colors; warmer, more accessible than raw brand hex | 2026-02-20 |
 | font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
+| Single-page accordion over multi-step wizard | Better UX: one page, HTMX validates per section, collapsed summaries show progress | 2026-02-20 |
 
 ---
 
