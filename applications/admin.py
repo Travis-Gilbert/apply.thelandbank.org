@@ -36,14 +36,13 @@ class ApplicationAdmin(ModelAdmin):
     list_display = (
         "reference_number",
         "full_name",
-        "email",
         "property_address",
+        "display_program",
         "display_status",
         "display_docs",
-        "assigned_to",
         "submitted_at",
     )
-    list_filter = ("status", "program_type", "purchase_type", "assigned_to", "submitted_at")
+    list_filter = ("status", "program_type", "purchase_type", "submitted_at")
     list_filter_submit = True
     search_fields = (
         "reference_number",
@@ -58,26 +57,27 @@ class ApplicationAdmin(ModelAdmin):
 
     fieldsets = (
         (
-            "Reference",
+            "Reference & Status",
             {
-                "fields": ("reference_number", "status", "assigned_to"),
+                "fields": ("reference_number", "status", "staff_notes"),
             },
         ),
         (
-            "Section 1: Applicant Identity",
+            "Applicant Identity",
             {
                 "fields": (
                     ("first_name", "last_name"),
                     "email",
                     "phone",
                     "preferred_contact",
-                    "street_address",
+                    "mailing_address",
                     ("city", "state", "zip_code"),
+                    ("purchasing_entity_name", "contact_name_different"),
                 ),
             },
         ),
         (
-            "Section 2: Property Information",
+            "Property & Program",
             {
                 "fields": (
                     "property_address",
@@ -89,52 +89,132 @@ class ApplicationAdmin(ModelAdmin):
             },
         ),
         (
-            "Section 3: Offer Details",
-            {
-                "fields": ("offer_amount", "purchase_type", "intended_use"),
-            },
-        ),
-        (
-            "Section 4: Eligibility",
+            "Eligibility",
             {
                 "fields": ("has_delinquent_taxes", "has_tax_foreclosure"),
-                "description": "If either is Yes, the applicant was disqualified but submitted anyway.",
+                "description": "If either is Yes, the applicant should have been disqualified at Step 3.",
             },
         ),
         (
-            "Section 6: Rehab Plan",
+            "Offer Details",
             {
                 "fields": (
-                    "rehab_scope",
-                    "rehab_budget",
-                    "rehab_timeline",
-                    "contractor_name",
-                    "contractor_phone",
+                    "offer_amount",
+                    "purchase_type",
+                    "down_payment_amount",
+                    "is_self_employed",
+                ),
+            },
+        ),
+        (
+            "Intended Use & Renovation Narrative",
+            {
+                "fields": (
+                    "intended_use",
+                    "first_home_or_moving",
+                    "renovation_description",
+                    "renovation_who",
+                    "renovation_when",
+                    "renovation_funding",
                 ),
                 "classes": ("collapse",),
-                "description": "Only applicable for Ready for Rehab program.",
             },
         ),
         (
-            "Section 7: Land Contract Details",
+            "R4R: Renovation Line Items — Interior",
             {
                 "fields": (
-                    "lc_provider_name",
-                    "lc_provider_phone",
-                    "lc_term_months",
-                    "lc_interest_rate",
+                    "reno_clean_out",
+                    "reno_demolition_disposal",
+                    "reno_hvac",
+                    "reno_water_heater",
+                    "reno_plumbing",
+                    "reno_electrical",
+                    "reno_kitchen_cabinets",
+                    "reno_kitchen_appliances",
+                    "reno_bathroom_repairs",
+                    "reno_flooring",
+                    "reno_doors_int",
+                    "reno_insulation",
+                    "reno_drywall_plaster",
+                    "reno_paint_wallpaper",
+                    "reno_lighting_int",
+                    "reno_interior_subtotal",
                 ),
                 "classes": ("collapse",),
-                "description": "Only applicable for Land Contract purchases.",
+                "description": "Only applicable for Ready for Rehab applications.",
             },
         ),
         (
-            "Section 8: Acknowledgments",
+            "R4R: Renovation Line Items — Exterior",
             {
                 "fields": (
+                    "reno_cleanup_landscaping",
+                    "reno_roof",
+                    "reno_foundation",
+                    "reno_doors_ext",
+                    "reno_windows",
+                    "reno_siding",
+                    "reno_masonry",
+                    "reno_porch_decking",
+                    "reno_lighting_ext",
+                    "reno_garage",
+                    "reno_exterior_subtotal",
+                    "reno_total",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "R4R: Prior GCLBA Purchase",
+            {
+                "fields": ("has_prior_gclba_purchase",),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Homebuyer Education (Land Contract Only)",
+            {
+                "fields": (
+                    "homebuyer_ed_completed",
+                    "homebuyer_ed_agency",
+                    "homebuyer_ed_other",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "VIP Proposal",
+            {
+                "fields": (
+                    "vip_q1_who_and_why",
+                    "vip_q2_prior_purchases",
+                    "vip_q2_prior_detail",
+                    "vip_q3_renovation_costs_timeline",
+                    "vip_q4_financing",
+                    "vip_q5_has_experience",
+                    "vip_q5_experience_detail",
+                    "vip_q6_completion_plan",
+                    "vip_q6_completion_detail",
+                    "vip_q7_contractor_info",
+                    "vip_q8_additional_info",
+                ),
+                "classes": ("collapse",),
+                "description": "Only applicable for VIP Spotlight applications.",
+            },
+        ),
+        (
+            "Acknowledgments",
+            {
+                "fields": (
+                    "ack_sold_as_is",
+                    "ack_quit_claim_deed",
+                    "ack_no_title_insurance",
+                    "ack_highest_not_guaranteed",
                     "ack_info_accurate",
-                    "ack_terms_conditions",
-                    "ack_inspection_waiver",
+                    "ack_tax_capture",
+                    "ack_reconveyance_deed",
+                    "ack_no_transfer",
                 ),
             },
         ),
@@ -150,16 +230,19 @@ class ApplicationAdmin(ModelAdmin):
     @display(
         description="Status",
         label={
-            Application.Status.SUBMITTED: "warning",
+            Application.Status.RECEIVED: "info",
             Application.Status.UNDER_REVIEW: "warning",
-            Application.Status.DOCS_REQUESTED: "info",
             Application.Status.APPROVED: "success",
-            Application.Status.DENIED: "danger",
-            Application.Status.WITHDRAWN: "info",
+            Application.Status.DECLINED: "danger",
+            Application.Status.NEEDS_MORE_INFO: "warning",
         },
     )
     def display_status(self, instance):
         return instance.status
+
+    @display(description="Program")
+    def display_program(self, instance):
+        return instance.get_program_type_display()
 
     @display(description="Docs")
     def display_docs(self, instance):
@@ -189,8 +272,8 @@ class ApplicationAdmin(ModelAdmin):
 
 @admin.register(ApplicationDraft)
 class ApplicationDraftAdmin(ModelAdmin):
-    list_display = ("token_short", "email", "current_step", "is_expired_display", "updated_at")
-    list_filter = ("current_step",)
+    list_display = ("token_short", "email", "program_type", "current_step", "is_expired_display", "updated_at")
+    list_filter = ("program_type", "current_step")
     search_fields = ("email",)
     readonly_fields = ("token", "form_data", "created_at", "updated_at", "expires_at")
 

@@ -4,14 +4,16 @@ Models for the GCLBA Application Portal.
 Four models:
 - ApplicationDraft: Temporary storage for multi-step form (UUID token, JSONField)
 - Application: Final submitted application with all flat fields for admin filtering
-- Document: Typed file uploads (photo ID, pay stubs, bank statements, etc.)
+- Document: Typed file uploads per program requirements
 - StatusLog: Audit trail for every status change
 """
 
 import uuid
 from datetime import timedelta
+from decimal import Decimal
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -27,6 +29,7 @@ class ApplicationDraft(models.Model):
 
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     email = models.EmailField(blank=True)
+    program_type = models.CharField(max_length=30, blank=True)
     form_data = models.JSONField(default=dict, blank=True)
     current_step = models.PositiveSmallIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,39 +58,59 @@ class Application(models.Model):
     A submitted GCLBA property purchase application.
 
     All fields are flat (not JSON) so the Unfold admin can filter,
-    sort, and search them. Sections mirror the 8-step buyer form.
+    sort, and search them. Program type determines which fields are
+    populated — VIP applications have proposal fields, R4R has
+    line-item renovation costs, Featured Homes has narrative renovation.
     """
 
+    # ── Choices ─────────────────────────────────────────────────
+
     class Status(models.TextChoices):
-        SUBMITTED = "submitted", "Submitted"
+        RECEIVED = "received", "Received"
         UNDER_REVIEW = "under_review", "Under Review"
-        DOCS_REQUESTED = "docs_requested", "Documents Requested"
         APPROVED = "approved", "Approved"
-        DENIED = "denied", "Denied"
-        WITHDRAWN = "withdrawn", "Withdrawn"
+        DECLINED = "declined", "Declined"
+        NEEDS_MORE_INFO = "needs_more_info", "Needs More Info"
 
     class ProgramType(models.TextChoices):
-        OWN_IT_NOW = "own_it_now", "Own It Now"
+        FEATURED_HOMES = "featured_homes", "Featured Homes"
         READY_FOR_REHAB = "ready_for_rehab", "Ready for Rehab"
+        VIP_SPOTLIGHT = "vip_spotlight", "VIP Spotlight"
+        VACANT_LOT = "vacant_lot", "Vacant Lot"
 
     class PurchaseType(models.TextChoices):
         CASH = "cash", "Cash"
         LAND_CONTRACT = "land_contract", "Land Contract"
-        CONVENTIONAL = "conventional", "Conventional Mortgage"
-        FHA_VA = "fha_va", "FHA/VA Loan"
 
     class IntendedUse(models.TextChoices):
-        PRIMARY_RESIDENCE = "primary_residence", "Primary Residence"
-        RENTAL = "rental", "Rental Property"
-        REHAB_RESALE = "rehab_resale", "Rehab & Resale"
-        COMMERCIAL = "commercial", "Commercial Use"
+        RENOVATE_MOVE_IN = "renovate_move_in", "Renovate & Move In"
+        RENOVATE_FAMILY = "renovate_family", "Renovate for Family Member"
+        RENOVATE_SELL = "renovate_sell", "Renovate & Sell"
+        RENOVATE_RENT = "renovate_rent", "Renovate & Rent Out"
+        DEMOLISH = "demolish", "Demolish"
 
     class PreferredContact(models.TextChoices):
         EMAIL = "email", "Email"
-        PHONE = "phone", "Phone"
+        PHONE = "phone", "Phone Call"
         TEXT = "text", "Text"
 
-    # ── Reference & Workflow ─────────────────────────────────────
+    class FirstHomeOrMoving(models.TextChoices):
+        FIRST_HOME = "first_home", "First Home Purchase"
+        MOVING_TO_MI = "moving_to_mi", "Moving to MI from Another State"
+        NEITHER = "neither", "Neither"
+
+    class HomebuyerEdAgency(models.TextChoices):
+        METRO_COMMUNITY_DEV = "metro_community_dev", "Metro Community Development"
+        HABITAT_FOR_HUMANITY = "habitat_for_humanity", "Genesee County Habitat for Humanity"
+        FANNIE_MAE_ONLINE = "fannie_mae_online", "Fannie Mae (Online)"
+        OTHER = "other", "Other"
+
+    class VIPCompletionPlan(models.TextChoices):
+        SELL = "sell", "Sell"
+        RENT = "rent", "Rent"
+
+    # ── Reference & Workflow ────────────────────────────────────
+
     reference_number = models.CharField(
         max_length=20,
         unique=True,
@@ -97,7 +120,7 @@ class Application(models.Model):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.SUBMITTED,
+        default=Status.RECEIVED,
     )
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -107,8 +130,13 @@ class Application(models.Model):
         related_name="assigned_applications",
         help_text="Staff member reviewing this application",
     )
+    staff_notes = models.TextField(
+        blank=True,
+        help_text="Internal notes — never visible to buyer",
+    )
 
-    # ── Section 1: Applicant Identity ────────────────────────────
+    # ── Section 1: Applicant Identity ───────────────────────────
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -118,12 +146,23 @@ class Application(models.Model):
         choices=PreferredContact.choices,
         default=PreferredContact.EMAIL,
     )
-    street_address = models.CharField(max_length=255)
+    mailing_address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=2, default="MI")
     zip_code = models.CharField(max_length=10)
+    purchasing_entity_name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="If purchasing through an LLC, trust, or other entity",
+    )
+    contact_name_different = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="If the primary contact is different from the buyer",
+    )
 
-    # ── Section 2: Property Info ─────────────────────────────────
+    # ── Section 2: Property Info ────────────────────────────────
+
     property_address = models.CharField(
         max_length=255,
         blank=True,
@@ -135,9 +174,9 @@ class Application(models.Model):
         help_text="County parcel ID number",
     )
     program_type = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=ProgramType.choices,
-        default=ProgramType.OWN_IT_NOW,
+        default=ProgramType.FEATURED_HOMES,
     )
     attended_open_house = models.BooleanField(
         default=False,
@@ -149,24 +188,8 @@ class Application(models.Model):
         help_text="Date of open house visit",
     )
 
-    # ── Section 3: Offer Details ─────────────────────────────────
-    offer_amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        help_text="Purchase offer in dollars",
-    )
-    purchase_type = models.CharField(
-        max_length=20,
-        choices=PurchaseType.choices,
-        default=PurchaseType.CASH,
-    )
-    intended_use = models.CharField(
-        max_length=20,
-        choices=IntendedUse.choices,
-        default=IntendedUse.PRIMARY_RESIDENCE,
-    )
+    # ── Section 3: Eligibility Gate ─────────────────────────────
 
-    # ── Section 4: Eligibility ───────────────────────────────────
     has_delinquent_taxes = models.BooleanField(
         default=False,
         help_text="Does the buyer owe delinquent property taxes in Genesee County?",
@@ -176,65 +199,212 @@ class Application(models.Model):
         help_text="Has the buyer lost property to tax foreclosure in Genesee County?",
     )
 
-    # ── Section 6: Rehab Plan (conditional: Ready for Rehab only) ─
-    rehab_scope = models.TextField(
-        blank=True,
-        help_text="Description of planned rehabilitation work",
-    )
-    rehab_budget = models.DecimalField(
+    # ── Section 4: Offer Details (Featured Homes + R4R) ─────────
+
+    offer_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Estimated rehab budget in dollars",
+        help_text="Purchase offer in dollars",
     )
-    rehab_timeline = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Expected timeline for rehab completion",
-    )
-    contractor_name = models.CharField(max_length=200, blank=True)
-    contractor_phone = models.CharField(max_length=20, blank=True)
-
-    # ── Section 7: Land Contract (conditional) ───────────────────
-    lc_provider_name = models.CharField(
-        max_length=200,
-        blank=True,
-        verbose_name="Land contract provider",
-    )
-    lc_provider_phone = models.CharField(
+    purchase_type = models.CharField(
         max_length=20,
-        blank=True,
-        verbose_name="Provider phone",
+        choices=PurchaseType.choices,
+        default=PurchaseType.CASH,
     )
-    lc_term_months = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="Contract term (months)",
-    )
-    lc_interest_rate = models.DecimalField(
-        max_digits=5,
+    down_payment_amount = models.DecimalField(
+        max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        verbose_name="Interest rate (%)",
+        help_text="Land contract down payment (min 10% or $1,000)",
+    )
+    is_self_employed = models.BooleanField(
+        default=False,
+        help_text="Changes income documentation requirements for land contract",
     )
 
-    # ── Section 8: Acknowledgments ───────────────────────────────
+    # ── Renovation Narrative (Featured Homes + R4R) ─────────────
+
+    intended_use = models.CharField(
+        max_length=20,
+        choices=IntendedUse.choices,
+        blank=True,
+    )
+    first_home_or_moving = models.CharField(
+        max_length=20,
+        choices=FirstHomeOrMoving.choices,
+        blank=True,
+        help_text="Sub-question when intended use is Renovate & Move In",
+    )
+    renovation_description = models.TextField(
+        blank=True,
+        help_text="What renovations will you be making?",
+    )
+    renovation_who = models.TextField(
+        blank=True,
+        help_text="Who will complete the renovations?",
+    )
+    renovation_when = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="When will renovations be completed?",
+    )
+    renovation_funding = models.TextField(
+        blank=True,
+        help_text="How will you pay for purchase and renovations?",
+    )
+
+    # ── R4R Line-Item Renovation Costs ──────────────────────────
+
+    # Interior costs
+    reno_clean_out = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_demolition_disposal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_hvac = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_water_heater = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_plumbing = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_electrical = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_kitchen_cabinets = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_kitchen_appliances = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_bathroom_repairs = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_flooring = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_doors_int = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_insulation = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_drywall_plaster = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_paint_wallpaper = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_lighting_int = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_interior_subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Exterior costs
+    reno_cleanup_landscaping = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_roof = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_foundation = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_doors_ext = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_windows = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_siding = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_masonry = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_porch_decking = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_lighting_ext = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_garage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    reno_exterior_subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Total
+    reno_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # ── R4R Prior GCLBA Purchase ────────────────────────────────
+
+    has_prior_gclba_purchase = models.BooleanField(
+        default=False,
+        help_text="Has applicant previously purchased from GCLBA?",
+    )
+
+    # ── Homebuyer Education (Land Contract Only) ────────────────
+
+    homebuyer_ed_completed = models.BooleanField(
+        default=False,
+        help_text="Has completed or will complete homebuyer education before closing",
+    )
+    homebuyer_ed_agency = models.CharField(
+        max_length=50,
+        choices=HomebuyerEdAgency.choices,
+        blank=True,
+    )
+    homebuyer_ed_other = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Agency name if Other selected",
+    )
+
+    # ── VIP Spotlight Proposal Questions ────────────────────────
+
+    vip_q1_who_and_why = models.TextField(
+        blank=True,
+        help_text="Who are you and why do you want to purchase this property?",
+    )
+    vip_q2_prior_purchases = models.BooleanField(
+        null=True,
+        blank=True,
+        help_text="Have you purchased single-family homes from GCLBA previously?",
+    )
+    vip_q2_prior_detail = models.TextField(
+        blank=True,
+        help_text="Details of prior GCLBA purchases",
+    )
+    vip_q3_renovation_costs_timeline = models.TextField(
+        blank=True,
+        help_text="Estimated renovation costs and development timeline",
+    )
+    vip_q4_financing = models.TextField(
+        blank=True,
+        help_text="How do you intend to finance the project?",
+    )
+    vip_q5_has_experience = models.BooleanField(
+        null=True,
+        blank=True,
+        help_text="Do you have single-family home renovation experience?",
+    )
+    vip_q5_experience_detail = models.TextField(
+        blank=True,
+        help_text="Portfolio: addresses, before/after photos",
+    )
+    vip_q6_completion_plan = models.CharField(
+        max_length=20,
+        choices=VIPCompletionPlan.choices,
+        blank=True,
+        help_text="Plans upon completion — sell or rent?",
+    )
+    vip_q6_completion_detail = models.TextField(
+        blank=True,
+        help_text="Details of completion plan",
+    )
+    vip_q7_contractor_info = models.TextField(
+        blank=True,
+        help_text="Contractor names and Genesee County experience",
+    )
+    vip_q8_additional_info = models.TextField(
+        blank=True,
+        help_text="Letters of support, references, community ties",
+    )
+
+    # ── Acknowledgments ─────────────────────────────────────────
+
+    ack_sold_as_is = models.BooleanField(
+        default=False,
+        verbose_name="I understand properties are sold as-is",
+    )
+    ack_quit_claim_deed = models.BooleanField(
+        default=False,
+        verbose_name="I understand closing is via Quit Claim Deed",
+    )
+    ack_no_title_insurance = models.BooleanField(
+        default=False,
+        verbose_name="I understand GCLBA does not provide title insurance",
+    )
+    ack_highest_not_guaranteed = models.BooleanField(
+        default=False,
+        verbose_name="I understand the highest offer is not guaranteed to be accepted",
+    )
     ack_info_accurate = models.BooleanField(
         default=False,
         verbose_name="I certify all information is accurate",
     )
-    ack_terms_conditions = models.BooleanField(
+    ack_tax_capture = models.BooleanField(
         default=False,
-        verbose_name="I agree to GCLBA terms and conditions",
+        verbose_name="I understand the 5/50 tax capture waiver requirement",
     )
-    ack_inspection_waiver = models.BooleanField(
+    # VIP only
+    ack_reconveyance_deed = models.BooleanField(
         default=False,
-        verbose_name="I understand properties are sold as-is",
+        verbose_name="I acknowledge the reconveyance deed requirement",
+    )
+    ack_no_transfer = models.BooleanField(
+        default=False,
+        verbose_name="I will not transfer or encumber without GCLBA consent",
     )
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # ── Timestamps ──────────────────────────────────────────────
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
@@ -249,21 +419,102 @@ class Application(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+    # ── Interior line-item field names (for calculation) ────────
+
+    INTERIOR_RENO_FIELDS = [
+        "reno_clean_out",
+        "reno_demolition_disposal",
+        "reno_hvac",
+        "reno_water_heater",
+        "reno_plumbing",
+        "reno_electrical",
+        "reno_kitchen_cabinets",
+        "reno_kitchen_appliances",
+        "reno_bathroom_repairs",
+        "reno_flooring",
+        "reno_doors_int",
+        "reno_insulation",
+        "reno_drywall_plaster",
+        "reno_paint_wallpaper",
+        "reno_lighting_int",
+    ]
+
+    EXTERIOR_RENO_FIELDS = [
+        "reno_cleanup_landscaping",
+        "reno_roof",
+        "reno_foundation",
+        "reno_doors_ext",
+        "reno_windows",
+        "reno_siding",
+        "reno_masonry",
+        "reno_porch_decking",
+        "reno_lighting_ext",
+        "reno_garage",
+    ]
+
+    def calculate_renovation_totals(self):
+        """Calculate and store renovation subtotals and total. Call before save()."""
+        self.reno_interior_subtotal = sum(
+            getattr(self, f) or Decimal("0") for f in self.INTERIOR_RENO_FIELDS
+        )
+        self.reno_exterior_subtotal = sum(
+            getattr(self, f) or Decimal("0") for f in self.EXTERIOR_RENO_FIELDS
+        )
+        self.reno_total = self.reno_interior_subtotal + self.reno_exterior_subtotal
+
+    def clean(self):
+        """Cross-field validation for program-specific rules."""
+        errors = {}
+
+        # Down payment validation for land contract
+        if (
+            self.purchase_type == self.PurchaseType.LAND_CONTRACT
+            and self.offer_amount
+            and self.down_payment_amount is not None
+        ):
+            min_down = max(self.offer_amount * Decimal("0.10"), Decimal("1000.00"))
+            if self.down_payment_amount < min_down:
+                errors["down_payment_amount"] = (
+                    f"Minimum down payment is ${min_down:,.2f} "
+                    f"(10% of offer or $1,000, whichever is higher)"
+                )
+
+        # Land contract only available for Featured Homes
+        if (
+            self.purchase_type == self.PurchaseType.LAND_CONTRACT
+            and self.program_type != self.ProgramType.FEATURED_HOMES
+        ):
+            errors["purchase_type"] = "Land contract is only available for Featured Homes."
+
+        # Land contract requires owner-occupied intent
+        if self.purchase_type == self.PurchaseType.LAND_CONTRACT and self.intended_use in (
+            self.IntendedUse.RENOVATE_SELL,
+            self.IntendedUse.RENOVATE_RENT,
+        ):
+            errors["intended_use"] = (
+                "Land contract is only available for owner-occupied properties."
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
     @property
     def docs_complete(self):
-        """Check if all required document types have been uploaded."""
+        """Check if all required document types have been uploaded, per program."""
         uploaded_types = set(self.documents.values_list("doc_type", flat=True))
         required = {"photo_id"}
 
-        if self.purchase_type == self.PurchaseType.CASH:
+        if self.program_type == self.ProgramType.FEATURED_HOMES:
+            if self.purchase_type == self.PurchaseType.CASH:
+                required.add("proof_of_funds")
+            else:  # land contract
+                required |= {"proof_of_income", "proof_of_down_payment"}
+        elif self.program_type == self.ProgramType.READY_FOR_REHAB:
+            required |= {"proof_of_funds", "reno_funding_proof"}
+            if self.has_prior_gclba_purchase:
+                required.add("prior_investment_proof")
+        elif self.program_type == self.ProgramType.VIP_SPOTLIGHT:
             required.add("proof_of_funds")
-        elif self.purchase_type == self.PurchaseType.LAND_CONTRACT:
-            required |= {"pay_stub_1", "pay_stub_2", "bank_statement"}
-        elif self.purchase_type in (
-            self.PurchaseType.CONVENTIONAL,
-            self.PurchaseType.FHA_VA,
-        ):
-            required.add("preapproval")
 
         return required.issubset(uploaded_types)
 
@@ -289,27 +540,27 @@ class Document(models.Model):
     """
     A typed document uploaded as part of an application.
 
-    Document types are conditional on purchase_type:
-    - Cash: photo_id + proof_of_funds
-    - Land contract: photo_id + 2 pay stubs + bank statement
-    - Conventional/FHA/VA: photo_id + preapproval letter
+    Document types are conditional on program + purchase type.
+    VIP portfolio photos and support letters allow multiple uploads.
     """
 
     class DocType(models.TextChoices):
         PHOTO_ID = "photo_id", "Photo ID"
-        PAY_STUB_1 = "pay_stub_1", "Pay Stub #1"
-        PAY_STUB_2 = "pay_stub_2", "Pay Stub #2"
-        BANK_STATEMENT = "bank_statement", "Bank Statement"
         PROOF_OF_FUNDS = "proof_of_funds", "Proof of Funds"
-        PREAPPROVAL = "preapproval", "Pre-Approval Letter"
-        ADDITIONAL_INCOME = "additional_income", "Additional Income Documentation"
+        PROOF_OF_INCOME = "proof_of_income", "Proof of Income"
+        PROOF_OF_DOWN_PAYMENT = "proof_of_down_payment", "Proof of Down Payment"
+        RENO_FUNDING_PROOF = "reno_funding_proof", "Renovation Funding Documentation"
+        PRIOR_INVESTMENT_PROOF = "prior_investment_proof", "Prior GCLBA Investment Proof"
+        VIP_PREAPPROVAL = "vip_preapproval", "Pre-Approval Letter"
+        VIP_PORTFOLIO_PHOTO = "vip_portfolio_photo", "Portfolio Photo"
+        VIP_SUPPORT_LETTER = "vip_support_letter", "Letter of Support"
 
     application = models.ForeignKey(
         Application,
         on_delete=models.CASCADE,
         related_name="documents",
     )
-    doc_type = models.CharField(max_length=30, choices=DocType.choices)
+    doc_type = models.CharField(max_length=50, choices=DocType.choices)
     file = models.FileField(upload_to="applications/%Y/%m/")
     original_filename = models.CharField(max_length=255, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -349,5 +600,6 @@ class StatusLog(models.Model):
 
     def __str__(self):
         return (
-            f"{self.application.reference_number}: {self.from_status or '(new)'} → {self.to_status}"
+            f"{self.application.reference_number}: "
+            f"{self.from_status or '(new)'} → {self.to_status}"
         )
