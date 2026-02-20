@@ -4,7 +4,7 @@
 
 {% block form_content %}
 <!-- Offer Details -->
-<div class="section-card p-6 sm:p-8 space-y-5">
+<div class="section-card p-5 sm:p-7 space-y-5">
     {% include "apply/_section_label.html" with text="Offer Details" %}
 
     <!-- Offer Amount -->
@@ -18,8 +18,13 @@
                    value="{{ form.offer_amount.value|default:'' }}"
                    class="gclba-input pl-7 font-mono{% if form.offer_amount.errors %} has-error{% endif %}"
                    placeholder="0.00"
-                   required>
+                   required
+                   hx-get="{% url 'applications:htmx_down_payment_minimum' %}"
+                   hx-target="#down-payment-min"
+                   hx-include="[name='offer_amount']"
+                   hx-trigger="input changed delay:500ms">
         </div>
+        <div id="down-payment-min"></div>
         {% if form.offer_amount.errors %}
         <p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>
         {% endif %}
@@ -27,7 +32,7 @@
 </div>
 
 <!-- Purchase Type -->
-<div class="section-card p-6 sm:p-8 space-y-5 mt-5">
+<div class="section-card p-5 sm:p-7 space-y-5 mt-4">
     {% include "apply/_section_label.html" with text="Purchase Type" blue=True %}
 
     <p class="text-sm text-warm-600 -mt-2">How do you plan to purchase? <span class="text-red-500">*</span></p>

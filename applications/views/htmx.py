@@ -86,6 +86,49 @@ def htmx_renovation_totals(request):
     )
 
 
+def htmx_down_payment_minimum(request):
+    """
+    Calculate and show the minimum down payment as the buyer types.
+
+    Triggered by: hx-get on offer_amount or down_payment_amount change
+    Target: #down-payment-min container
+    """
+    offer_raw = request.GET.get("offer_amount", "0")
+    try:
+        offer = Decimal(offer_raw) if offer_raw else Decimal("0")
+    except InvalidOperation:
+        offer = Decimal("0")
+
+    if offer > 0:
+        min_down = max(offer * Decimal("0.10"), Decimal("1000.00"))
+        return HttpResponse(
+            f'<p class="text-xs text-civic-blue-700 font-mono mt-1">'
+            f"Minimum down payment: ${min_down:,.2f} "
+            f"(10% of offer or $1,000, whichever is higher)</p>"
+        )
+    return HttpResponse("")
+
+
+def htmx_progress_bar(request):
+    """
+    Return updated progress bar data after program/purchase type selection.
+
+    Triggered by: hx-get on program_type or purchase_type radio change
+    Target: #progress-bar container (or full sidebar re-render)
+    """
+    from ..routing import get_all_steps
+
+    program_type = request.GET.get("program_type", "featured_homes")
+    purchase_type = request.GET.get("purchase_type", "cash")
+    all_steps = get_all_steps(program_type, purchase_type)
+    total = len(all_steps)
+
+    return HttpResponse(
+        f'<span class="text-[11px] font-mono text-warm-500 flex-shrink-0">'
+        f"2/{total}</span>"
+    )
+
+
 def htmx_self_employed_label(request):
     """
     Swap income document label based on self-employed checkbox.

@@ -5,6 +5,8 @@ save/resume functionality.
 These steps are identical across all four program paths.
 """
 
+import logging
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -14,6 +16,8 @@ from django.utils import timezone
 from ..forms import EligibilityForm, IdentityForm, PropertyForm
 from ..models import ApplicationDraft
 from ..routing import get_all_steps, get_total_steps
+
+logger = logging.getLogger(__name__)
 
 
 # ── Draft helpers ─────────────────────────────────────────────────
@@ -90,6 +94,11 @@ def step_identity(request):
 def step_property(request):
     """Step 2: Property Information + Program Selection."""
     draft = _get_draft(request)
+
+    # Must complete step 1 before accessing step 2
+    if draft.current_step < 2:
+        return redirect("applications:step_identity")
+
     form_data = draft.form_data or {}
 
     if request.method == "POST":
@@ -122,6 +131,13 @@ def step_property(request):
 def step_eligibility(request):
     """Step 3: Eligibility gate — hard block if disqualified."""
     draft = _get_draft(request)
+
+    # Must complete step 2 before accessing step 3
+    if draft.current_step < 3:
+        if draft.current_step < 2:
+            return redirect("applications:step_identity")
+        return redirect("applications:step_property")
+
     form_data = draft.form_data or {}
 
     if request.method == "POST":
@@ -174,19 +190,26 @@ def save_progress(request):
 
     resume_url = request.build_absolute_uri(f"/apply/resume/{draft.token}/")
 
-    send_mail(
-        subject="Continue Your GCLBA Application",
-        message=(
-            f"You can continue your application at any time using this link:\n\n"
-            f"{resume_url}\n\n"
-            f"This link expires on {draft.expires_at.strftime('%B %d, %Y')}.\n\n"
-            "Genesee County Land Bank Authority\n"
-            "(810) 257-3088"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[draft.email],
-        fail_silently=True,
-    )
+    try:
+        send_mail(
+            subject="Continue Your GCLBA Application",
+            message=(
+                f"You can continue your application at any time using this link:\n\n"
+                f"{resume_url}\n\n"
+                f"This link expires on {draft.expires_at.strftime('%B %d, %Y')}.\n\n"
+                "Genesee County Land Bank Authority\n"
+                "(810) 257-3088"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[draft.email],
+        )
+    except Exception:
+        logger.exception("Failed to send magic link email to %s", draft.email)
+        return HttpResponse(
+            '<span class="text-amber-600">'
+            "Progress saved, but we couldn't send the email. "
+            "Please try again or note your application link.</span>"
+        )
 
     return HttpResponse(
         '<span class="text-civic-green-700 font-medium">'
@@ -197,6 +220,16 @@ def save_progress(request):
 def resume_draft(request, token):
     """Resume a draft from a magic link."""
     draft = get_object_or_404(ApplicationDraft, token=token)
+
+    if draft.submitted:
+        # Draft was already submitted — show the confirmation info
+        from ..models import Application
+
+        app = Application.objects.filter(email=draft.email).order_by("-submitted_at").first()
+        return render(request, "apply/already_submitted.html", {
+            "reference_number": app.reference_number if app else None,
+            "email": draft.email,
+        })
 
     if draft.is_expired:
         return render(request, "apply/link_expired.html")

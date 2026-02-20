@@ -520,20 +520,29 @@ class Application(models.Model):
 
     @staticmethod
     def generate_reference_number():
-        """Generate next GCLBA-YYYY-NNNN reference number."""
-        year = timezone.now().year
-        prefix = f"GCLBA-{year}-"
-        last = (
-            Application.objects.filter(reference_number__startswith=prefix)
-            .order_by("-reference_number")
-            .first()
-        )
-        if last:
-            last_num = int(last.reference_number.split("-")[-1])
-            next_num = last_num + 1
-        else:
-            next_num = 1
-        return f"{prefix}{next_num:04d}"
+        """
+        Generate next GCLBA-YYYY-NNNN reference number.
+
+        Uses select_for_update() inside a transaction to prevent race
+        conditions when two applications are submitted simultaneously.
+        """
+        from django.db import transaction
+
+        with transaction.atomic():
+            year = timezone.now().year
+            prefix = f"GCLBA-{year}-"
+            last = (
+                Application.objects.select_for_update()
+                .filter(reference_number__startswith=prefix)
+                .order_by("-reference_number")
+                .first()
+            )
+            if last:
+                last_num = int(last.reference_number.split("-")[-1])
+                next_num = last_num + 1
+            else:
+                next_num = 1
+            return f"{prefix}{next_num:04d}"
 
 
 class Document(models.Model):

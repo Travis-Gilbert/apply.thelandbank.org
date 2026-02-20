@@ -40,6 +40,16 @@ urlpatterns = [
         views.htmx_self_employed_label,
         name="htmx_self_employed_label",
     ),
+    path(
+        "htmx/down-payment-min/",
+        views.htmx_down_payment_minimum,
+        name="htmx_down_payment_minimum",
+    ),
+    path(
+        "htmx/progress-bar/",
+        views.htmx_progress_bar,
+        name="htmx_progress_bar",
+    ),
     # ── Save & resume ─────────────────────────────────────────────
     path("save/", views.save_progress, name="save_progress"),
     path("resume/<uuid:token>/", views.resume_draft, name="resume"),

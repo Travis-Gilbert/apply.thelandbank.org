@@ -18,16 +18,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Security
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-dev-only-change-in-production",
-)
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+_INSECURE_KEY = "django-insecure-dev-only-change-in-production"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", _INSECURE_KEY)
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
+
+# Fail loud if insecure key reaches production
+if not DEBUG and SECRET_KEY == _INSECURE_KEY:
+    raise RuntimeError(
+        "DJANGO_SECRET_KEY must be set in production. "
+        "Generate one with: python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'"
+    )
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1",
+).split(",")
 
 CSRF_TRUSTED_ORIGINS = os.getenv(
     "CSRF_TRUSTED_ORIGINS",
-    "http://localhost:8000,http://127.0.0.1:8000",
+    "http://localhost:8000,http://127.0.0.1:8000,"
+    "http://localhost:8199,http://127.0.0.1:8199,"
+    "https://apply.thelandbank.org,"
+    "https://apply-thelandbankorg.up.railway.app",
 ).split(",")
 
 
@@ -49,6 +60,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "django_htmx",
+    "anymail",
     # Local apps
     "applications",
 ]
@@ -147,11 +159,11 @@ REST_FRAMEWORK = {
 }
 
 
-# CORS - allow frontend dev server in development
+# CORS — only needed if a separate frontend exists (currently server-rendered)
 
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000",
+    "https://apply.thelandbank.org",
 ).split(",")
 
 
@@ -160,14 +172,34 @@ CORS_ALLOWED_ORIGINS = os.getenv(
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# Email — console backend for development, swap to SMTP/SendGrid for production
+# Email — Resend via Anymail in production, console backend for development
 
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
     "django.core.mail.backends.console.EmailBackend",
 )
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@thelandbank.org")
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv("RESEND_API_KEY", ""),
+}
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "applications@thelandbank.org")
 STAFF_NOTIFICATION_EMAIL = os.getenv("STAFF_NOTIFICATION_EMAIL", "offers@thelandbank.org")
+
+
+# ---------------------------------------------------------------------------
+# Security headers — always-on and production-only settings
+# ---------------------------------------------------------------------------
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Railway is a reverse proxy — trust X-Forwarded-Proto
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # ---------------------------------------------------------------------------
