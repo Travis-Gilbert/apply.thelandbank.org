@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Submission Error{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-12 px-4">
+    <!-- Warning Icon -->
+    <div class="mx-auto w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+    </div>
+
+    <h2 class="font-heading text-3xl font-bold text-warm-900 mb-4">Something Went Wrong</h2>
+
+    <p class="text-warm-600 mb-6">
+        We were unable to process your application submission. Your progress has been saved
+        and no duplicate application was created.
+    </p>
+
+    <div class="section-card p-6 mb-8 text-left space-y-3">
+        <p class="text-sm text-warm-700 font-medium">What you can do:</p>
+        <ul class="text-sm text-warm-600 space-y-2 list-disc list-inside">
+            <li>Go back and try submitting again</li>
+            <li>If the problem persists, contact our office for assistance</li>
+        </ul>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button onclick="history.back()" class="gclba-btn-primary px-6 py-2.5">
+            &larr; Go Back and Retry
+        </button>
+    </div>
+
+    <!-- Contact -->
+    <div class="mt-8 space-y-2">
+        <p class="text-sm text-warm-500">Need help?</p>
+        <p class="font-mono text-sm text-warm-500">(810) 257-3088</p>
+        <p>
+            <a href="mailto:offers@thelandbank.org" class="font-mono text-sm text-civic-green-700 hover:underline">
+                offers@thelandbank.org
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}
