@@ -11,7 +11,7 @@
         </svg>
     </div>
 
-    <h2 class="font-title text-3xl font-bold text-warm-900 mb-2">Application Submitted!</h2>
+    <h2 class="font-heading text-3xl font-bold text-warm-900 mb-2">Application Submitted!</h2>
     <p class="text-lg text-civic-green-700 font-mono font-bold mb-4">{{ application.reference_number }}</p>
 
     <p class="text-warm-600 mb-8">
@@ -21,7 +21,7 @@
 
     <!-- What Happens Next -->
     <div class="section-card p-6 text-left space-y-3 mb-6">
-        <h3 class="font-title text-lg font-semibold text-warm-900">What happens next?</h3>
+        <h3 class="font-heading text-lg font-semibold text-warm-900">What happens next?</h3>
         <ol class="list-decimal list-inside text-sm text-warm-600 space-y-2">
             <li>Our team will review your application within <strong class="font-mono text-warm-900">5-7 business days</strong>.</li>
             <li>We may contact you if additional documents are needed.</li>
@@ -36,7 +36,7 @@
 
     <!-- Application Summary -->
     <div class="section-card p-6 text-left mb-8" style="border-left: 4px solid #2e7d32;">
-        <h3 class="font-title text-lg font-semibold text-warm-900 mb-3">Your Application Summary</h3>
+        <h3 class="font-heading text-lg font-semibold text-warm-900 mb-3">Your Application Summary</h3>
         <div class="text-sm text-warm-600 space-y-1.5">
             <p>Property: <span class="text-warm-900">{{ application.property_address }}</span></p>
             <p>Program: <span class="text-warm-900">{{ application.get_program_type_display }}</span></p>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Application Already Submitted{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-12 px-4">
+    <!-- Info Icon -->
+    <div class="mx-auto w-20 h-20 bg-civic-blue-100 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-10 h-10 text-civic-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+    </div>
+
+    <h2 class="font-heading text-3xl font-bold text-warm-900 mb-4">Already Submitted</h2>
+
+    <p class="text-warm-600 mb-6">
+        This application has already been submitted and is being reviewed by our team.
+    </p>
+
+    {% if reference_number %}
+    <div class="section-card p-6 mb-8">
+        <p class="text-sm text-warm-600 mb-1">Your reference number:</p>
+        <p class="text-2xl font-mono font-bold text-civic-green-700">{{ reference_number }}</p>
+    </div>
+    {% endif %}
+
+    <p class="text-sm text-warm-600 mb-6">
+        If you need to make changes or have questions about your application,
+        please contact our office.
+    </p>
+
+    <!-- Contact -->
+    <div class="space-y-2">
+        <p class="font-mono text-sm text-warm-500">(810) 257-3088</p>
+        <p>
+            <a href="mailto:offers@thelandbank.org" class="font-mono text-sm text-civic-green-700 hover:underline">
+                offers@thelandbank.org
+            </a>
+        </p>
+    </div>
+
+    <div class="mt-8">
+        <a href="{% url 'applications:step_identity' %}" class="text-civic-green-700 hover:underline text-sm">
+            Start a new application &rarr;
+        </a>
+    </div>
+</div>
+{% endblock %}

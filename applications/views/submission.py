@@ -3,6 +3,7 @@ Application submission — converts an ApplicationDraft into a real
 Application with Documents, sends confirmation emails.
 """
 
+import logging
 import os
 import shutil
 from datetime import date
@@ -10,10 +11,13 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import transaction
 from django.shortcuts import render
 from django.utils import timezone
 
 from ..models import Application, Document
+
+logger = logging.getLogger(__name__)
 
 
 def submit_application(request, draft):
@@ -122,17 +126,30 @@ def submit_application(request, draft):
         app.vip_q7_contractor_info = data.get("vip_q7_contractor_info", "")
         app.vip_q8_additional_info = data.get("vip_q8_additional_info", "")
 
-    app.save()
+    try:
+        with transaction.atomic():
+            app.save()
 
-    # Move uploaded files from drafts/ to applications/
-    _move_documents(draft, app, data)
+            # Move uploaded files from drafts/ to applications/
+            _move_documents(draft, app, data)
 
-    # Emails
+            # Mark draft as submitted inside the transaction
+            draft.submitted = True
+            draft.submitted_at = timezone.now()
+            draft.save()
+    except Exception:
+        logger.exception("Submission failed for draft %s", draft.token)
+        return render(request, "apply/submission_error.html", {
+            "email": draft.email,
+        })
+
+    # Emails happen outside the transaction — non-critical side effects
     _send_buyer_confirmation(app)
     _send_staff_notification(app)
 
-    # Clean up
-    _cleanup_draft(request, draft)
+    # Clean up session (but keep draft record since it's marked submitted)
+    if "draft_token" in request.session:
+        del request.session["draft_token"]
 
     return render(request, "apply/confirmation.html", {"application": app})
 
@@ -141,7 +158,9 @@ def _move_documents(draft, app, data):
     """Move uploaded files from drafts/ to applications/ and create Document records."""
     uploads = data.get("uploads", {})
     for doc_type, info in uploads.items():
-        if info.get("path") and os.path.exists(info["path"]):
+        # Paths are stored relative to MEDIA_ROOT
+        source_path = os.path.join(settings.MEDIA_ROOT, info.get("path", ""))
+        if info.get("path") and os.path.exists(source_path):
             dest_dir = os.path.join(
                 settings.MEDIA_ROOT,
                 "applications",
@@ -149,8 +168,13 @@ def _move_documents(draft, app, data):
                 f"{timezone.now().month:02d}",
             )
             os.makedirs(dest_dir, exist_ok=True)
-            dest_path = os.path.join(dest_dir, f"{app.reference_number}_{info['filename']}")
-            shutil.move(info["path"], dest_path)
+
+            # Sanitize the stored filename before using in destination path
+            safe_filename = "".join(
+                c for c in info["filename"] if c.isalnum() or c in ".-_"
+            ) or "upload"
+            dest_path = os.path.join(dest_dir, f"{app.reference_number}_{safe_filename}")
+            shutil.move(source_path, dest_path)
 
             relative_path = os.path.relpath(dest_path, settings.MEDIA_ROOT)
             Document.objects.create(
@@ -174,31 +198,32 @@ def _send_buyer_confirmation(app):
     else:
         offer_line = f"Offer: ${app.offer_amount:,.2f}" if app.offer_amount else ""
 
-    send_mail(
-        subject=f"GCLBA Application Received — {app.reference_number}",
-        message=(
-            f"Dear {app.first_name},\n\n"
-            f"Your application {app.reference_number} has been received.\n"
-            f"Property: {app.property_address}\n"
-            f"Program: {app.get_program_type_display()}\n"
-            f"{offer_line}\n\n"
-            "Our team will review your application and contact you within "
-            "5-7 business days.\n\n"
-            "Genesee County Land Bank Authority\n"
-            "(810) 257-3088\n"
-            "offers@thelandbank.org"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[app.email],
-        fail_silently=True,
-    )
+    try:
+        send_mail(
+            subject=f"GCLBA Application Received — {app.reference_number}",
+            message=(
+                f"Dear {app.first_name},\n\n"
+                f"Your application {app.reference_number} has been received.\n"
+                f"Property: {app.property_address}\n"
+                f"Program: {app.get_program_type_display()}\n"
+                f"{offer_line}\n\n"
+                "Our team will review your application and contact you within "
+                "5-7 business days.\n\n"
+                "Genesee County Land Bank Authority\n"
+                "(810) 257-3088\n"
+                "offers@thelandbank.org"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[app.email],
+        )
+    except Exception:
+        logger.exception("Failed to send buyer confirmation for %s", app.reference_number)
 
 
 def _send_staff_notification(app):
     """Send new application alert to staff."""
-    send_mail(
-        subject=f"New Application: {app.reference_number} — {app.full_name}",
-        message=(
+    if app.offer_amount:
+        body = (
             f"New application submitted:\n\n"
             f"Reference: {app.reference_number}\n"
             f"Applicant: {app.full_name}\n"
@@ -209,7 +234,9 @@ def _send_staff_notification(app):
             f"Purchase Type: {app.get_purchase_type_display()}\n"
             f"Offer: ${app.offer_amount:,.2f}\n\n"
             f"Review in admin: /admin/applications/application/{app.pk}/change/"
-        ) if app.offer_amount else (
+        )
+    else:
+        body = (
             f"New application submitted:\n\n"
             f"Reference: {app.reference_number}\n"
             f"Applicant: {app.full_name}\n"
@@ -218,15 +245,16 @@ def _send_staff_notification(app):
             f"Property: {app.property_address}\n"
             f"Program: {app.get_program_type_display()}\n\n"
             f"Review in admin: /admin/applications/application/{app.pk}/change/"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[settings.STAFF_NOTIFICATION_EMAIL],
-        fail_silently=True,
-    )
+        )
+
+    try:
+        send_mail(
+            subject=f"New Application: {app.reference_number} — {app.full_name}",
+            message=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.STAFF_NOTIFICATION_EMAIL],
+        )
+    except Exception:
+        logger.exception("Failed to send staff notification for %s", app.reference_number)
 
 
-def _cleanup_draft(request, draft):
-    """Remove draft and clear session."""
-    if "draft_token" in request.session:
-        del request.session["draft_token"]
-    draft.delete()

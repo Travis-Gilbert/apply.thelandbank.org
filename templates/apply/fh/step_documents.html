@@ -3,16 +3,18 @@
 {% block step_subtitle %}Upload the required documents for your application.{% endblock %}
 
 {% block form_content %}
-<div class="section-card p-6 sm:p-8 space-y-5">
+<div class="section-card p-5 sm:p-7 space-y-5">
     {% include "apply/_section_label.html" with text="Required Documents" %}
 
     <p class="text-sm text-warm-600 -mt-2">
-        Accepted formats: PDF, JPG, PNG (max 10 MB each).
+        Accepted formats: PDF, JPG, PNG, HEIC (max 10 MB each).
     </p>
 
-    {% if error %}
-    <div class="p-4 rounded-xl bg-red-50/60 border border-red-200">
-        <p class="text-sm text-red-700">{{ error }}</p>
+    {% if errors %}
+    <div class="p-4 rounded-xl bg-red-50/60 border border-red-200 space-y-1">
+        {% for err in errors %}
+        <p class="text-sm text-red-700">{{ err }}</p>
+        {% endfor %}
     </div>
     {% endif %}
 
@@ -47,7 +49,7 @@
             </div>
             {% endif %}
 
-            <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png"
+            <input type="file" name="{{ doc_type }}" accept=".pdf,.jpg,.jpeg,.png,.heic"
                    class="block w-full text-sm text-warm-600 file:mr-3 file:py-2.5 file:px-3 sm:file:px-4 file:rounded-lg file:border file:border-dashed file:border-civic-blue-300 file:text-xs sm:file:text-sm file:font-medium file:bg-civic-blue-50 file:text-civic-blue-700 hover:file:bg-civic-blue-100 file:transition-colors file:cursor-pointer">
         </div>
         {% endfor %}

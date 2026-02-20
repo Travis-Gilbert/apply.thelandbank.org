@@ -14,7 +14,7 @@
             <div class="h-full rounded-full transition-all duration-500 ease-out bg-civic-green-600"
                  style="width: {% widthratio current_step total_steps 100 %}%"></div>
         </div>
-        <span class="text-[11px] font-mono text-warm-500 flex-shrink-0">{{ current_step }}/{{ total_steps }}</span>
+        <span id="step-count" class="text-[11px] font-mono text-warm-500 flex-shrink-0">{{ current_step }}/{{ total_steps }}</span>
     </div>
 </div>
 
@@ -55,7 +55,7 @@
             </div>
 
             <!-- Sidebar help card -->
-            <div class="mt-8 p-4 rounded-xl bg-civic-blue-50 border border-civic-blue-100">
+            <div class="mt-7 p-4 rounded-xl bg-civic-blue-50 border border-civic-blue-100">
                 <p class="text-[11px] font-semibold uppercase tracking-wider text-civic-blue-600 font-mono mb-2">Need Help?</p>
                 <p class="text-xs leading-relaxed text-civic-blue-700">
                     Call <span class="font-mono">(810) 257-3088</span> or visit
@@ -68,10 +68,10 @@
     <!-- Form content area -->
     <div class="flex-1 min-w-0 animate-step">
         <!-- Step header -->
-        <div class="mb-6 sm:mb-8">
+        <div class="mb-5 sm:mb-7">
             <div class="flex items-center gap-2.5 sm:gap-3 mb-2">
                 <span class="hidden lg:inline-flex items-center justify-center w-8 h-8 rounded-full bg-civic-green-700 text-white text-xs font-bold font-mono">{{ current_step }}</span>
-                <h2 class="text-xl sm:text-2xl lg:text-[28px] font-bold font-title text-warm-900">{{ step_title }}</h2>
+                <h2 class="text-xl sm:text-2xl lg:text-[28px] font-bold font-heading text-warm-900">{{ step_title }}</h2>
             </div>
             <p class="text-sm leading-relaxed text-warm-600 lg:pl-11">{% block step_subtitle %}{% endblock %}</p>
         </div>
@@ -83,7 +83,7 @@
             {% block form_content %}{% endblock %}
 
             <!-- Navigation bar -->
-            <div class="mt-6 p-4 sm:px-6 rounded-2xl section-card">
+            <div class="mt-5 p-4 sm:px-6 rounded-xl section-card">
                 <!-- Mobile: stacked layout, primary action on top -->
                 <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div class="flex items-center justify-between sm:justify-start gap-2">
@@ -105,7 +105,7 @@
                         </span>
                     </div>
 
-                    <button type="submit" class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl text-sm font-semibold text-white bg-civic-green-700 hover:bg-civic-green-800 shadow-sm transition-all duration-200">
+                    <button type="submit" class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-lg text-sm font-semibold text-white bg-civic-green-700 hover:bg-civic-green-800 border border-civic-green-800 transition-all duration-200">
                         {% block submit_label %}{% if is_last_step %}Submit Application{% else %}Continue{% endif %}{% endblock %}
                         {% if not is_last_step %}
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>

@@ -4,7 +4,7 @@
 
 {% block form_content %}
 <!-- Personal Details -->
-<div class="section-card p-6 sm:p-8 space-y-5">
+<div class="section-card p-5 sm:p-7 space-y-5">
     {% include "apply/_section_label.html" with text="Personal Details" %}
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -39,7 +39,7 @@
 </div>
 
 <!-- Mailing Address -->
-<div class="section-card p-6 sm:p-8 space-y-5 mt-5">
+<div class="section-card p-5 sm:p-7 space-y-5 mt-4">
     {% include "apply/_section_label.html" with text="Current Mailing Address" blue=True %}
 
     {% include "apply/_field.html" with field=form.mailing_address label="Street Address" required=True placeholder="123 Main St" %}
@@ -56,7 +56,7 @@
 </div>
 
 <!-- Purchasing Entity (optional) -->
-<div class="section-card p-6 sm:p-8 space-y-5 mt-5">
+<div class="section-card p-5 sm:p-7 space-y-5 mt-4">
     {% include "apply/_section_label.html" with text="Purchasing Entity" blue=True %}
     <p class="text-xs text-warm-500 -mt-3">If purchasing on behalf of an LLC, trust, or other entity, provide details below. Otherwise skip this section.</p>
 

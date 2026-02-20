@@ -20,6 +20,17 @@ from ..routing import get_program_steps
 from .shared import _get_draft, _step_context
 from .submission import submit_application
 
+# Document upload constraints
+ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".heic"}
+ALLOWED_MIME_TYPES = {
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+    "image/heic",
+    "image/heif",
+}
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
 
 def program_step(request, step_num):
     """
@@ -39,8 +50,22 @@ def program_step(request, step_num):
     if step_num < 1 or step_num > len(program_steps):
         return redirect("applications:step_identity")
 
-    step_def = program_steps[step_num - 1]
+    # Enforce step ordering — can't skip ahead past current_step
     overall_step = step_num + 3  # shared steps are 1-3
+    if overall_step > draft.current_step:
+        # Redirect to where they actually are
+        if draft.current_step <= 1:
+            return redirect("applications:step_identity")
+        elif draft.current_step == 2:
+            return redirect("applications:step_property")
+        elif draft.current_step == 3:
+            return redirect("applications:step_eligibility")
+        else:
+            return redirect(
+                "applications:program_step", step_num=draft.current_step - 3
+            )
+
+    step_def = program_steps[step_num - 1]
 
     # Document upload steps have no form class
     if step_def.get("is_documents"):
@@ -98,52 +123,105 @@ def program_step(request, step_num):
     return render(request, step_def["template"], ctx)
 
 
+def _validate_upload(file):
+    """
+    Validate an uploaded file's type and size.
+
+    Returns None if valid, or an error message string if invalid.
+    Checks both file extension and browser-reported MIME type.
+    """
+    ext = os.path.splitext(file.name)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return (
+            f'"{file.name}" is not an accepted file type. '
+            "Please upload a PDF, JPG, PNG, or HEIC file."
+        )
+    if file.content_type not in ALLOWED_MIME_TYPES:
+        return (
+            f'"{file.name}" has an unrecognized file format. '
+            "Please upload a PDF, JPG, PNG, or HEIC file."
+        )
+    if file.size > MAX_UPLOAD_SIZE:
+        size_mb = file.size / (1024 * 1024)
+        return f'"{file.name}" is {size_mb:.1f} MB. Maximum file size is 10 MB.'
+    return None
+
+
 def _handle_documents_step(
     request, draft, step_def, step_num, overall_step, program_type, purchase_type
 ):
-    """Handle document upload steps (no form class)."""
+    """Handle document upload steps with file type and size validation."""
     form_data = draft.form_data or {}
     required_docs = _get_required_docs(program_type, purchase_type, form_data)
+    optional_docs = _get_optional_docs(program_type)
+    all_doc_types = required_docs + optional_docs
 
     if request.method == "POST":
         uploaded = {}
+        file_errors = {}
         upload_dir = os.path.join(settings.MEDIA_ROOT, "drafts", str(draft.token))
         os.makedirs(upload_dir, exist_ok=True)
 
-        all_uploaded = True
-        for doc_type in required_docs:
+        for doc_type in all_doc_types:
             file = request.FILES.get(doc_type)
             if file:
-                file_path = os.path.join(upload_dir, f"{doc_type}_{file.name}")
+                # Validate before saving
+                error = _validate_upload(file)
+                if error:
+                    file_errors[doc_type] = error
+                    continue
+
+                # Sanitize filename: keep only alphanumeric, dots, hyphens, underscores
+                safe_name = "".join(
+                    c for c in file.name if c.isalnum() or c in ".-_"
+                ) or "upload"
+                file_path = os.path.join(upload_dir, f"{doc_type}_{safe_name}")
                 with open(file_path, "wb+") as dest:
                     for chunk in file.chunks():
                         dest.write(chunk)
                 uploaded[doc_type] = {
                     "filename": file.name,
-                    "path": file_path,
+                    "path": os.path.relpath(file_path, settings.MEDIA_ROOT),
                 }
             elif form_data.get("uploads", {}).get(doc_type):
+                # Keep previously uploaded file
                 uploaded[doc_type] = form_data["uploads"][doc_type]
-            else:
-                all_uploaded = False
+
+        # Check which required docs are still missing
+        missing_docs = [d for d in required_docs if d not in uploaded]
 
         form_data["uploads"] = uploaded
         draft.form_data = form_data
         draft.save()
 
-        if all_uploaded:
+        # Build combined error message
+        errors = []
+        if file_errors:
+            errors.extend(file_errors.values())
+        if missing_docs:
+            doc_labels = {
+                "photo_id": "Photo ID",
+                "proof_of_funds": "Proof of Funds",
+                "proof_of_income": "Proof of Income",
+                "proof_of_down_payment": "Proof of Down Payment",
+                "reno_funding_proof": "Renovation Funding Documentation",
+                "prior_investment_proof": "Prior GCLBA Investment Proof",
+            }
+            names = [doc_labels.get(d, d.replace("_", " ").title()) for d in missing_docs]
+            errors.append("Missing required documents: " + ", ".join(names))
+
+        if not errors:
             draft.current_step = overall_step + 1
             draft.save()
             return redirect("applications:program_step", step_num=step_num + 1)
 
-        # Re-render with error
         ctx = _step_context(draft, overall_step)
         ctx.update({
             "step_title": step_def["title"],
             "required_docs": required_docs,
-            "optional_docs": _get_optional_docs(program_type),
+            "optional_docs": optional_docs,
             "uploaded": uploaded,
-            "error": "Please upload all required documents.",
+            "errors": errors,
             "prev_url": _prev_url(step_num),
             "has_file_upload": True,
         })
@@ -155,7 +233,7 @@ def _handle_documents_step(
     ctx.update({
         "step_title": step_def["title"],
         "required_docs": required_docs,
-        "optional_docs": _get_optional_docs(program_type),
+        "optional_docs": optional_docs,
         "uploaded": uploaded,
         "prev_url": _prev_url(step_num),
         "has_file_upload": True,
