@@ -3,12 +3,13 @@
 {% block title %}Step {{ current_step }} of {{ total_steps }} - GCLBA Application{% endblock %}
 
 {% block content %}
-<!-- Mobile progress pill (below header, not overlapping) -->
-<div class="lg:hidden mb-4">
-    <div class="flex items-center gap-3 px-1">
+<!-- Mobile sticky progress bar — pins below header on scroll -->
+<div class="lg:hidden sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 mb-4 transition-shadow"
+     style="background: linear-gradient(180deg, #F2EDE6 0%, rgba(242,237,230,0.95) 100%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0,0,0,0.06);">
+    <div class="flex items-center gap-3">
         <div class="flex items-center gap-2 flex-shrink-0">
             <span class="w-7 h-7 rounded-full bg-civic-green-700 text-white flex items-center justify-center text-xs font-bold font-mono">{{ current_step }}</span>
-            <span class="text-sm font-semibold text-warm-900">{{ step_title }}</span>
+            <span class="text-sm font-semibold text-warm-900 truncate">{{ step_title }}</span>
         </div>
         <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:rgba(0,0,0,0.06)">
             <div class="h-full rounded-full transition-all duration-500 ease-out bg-civic-green-600"
