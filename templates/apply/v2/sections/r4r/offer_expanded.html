@@ -1,0 +1,102 @@
+{# Ready for Rehab offer — cash only, prior GCLBA purchase question #}
+<div class="section-card-v2" style="border-left: 3px solid {{ program_color }}">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color }}">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-5">
+            {# Cash-only note #}
+            <div class="p-4 rounded-xl border border-program-rehab/20 bg-program-rehab/5">
+                <p class="text-sm leading-relaxed" style="color: {{ program_color }}">
+                    <strong>Ready for Rehab properties are cash purchase only.</strong>
+                    No land contract or financing options are available for this program.
+                </p>
+            </div>
+
+            {# Offer amount #}
+            <div class="space-y-1.5">
+                <label for="{{ form.offer_amount.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    Offer Amount <span class="text-red-500 text-xs">*</span>
+                </label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
+                    <input type="number" step="0.01" min="1"
+                           name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
+                           value="{{ form.offer_amount.value|default:'' }}" required
+                           placeholder="15,000.00"
+                           class="gclba-input pl-7 font-mono{% if form.offer_amount.errors %} has-error{% endif %}">
+                </div>
+                {% if form.offer_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Intended use dropdown #}
+            <div class="space-y-1.5">
+                <label for="{{ form.intended_use.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    How do you plan to use this property? <span class="text-red-500 text-xs">*</span>
+                </label>
+                <select name="{{ form.intended_use.html_name }}" id="{{ form.intended_use.id_for_label }}"
+                        class="gclba-input gclba-select"
+                        hx-post="{% url 'applications:htmx_intended_use_fields' %}"
+                        hx-target="#intended-use-fields"
+                        hx-swap="innerHTML"
+                        hx-include="closest form">
+                    <option value="">— Select —</option>
+                    {% for value, label in form.intended_use.field.choices %}
+                    <option value="{{ value }}" {% if form.intended_use.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.intended_use.errors %}<p class="text-xs text-red-600 font-medium">{{ form.intended_use.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Conditional first home / moving field #}
+            <div id="intended-use-fields">
+                {% if form.intended_use.value == "renovate_move_in" or form_data.intended_use == "renovate_move_in" %}
+                <div class="space-y-1.5 animate-step">
+                    <label for="{{ form.first_home_or_moving.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        Is this your first home purchase, or are you moving to Michigan? <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <select name="{{ form.first_home_or_moving.html_name }}" id="{{ form.first_home_or_moving.id_for_label }}"
+                            class="gclba-input gclba-select">
+                        <option value="">— Select —</option>
+                        {% for value, label in form.first_home_or_moving.field.choices %}
+                        {% if value %}
+                        <option value="{{ value }}" {% if form.first_home_or_moving.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.first_home_or_moving.errors %}<p class="text-xs text-red-600 font-medium">{{ form.first_home_or_moving.errors.0 }}</p>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {# Prior GCLBA purchase #}
+            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
+                <input type="checkbox" name="{{ form.has_prior_gclba_purchase.html_name }}"
+                       {% if form.has_prior_gclba_purchase.value %}checked{% endif %}
+                       class="mt-0.5 w-4 h-4 rounded border-warm-300 focus:ring-2 flex-shrink-0"
+                       style="color: {{ program_color }}">
+                <div>
+                    <span class="text-sm text-warm-900">{{ form.has_prior_gclba_purchase.label }}</span>
+                    <p class="text-xs text-warm-500 mt-0.5">{{ form.has_prior_gclba_purchase.help_text }}</p>
+                </div>
+            </label>
+
+            {# Continue button #}
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

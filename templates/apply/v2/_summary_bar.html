@@ -1,0 +1,32 @@
+{# Collapsed section summary bar (48px) #}
+{# Include with: section_id, section_title, summary_text, program_color, edit_url #}
+<div id="section-{{ section_id }}" class="accordion-section accordion-gap">
+    <div class="summary-bar">
+        {# Checkmark #}
+        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+             style="background: {{ program_color|default:'#2E7D32' }}15">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ program_color|default:'#2E7D32' }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+            </svg>
+        </div>
+
+        {# Title + summary #}
+        <div class="flex-1 min-w-0">
+            <span class="text-sm font-semibold text-warm-800">{{ section_title }}</span>
+            {% if summary_text %}
+            <span class="text-warm-500 mx-1.5">&middot;</span>
+            <span class="text-sm text-warm-500 truncate">{{ summary_text }}</span>
+            {% endif %}
+        </div>
+
+        {# Edit link #}
+        <button type="button"
+                hx-get="{{ edit_url }}"
+                hx-target="#section-{{ section_id }}"
+                hx-swap="outerHTML"
+                class="text-xs font-medium flex-shrink-0 px-2.5 py-1 rounded-md transition-colors hover:bg-warm-100"
+                style="color: {{ program_color|default:'#2E7D32' }}">
+            Edit
+        </button>
+    </div>
+</div>

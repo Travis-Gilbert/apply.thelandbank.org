@@ -1,0 +1,114 @@
+{# Ready for Rehab renovation narrative — expanded #}
+<div class="section-card-v2" style="border-left: 3px solid {{ program_color }}">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color }}">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-5">
+            {# Intended use dropdown #}
+            <div class="space-y-1.5">
+                <label for="{{ form.intended_use.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    How do you plan to use this property? <span class="text-red-500 text-xs">*</span>
+                </label>
+                <select name="{{ form.intended_use.html_name }}" id="{{ form.intended_use.id_for_label }}"
+                        class="gclba-input gclba-select"
+                        hx-post="{% url 'applications:htmx_intended_use_fields' %}"
+                        hx-target="#intended-use-fields-reno"
+                        hx-swap="innerHTML"
+                        hx-include="closest form">
+                    <option value="">— Select —</option>
+                    {% for value, label in form.intended_use.field.choices %}
+                    <option value="{{ value }}" {% if form.intended_use.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.intended_use.errors %}<p class="text-xs text-red-600 font-medium">{{ form.intended_use.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Conditional first home / moving field #}
+            <div id="intended-use-fields-reno">
+                {% if form.intended_use.value == "renovate_move_in" or form_data.intended_use == "renovate_move_in" %}
+                <div class="space-y-1.5 animate-step">
+                    <label for="{{ form.first_home_or_moving.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                        Is this your first home purchase, or are you moving to Michigan? <span class="text-red-500 text-xs">*</span>
+                    </label>
+                    <select name="{{ form.first_home_or_moving.html_name }}" id="{{ form.first_home_or_moving.id_for_label }}"
+                            class="gclba-input gclba-select">
+                        <option value="">— Select —</option>
+                        {% for value, label in form.first_home_or_moving.field.choices %}
+                        {% if value %}
+                        <option value="{{ value }}" {% if form.first_home_or_moving.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.first_home_or_moving.errors %}<p class="text-xs text-red-600 font-medium">{{ form.first_home_or_moving.errors.0 }}</p>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {# Renovation description #}
+            <div class="space-y-1.5">
+                <label for="{{ form.renovation_description.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    What renovations will you be making? <span class="text-red-500 text-xs">*</span>
+                </label>
+                <textarea name="{{ form.renovation_description.html_name }}" id="{{ form.renovation_description.id_for_label }}"
+                          rows="4" required
+                          placeholder="Describe the renovations you plan to make..."
+                          class="gclba-input{% if form.renovation_description.errors %} has-error{% endif %}">{{ form.renovation_description.value|default:"" }}</textarea>
+                {% if form.renovation_description.errors %}<p class="text-xs text-red-600 font-medium">{{ form.renovation_description.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Who will complete #}
+            <div class="space-y-1.5">
+                <label for="{{ form.renovation_who.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    Who will complete the renovations? <span class="text-red-500 text-xs">*</span>
+                </label>
+                <textarea name="{{ form.renovation_who.html_name }}" id="{{ form.renovation_who.id_for_label }}"
+                          rows="3" required
+                          placeholder="Self, licensed contractor, etc."
+                          class="gclba-input{% if form.renovation_who.errors %} has-error{% endif %}">{{ form.renovation_who.value|default:"" }}</textarea>
+                {% if form.renovation_who.errors %}<p class="text-xs text-red-600 font-medium">{{ form.renovation_who.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# When will renovations be completed #}
+            <div class="space-y-1.5">
+                <label for="{{ form.renovation_when.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    When will renovations be completed? <span class="text-red-500 text-xs">*</span>
+                </label>
+                <input type="text" name="{{ form.renovation_when.html_name }}" id="{{ form.renovation_when.id_for_label }}"
+                       value="{{ form.renovation_when.value|default:'' }}" required
+                       placeholder="e.g. Within 6 months of closing"
+                       class="gclba-input{% if form.renovation_when.errors %} has-error{% endif %}">
+                {% if form.renovation_when.errors %}<p class="text-xs text-red-600 font-medium">{{ form.renovation_when.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# How will you pay #}
+            <div class="space-y-1.5">
+                <label for="{{ form.renovation_funding.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    How will you pay for the purchase and renovations? <span class="text-red-500 text-xs">*</span>
+                </label>
+                <textarea name="{{ form.renovation_funding.html_name }}" id="{{ form.renovation_funding.id_for_label }}"
+                          rows="3" required
+                          placeholder="Savings, construction loan, etc."
+                          class="gclba-input{% if form.renovation_funding.errors %} has-error{% endif %}">{{ form.renovation_funding.value|default:"" }}</textarea>
+                {% if form.renovation_funding.errors %}<p class="text-xs text-red-600 font-medium">{{ form.renovation_funding.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Continue button #}
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

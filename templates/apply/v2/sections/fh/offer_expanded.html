@@ -1,0 +1,108 @@
+{# Featured Homes offer — expanded #}
+<div class="section-card-v2" style="border-left: 3px solid {{ program_color }}">
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color }}">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-5">
+            {# Purchase type radio #}
+            <div class="space-y-2">
+                <p class="text-sm font-medium text-warm-900">
+                    How will you finance this purchase? <span class="text-red-500 text-xs">*</span>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    {% for value, label in form.purchase_type.field.widget.choices %}
+                    <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border border-warm-200 bg-white/60 hover:bg-white transition-colors">
+                        <input type="radio" name="{{ form.purchase_type.html_name }}" value="{{ value }}"
+                               {% if form.purchase_type.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
+                               class="w-4 h-4 border-warm-300 text-civic-green-600 focus:ring-civic-green-200"
+                               hx-post="{% url 'applications:htmx_purchase_type_fields' %}"
+                               hx-target="#purchase-type-fields"
+                               hx-swap="innerHTML"
+                               hx-include="closest form"
+                               required>
+                        <span class="text-sm text-warm-800">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.purchase_type.errors %}<p class="text-xs text-red-600 font-medium">{{ form.purchase_type.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Offer amount #}
+            <div class="space-y-1.5">
+                <label for="{{ form.offer_amount.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    Offer Amount <span class="text-red-500 text-xs">*</span>
+                </label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
+                    <input type="number" step="0.01" min="1"
+                           name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
+                           value="{{ form.offer_amount.value|default:'' }}" required
+                           placeholder="15,000.00"
+                           class="gclba-input pl-7 font-mono{% if form.offer_amount.errors %} has-error{% endif %}">
+                </div>
+                {% if form.offer_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>{% endif %}
+            </div>
+
+            {# Conditional fields — swapped by HTMX based on purchase type #}
+            <div id="purchase-type-fields">
+                {% if form.purchase_type.value == "land_contract" or form_data.purchase_type == "land_contract" %}
+                {# Down payment #}
+                <div class="space-y-4 animate-step">
+                    <div class="space-y-1.5">
+                        <label for="{{ form.down_payment_amount.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                            Down Payment Amount <span class="text-red-500 text-xs">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
+                            <input type="number" step="0.01" min="1000"
+                                   name="{{ form.down_payment_amount.html_name }}" id="{{ form.down_payment_amount.id_for_label }}"
+                                   value="{{ form.down_payment_amount.value|default:'' }}"
+                                   placeholder="1,500.00"
+                                   class="gclba-input pl-7 font-mono{% if form.down_payment_amount.errors %} has-error{% endif %}">
+                        </div>
+                        <p class="text-xs text-warm-500">Minimum: 10% of offer or $1,000, whichever is higher</p>
+                        {% if form.down_payment_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.down_payment_amount.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="{{ form.is_self_employed.html_name }}"
+                               {% if form.is_self_employed.value %}checked{% endif %}
+                               class="mt-0.5 w-4 h-4 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
+                        <div>
+                            <span class="text-sm text-warm-900">I am self-employed</span>
+                            <p class="text-xs text-warm-500 mt-0.5">This changes your income documentation requirements</p>
+                        </div>
+                    </label>
+
+                    {# Credit reporting "Coming Soon" #}
+                    <div class="p-3 rounded-lg border border-warm-200" style="background: repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.02) 10px, rgba(0,0,0,0.02) 20px)">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-warm-400 uppercase tracking-wider">Coming Soon</span>
+                            <span class="text-xs text-warm-400">&middot;</span>
+                            <span class="text-xs text-warm-500">Credit reporting authorization</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Continue button #}
+            <div class="flex justify-end pt-2">
+                <button type="submit"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

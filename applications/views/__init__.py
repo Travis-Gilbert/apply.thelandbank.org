@@ -4,6 +4,13 @@ Views package for the GCLBA buyer-facing application form.
 Re-exports all view functions for use in urls.py.
 """
 
+from .accordion import (
+    apply_page,
+    disqualified,
+    section_edit,
+    section_program_select,
+    section_validate,
+)
 from .dispatcher import program_step
 from .htmx import (
     htmx_down_payment_minimum,
@@ -22,13 +29,19 @@ from .shared import (
 )
 
 __all__ = [
-    # Shared steps
+    # Shared steps (v1 wizard)
     "step_identity",
     "step_property",
     "step_eligibility",
-    # Program dispatcher
+    # Program dispatcher (v1 wizard)
     "program_step",
-    # HTMX partials
+    # Accordion views (v2)
+    "apply_page",
+    "section_program_select",
+    "section_validate",
+    "section_edit",
+    "disqualified",
+    # HTMX partials (shared)
     "htmx_purchase_type_fields",
     "htmx_intended_use_fields",
     "htmx_renovation_totals",

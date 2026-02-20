@@ -1,0 +1,23 @@
+{# Expandable section card with numbered header + program accent border #}
+{# Include with: section_number, section_title, program_color (hex), section_id #}
+{# Wrap form fields in {% block %} or use as include with body content #}
+<div id="section-{{ section_id }}"
+     class="section-card-v2 accordion-section"
+     style="border-left: 3px solid {{ program_color|default:'#2E7D32' }}">
+
+    {# Section header with step number + title #}
+    <div class="section-card-v2-header">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+              style="background: {{ program_color|default:'#2E7D32' }}">
+            {{ section_number }}
+        </span>
+        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+    </div>
+
+    {# Section body — form content goes here #}
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6">
+            {{ section_content }}
+        </div>
+    </div>
+</div>

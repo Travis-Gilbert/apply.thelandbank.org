@@ -26,6 +26,11 @@
                             green: { 50:'#f0f7f1', 100:'#dceede', 200:'#b8ddb9', 600:'#2e7d32', 700:'#256929', 800:'#1b5e20', 900:'#0d3311' },
                             blue:  { 50:'#eff4f8', 100:'#dae6f0', 200:'#b4cde0', 500:'#3d7ea6', 600:'#2d6a8a', 700:'#1e5673', 800:'#184862' },
                         },
+                        program: {
+                            featured: { DEFAULT:'#2E7D32', light:'#E8F5E9', border:'#b8ddb9' },
+                            rehab:    { DEFAULT:'#F57C00', light:'#FFF3E0', border:'#FFE0B2' },
+                            vip:      { DEFAULT:'#1565C0', light:'#E3F2FD', border:'#BBDEFB' },
+                        },
                         warm: { 50:'#FAF6F1', 100:'#F2EDE6', 200:'#EAE4DC', 300:'#DDD6CC', 400:'#CCC7BF', 500:'#A09890', 600:'#7A746C', 700:'#5A5550', 800:'#3A3632', 900:'#2A2622' },
                     },
                 },
@@ -48,6 +53,85 @@
         .animate-step { animation: fadeSlideIn 0.3s ease-out; }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         .animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* ── Accordion v2 ───────────────────────────────── */
+
+        /* Summary bar: collapsed section (48px) */
+        .summary-bar {
+            display: flex; align-items: center; gap: 0.75rem;
+            height: 48px; padding: 0 1rem;
+            background: rgba(255,255,255,0.82);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 0.75rem;
+            animation: fadeSlideIn 200ms ease;
+        }
+        .summary-bar:hover { background: rgba(255,255,255,0.95); }
+
+        /* Expanded section card with numbered header + accent left border */
+        .section-card-v2 {
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .section-card-v2-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 1.25rem 1.25rem 0;
+        }
+
+        /* Section expand/collapse animation */
+        .section-body { max-height: 0; overflow: hidden; transition: max-height 250ms ease; }
+        .section-body.expanded { max-height: 3000px; }
+
+        /* Continue button: outlined in program accent */
+        .continue-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.625rem 1.5rem;
+            border: 1.5px solid currentColor;
+            border-radius: 0.625rem;
+            font-size: 0.875rem; font-weight: 600;
+            background: transparent;
+            transition: all 150ms;
+            cursor: pointer;
+        }
+        .continue-btn:hover { background: rgba(0,0,0,0.04); }
+
+        /* Document capture buttons — square aspect */
+        .doc-capture-btn {
+            aspect-ratio: 1 / 1;
+            max-width: 140px; width: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+            border: 2px dashed rgba(0,0,0,0.15);
+            border-radius: 0.75rem;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 150ms;
+            padding: 1rem;
+            text-align: center;
+        }
+        .doc-capture-btn:hover { border-color: rgba(0,0,0,0.3); background: rgba(255,255,255,0.8); }
+
+        /* Entity dropdown (LLC/Trust collapsible) */
+        .entity-dropdown summary { cursor: pointer; list-style: none; }
+        .entity-dropdown summary::-webkit-details-marker { display: none; }
+        .entity-dropdown[open] .entity-chevron { transform: rotate(180deg); }
+        .entity-chevron { transition: transform 150ms ease; }
+
+        /* Scroll offset for edit-jump behavior */
+        .accordion-section { scroll-margin-top: 70px; }
+
+        /* Spacing between accordion items */
+        .accordion-gap { margin-top: 0.5rem; }       /* 8px between collapsed bars */
+        .accordion-gap-active { margin-top: 1.25rem; } /* 20px before active section */
+
+        /* Section transition divider */
+        .section-divider {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.25rem 0; margin: 0.75rem 0;
+        }
+        .section-divider::before, .section-divider::after {
+            content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.08);
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
