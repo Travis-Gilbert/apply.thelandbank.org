@@ -544,18 +544,9 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Models + Migration (Batch 1) | Done | 87 fields, 4 program types, all choices updated |
-| Forms Package (Batch 2) | Done | shared.py, featured_homes.py, ready_for_rehab.py, vip_spotlight.py |
-| Views + URLs + Routing (Batch 3) | Done | Dispatcher pattern, HTMX endpoints, save/resume |
-| Templates (Batch 4) | Done | 28 templates, civic design system, all 4 program paths |
-| Admin (Batch 5) | Done | django-unfold config, admin_utils.py, fieldsets |
-| Railway deployment | Done | Live at https://apply-thelandbankorg.up.railway.app/apply/ |
-| Document uploads (S3/B2) | Open | Not yet implemented — file fields exist but no storage backend |
-| Email (SendGrid/Resend) | Open | No email integration yet |
+| Document uploads (S3/B2) | Open | File fields exist but no storage backend wired |
+| Email (SendGrid/Resend) | Open | django-anymail installed, not configured |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing |
-| Submission flow | Done | transaction.atomic(), reference number generation, error handling |
-| Security hardening | Done | Step-order enforcement, CSRF, rate limiting, input validation |
-| UI polish | Done | Logo, header redesign, font-mono audit, plain language |
 
 ## Next Step
 
@@ -574,8 +565,6 @@ Two critical-path items remain for end-to-end MVP:
 | Django 6.0.2 instead of spec's 5.2 | 6.0 released after spec written; no breaking changes; already deployed | 2026-02-19 |
 | Port 8199 for dev server | Avoids conflict with other local services | 2026-02-20 |
 | Civic design system (green #2e7d32, blue #2d6a8a) | Evolved from GCLBA brand colors; warmer, more accessible than raw brand hex | 2026-02-20 |
-| Forms package split by program | One file per program (featured_homes.py, ready_for_rehab.py, vip_spotlight.py) + shared.py — keeps each under 200 lines | 2026-02-19 |
-| intended_use on renovation form, not offer form | Template for renovation step references it; dispatcher passes one form per step | 2026-02-20 |
 | font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
 
 ---
