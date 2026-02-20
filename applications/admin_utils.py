@@ -61,6 +61,16 @@ def dashboard_callback(request, context):
     declined = status_counts.get("declined", 0)
     needs_more_info = status_counts.get("needs_more_info", 0)
 
+    # Queue health
+    unassigned_received = Application.objects.filter(
+        status="received",
+        assigned_to__isnull=True,
+    ).count()
+    stale_received = Application.objects.filter(
+        status="received",
+        submitted_at__lt=timezone.now() - timezone.timedelta(days=5),
+    ).count()
+
     # Recent submissions (last 7 days)
     week_ago = timezone.now() - timezone.timedelta(days=7)
     recent_count = Application.objects.filter(submitted_at__gte=week_ago).count()
@@ -102,6 +112,20 @@ def dashboard_callback(request, context):
                     "icon": "cancel",
                     "color": "danger",
                     "link": "/admin/applications/application/?status__exact=declined",
+                },
+                {
+                    "label": "Unassigned",
+                    "value": unassigned_received,
+                    "icon": "person_off",
+                    "color": "warning",
+                    "link": "/admin/applications/application/?status__exact=received&assigned_to__isnull=True",
+                },
+                {
+                    "label": "Stale (5+ Days)",
+                    "value": stale_received,
+                    "icon": "schedule",
+                    "color": "danger",
+                    "link": "/admin/applications/application/?status__exact=received",
                 },
             ],
             "total_applications": total,

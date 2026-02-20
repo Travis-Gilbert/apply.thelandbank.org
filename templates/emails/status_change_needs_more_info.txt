@@ -1,0 +1,16 @@
+Dear {{ application.first_name }},
+
+We reviewed your application and need more information before we can make a final decision.
+
+Reference Number: {{ application.reference_number }}
+Property: {{ application.property_address }}
+Program: {{ application.get_program_type_display }}
+
+What we need from you:
+{% if note %}{{ note }}{% else %}Please provide the missing information requested by our sales team.{% endif %}
+
+Please reply to {{ contact_email }} as soon as possible so your application can continue in review.
+
+Genesee County Land Bank Authority
+{{ contact_phone }}
+

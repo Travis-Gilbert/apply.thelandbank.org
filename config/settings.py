@@ -254,6 +254,11 @@ UNFOLD = {
                         "link": "/admin/applications/application/?status__exact=received",
                     },
                     {
+                        "title": "Unassigned Queue",
+                        "icon": "person_off",
+                        "link": "/admin/applications/application/?status__exact=received&assigned_to__isnull=True",
+                    },
+                    {
                         "title": "Under Review",
                         "icon": "rate_review",
                         "link": "/admin/applications/application/?status__exact=under_review",
@@ -272,6 +277,11 @@ UNFOLD = {
                         "title": "Declined",
                         "icon": "cancel",
                         "link": "/admin/applications/application/?status__exact=declined",
+                    },
+                    {
+                        "title": "Missing Docs",
+                        "icon": "folder_off",
+                        "link": "/admin/applications/application/?docs_state=missing",
                     },
                 ],
             },

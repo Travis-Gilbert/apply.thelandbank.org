@@ -32,6 +32,8 @@ class ApplicationDraft(models.Model):
     program_type = models.CharField(max_length=30, blank=True)
     form_data = models.JSONField(default=dict, blank=True)
     current_step = models.PositiveSmallIntegerField(default=1)
+    submitted = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField()
@@ -501,7 +503,11 @@ class Application(models.Model):
     @property
     def docs_complete(self):
         """Check if all required document types have been uploaded, per program."""
-        uploaded_types = set(self.documents.values_list("doc_type", flat=True))
+        prefetched = getattr(self, "_prefetched_objects_cache", {})
+        if "documents" in prefetched:
+            uploaded_types = {doc.doc_type for doc in prefetched["documents"]}
+        else:
+            uploaded_types = set(self.documents.values_list("doc_type", flat=True))
         required = {"photo_id"}
 
         if self.program_type == self.ProgramType.FEATURED_HOMES:

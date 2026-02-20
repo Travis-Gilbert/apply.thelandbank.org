@@ -1,0 +1,17 @@
+Dear {{ application.first_name }},
+
+Your application has been approved.
+
+Reference Number: {{ application.reference_number }}
+Property: {{ application.property_address }}
+Program: {{ application.get_program_type_display }}
+
+{% if note %}Staff note:
+{{ note }}
+
+{% endif %}Our sales team will follow up with next steps for closing.
+If you have questions, contact {{ contact_email }}.
+
+Genesee County Land Bank Authority
+{{ contact_phone }}
+

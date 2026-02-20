@@ -1,0 +1,16 @@
+Dear {{ application.first_name }},
+
+Thank you for your application. After review, your application was not selected at this time.
+
+Reference Number: {{ application.reference_number }}
+Property: {{ application.property_address }}
+Program: {{ application.get_program_type_display }}
+
+Review note:
+{% if note %}{{ note }}{% else %}Your application was not selected in this review round.{% endif %}
+
+If you have questions, contact {{ contact_email }}.
+
+Genesee County Land Bank Authority
+{{ contact_phone }}
+
