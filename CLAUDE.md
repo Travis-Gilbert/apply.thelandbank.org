@@ -559,11 +559,12 @@ AWS_S3_REGION_NAME
 |------|--------|-------|
 | Document uploads (S3/B2) | Open | File fields exist but no storage backend wired |
 | Email (SendGrid/Resend) | Open | django-anymail installed, not configured |
+| Wire accordion views to models | Open | Section validators need to save to ApplicationDraft |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing |
 
 ## Next Step
 
-Accordion v2 UI and mobile optimization are deployed. Three critical-path items remain for end-to-end MVP:
+Design upgrade is deployed. Three critical-path items remain for end-to-end MVP:
 1. **Document uploads** — wire S3/Backblaze B2 storage backend via django-storages. File fields
    exist on models but no storage configured. Pre-signed URLs needed for staff viewing.
 2. **Email integration** — django-anymail with Resend is installed but not configured. Need
@@ -579,9 +580,10 @@ Accordion v2 UI and mobile optimization are deployed. Three critical-path items 
 |----------|-----|------|
 | Django 6.0.2 instead of spec's 5.2 | 6.0 released after spec written; no breaking changes; already deployed | 2026-02-19 |
 | Port 8199 for dev server | Avoids conflict with other local services | 2026-02-20 |
-| Civic design system (green #2e7d32, blue #2d6a8a) | Evolved from GCLBA brand colors; warmer, more accessible than raw brand hex | 2026-02-20 |
 | font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
 | Single-page accordion over multi-step wizard | Better UX: one page, HTMX validates per section, collapsed summaries show progress | 2026-02-20 |
+| Warm Civic Craft design: CSS-only textures + frosted glass | Colors (#2e7d32 green, #2d6a8a blue, #d4a843 gold), grid/noise/blur — no image assets, no build tooling | 2026-02-20 |
+| Header: full org name over acronym | First-time visitors don't know "GCLBA"; spell out "Genesee County Land Bank Authority" with "Property Application Portal" subtitle | 2026-02-20 |
 
 ---
 
