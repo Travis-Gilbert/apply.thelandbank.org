@@ -1,43 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" width="240" height="200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" width="200" height="180">
   <defs>
-    <linearGradient id="sky" x1="30%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#56C4F0"/>
-      <stop offset="45%" stop-color="#3AABE0"/>
-      <stop offset="100%" stop-color="#1F7DB8"/>
+    <linearGradient id="sky" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#A8DCF0"/>
+      <stop offset="60%" stop-color="#5BB8E0"/>
+      <stop offset="100%" stop-color="#2E9AD0"/>
     </linearGradient>
-    <linearGradient id="earth" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7DC462"/>
-      <stop offset="100%" stop-color="#3DA335"/>
+    <linearGradient id="earth" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#8BC34A"/>
+      <stop offset="50%" stop-color="#5FA830"/>
+      <stop offset="100%" stop-color="#3D8B1C"/>
     </linearGradient>
-    <linearGradient id="arc" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#1F7DB8" stop-opacity="0.3"/>
-      <stop offset="30%" stop-color="#2A96CC"/>
-      <stop offset="100%" stop-color="#56C4F0"/>
+    <linearGradient id="horizon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E8F5E9" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#C8E6C9" stop-opacity="0"/>
     </linearGradient>
+    <clipPath id="diamond-clip">
+      <rect x="-48" y="-48" width="96" height="96" rx="5" ry="5"
+            transform="rotate(45)"/>
+    </clipPath>
   </defs>
 
-  <!-- Swoosh arc — thin teal curve under and around diamond -->
-  <path d="M 32 120 C 50 158, 100 168, 145 158 C 175 150, 198 130, 210 100"
-        fill="none" stroke="url(#arc)" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Diamond with white frame, centered -->
+  <g transform="translate(100, 72)">
+    <!-- White outer frame -->
+    <rect x="-54" y="-54" width="108" height="108" rx="7" ry="7"
+          transform="rotate(45)"
+          fill="white" fill-opacity="0.92"/>
+    <!-- Gray border on frame -->
+    <rect x="-54" y="-54" width="108" height="108" rx="7" ry="7"
+          transform="rotate(45)"
+          fill="none" stroke="#b0bec5" stroke-width="1.5" stroke-opacity="0.5"/>
 
-  <!-- Diamond (rotated square) -->
-  <g transform="translate(120, 78)">
-    <!-- Blue sky portion (upper area of diamond) -->
-    <rect x="-50" y="-50" width="100" height="100" rx="6" ry="6"
+    <!-- Blue sky fill (entire diamond) -->
+    <rect x="-48" y="-48" width="96" height="96" rx="5" ry="5"
           transform="rotate(45)"
           fill="url(#sky)"/>
 
-    <!-- Green earth portion (lower-left triangle, clipped to diamond) -->
-    <clipPath id="diamond-clip">
-      <rect x="-50" y="-50" width="100" height="100" rx="6" ry="6"
-            transform="rotate(45)"/>
-    </clipPath>
-    <polygon points="-71,0 0,71 0,0"
+    <!-- Green earth (bottom-left portion) -->
+    <polygon points="-68,0 0,68 68,0 0,12"
              fill="url(#earth)" clip-path="url(#diamond-clip)"/>
 
-    <!-- White highlight edge between blue and green -->
-    <line x1="-50" y1="50" x2="0" y2="0"
-          stroke="white" stroke-width="1" stroke-opacity="0.3"
+    <!-- Subtle white horizon glow -->
+    <line x1="-60" y1="8" x2="50" y2="-4"
+          stroke="white" stroke-width="2" stroke-opacity="0.25"
           clip-path="url(#diamond-clip)"/>
   </g>
+
+  <!-- Swoosh arc — teal curve crossing through diamond -->
+  <path d="M 16 118 C 40 152, 85 162, 130 152 C 165 144, 186 124, 196 96"
+        fill="none" stroke="#0D5E8B" stroke-width="5" stroke-linecap="round"
+        opacity="0.85"/>
+  <!-- Lighter inner edge of swoosh -->
+  <path d="M 18 116 C 42 148, 86 158, 130 148 C 164 140, 185 122, 194 96"
+        fill="none" stroke="#1A7FAE" stroke-width="2" stroke-linecap="round"
+        opacity="0.4"/>
 </svg>

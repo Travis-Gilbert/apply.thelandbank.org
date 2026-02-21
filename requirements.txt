@@ -1,7 +1,9 @@
 asgiref==3.11.1
+boto3==1.42.54
 dj-database-url==3.1.2
 Django==6.0.2
 django-anymail[resend]==14.0
+django-storages[s3]==1.14.6
 django-cors-headers==4.9.0
 django-htmx==1.27.0
 django-unfold==0.80.2

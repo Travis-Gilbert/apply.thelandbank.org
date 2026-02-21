@@ -1,0 +1,10 @@
+Hello{{ first_name|default:"" }},
+
+Your application for {{ property_address }} has been saved. You can continue where you left off at any time using this link:
+
+{{ resume_url }}
+
+This link expires on {{ expires_at }}.
+
+Genesee County Land Bank Authority
+(810) 257-3088

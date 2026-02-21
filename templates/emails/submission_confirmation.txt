@@ -1,0 +1,15 @@
+Dear {{ application.first_name }},
+
+Your application has been received and is now under review.
+
+Reference Number: {{ application.reference_number }}
+Property: {{ application.property_address }}
+Program: {{ application.get_program_type_display }}
+{% if offer_line %}{{ offer_line }}
+{% endif %}
+Our team will review your application and contact you within 5-7 business days. Please keep your reference number for your records.
+
+If you have questions, contact {{ contact_email }} or call {{ contact_phone }}.
+
+Genesee County Land Bank Authority
+{{ contact_phone }}

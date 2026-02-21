@@ -5,14 +5,15 @@ Application with Documents, sends confirmation emails.
 
 import logging
 import os
-import shutil
 from datetime import date
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.db import transaction
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from ..models import Application, Document
@@ -155,66 +156,71 @@ def submit_application(request, draft):
 
 
 def _move_documents(draft, app, data):
-    """Move uploaded files from drafts/ to applications/ and create Document records."""
+    """
+    Move uploaded files from drafts/ to applications/ and create Document records.
+
+    Uses Django's default_storage API so this works transparently with both
+    local filesystem (development) and S3/B2 (production).
+    """
     uploads = data.get("uploads", {})
+    now = timezone.now()
+    dest_prefix = f"applications/{now.year}/{now.month:02d}"
+
     for doc_type, info in uploads.items():
-        # Paths are stored relative to MEDIA_ROOT
-        source_path = os.path.join(settings.MEDIA_ROOT, info.get("path", ""))
-        if info.get("path") and os.path.exists(source_path):
-            dest_dir = os.path.join(
-                settings.MEDIA_ROOT,
-                "applications",
-                str(timezone.now().year),
-                f"{timezone.now().month:02d}",
-            )
-            os.makedirs(dest_dir, exist_ok=True)
+        source_path = info.get("path", "")
+        if not source_path or not default_storage.exists(source_path):
+            continue
 
-            # Sanitize the stored filename before using in destination path
-            safe_filename = "".join(
-                c for c in info["filename"] if c.isalnum() or c in ".-_"
-            ) or "upload"
-            dest_path = os.path.join(dest_dir, f"{app.reference_number}_{safe_filename}")
-            shutil.move(source_path, dest_path)
+        # Sanitize the original filename for the destination path
+        safe_filename = "".join(
+            c for c in info["filename"] if c.isalnum() or c in ".-_"
+        ) or "upload"
+        dest_path = f"{dest_prefix}/{app.reference_number}_{safe_filename}"
 
-            relative_path = os.path.relpath(dest_path, settings.MEDIA_ROOT)
-            Document.objects.create(
-                application=app,
-                doc_type=doc_type,
-                file=relative_path,
-                original_filename=info["filename"],
-            )
+        # Read from source, save to destination via storage API
+        with default_storage.open(source_path, "rb") as source_file:
+            saved_path = default_storage.save(dest_path, source_file)
 
-    # Clean up draft directory
+        # Remove the draft copy
+        default_storage.delete(source_path)
+
+        Document.objects.create(
+            application=app,
+            doc_type=doc_type,
+            file=saved_path,
+            original_filename=info["filename"],
+        )
+
+    # Clean up empty draft directory (local filesystem only)
     draft_dir = os.path.join(settings.MEDIA_ROOT, "drafts", str(draft.token))
-    if os.path.exists(draft_dir):
-        shutil.rmtree(draft_dir)
+    if os.path.isdir(draft_dir):
+        try:
+            os.rmdir(draft_dir)  # Only removes if empty
+        except OSError:
+            pass  # Directory not empty or doesn't exist — fine
 
 
 def _send_buyer_confirmation(app):
     """Send submission confirmation email to the buyer."""
-    # Build program-specific summary
     if app.program_type == Application.ProgramType.VIP_SPOTLIGHT:
-        offer_line = "Program: VIP Spotlight (proposal-based)"
+        offer_line = ""
     else:
         offer_line = f"Offer: ${app.offer_amount:,.2f}" if app.offer_amount else ""
+
+    context = {
+        "application": app,
+        "offer_line": offer_line,
+        "contact_email": settings.STAFF_NOTIFICATION_EMAIL,
+        "contact_phone": "(810) 257-3088",
+    }
 
     try:
         send_mail(
             subject=f"GCLBA Application Received — {app.reference_number}",
-            message=(
-                f"Dear {app.first_name},\n\n"
-                f"Your application {app.reference_number} has been received.\n"
-                f"Property: {app.property_address}\n"
-                f"Program: {app.get_program_type_display()}\n"
-                f"{offer_line}\n\n"
-                "Our team will review your application and contact you within "
-                "5-7 business days.\n\n"
-                "Genesee County Land Bank Authority\n"
-                "(810) 257-3088\n"
-                "offers@thelandbank.org"
-            ),
+            message=render_to_string("emails/submission_confirmation.txt", context),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[app.email],
+            html_message=render_to_string("emails/submission_confirmation.html", context),
         )
     except Exception:
         logger.exception("Failed to send buyer confirmation for %s", app.reference_number)
@@ -222,37 +228,18 @@ def _send_buyer_confirmation(app):
 
 def _send_staff_notification(app):
     """Send new application alert to staff."""
-    if app.offer_amount:
-        body = (
-            f"New application submitted:\n\n"
-            f"Reference: {app.reference_number}\n"
-            f"Applicant: {app.full_name}\n"
-            f"Email: {app.email}\n"
-            f"Phone: {app.phone}\n"
-            f"Property: {app.property_address}\n"
-            f"Program: {app.get_program_type_display()}\n"
-            f"Purchase Type: {app.get_purchase_type_display()}\n"
-            f"Offer: ${app.offer_amount:,.2f}\n\n"
-            f"Review in admin: /admin/applications/application/{app.pk}/change/"
-        )
-    else:
-        body = (
-            f"New application submitted:\n\n"
-            f"Reference: {app.reference_number}\n"
-            f"Applicant: {app.full_name}\n"
-            f"Email: {app.email}\n"
-            f"Phone: {app.phone}\n"
-            f"Property: {app.property_address}\n"
-            f"Program: {app.get_program_type_display()}\n\n"
-            f"Review in admin: /admin/applications/application/{app.pk}/change/"
-        )
+    context = {
+        "application": app,
+        "admin_url": f"/admin/applications/application/{app.pk}/change/",
+    }
 
     try:
         send_mail(
             subject=f"New Application: {app.reference_number} — {app.full_name}",
-            message=body,
+            message=render_to_string("emails/staff_notification.txt", context),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.STAFF_NOTIFICATION_EMAIL],
+            html_message=render_to_string("emails/staff_notification.html", context),
         )
     except Exception:
         logger.exception("Failed to send staff notification for %s", app.reference_number)

@@ -1,0 +1,19 @@
+<p>Hello{{ first_name|default:"" }},</p>
+
+<p>Your application for <strong>{{ property_address }}</strong> has been saved. You can continue where you left off at any time using the link below.</p>
+
+<p style="margin: 24px 0;">
+  <a href="{{ resume_url }}" style="background-color: #2e7d32; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Continue Your Application</a>
+</p>
+
+<p style="font-size: 14px; color: #666;">
+  Or copy and paste this link into your browser:<br>
+  <a href="{{ resume_url }}">{{ resume_url }}</a>
+</p>
+
+<p style="font-size: 14px; color: #666;">This link expires on {{ expires_at }}.</p>
+
+<p>
+  Genesee County Land Bank Authority<br>
+  (810) 257-3088
+</p>

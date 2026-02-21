@@ -20,6 +20,7 @@ from .htmx import (
     htmx_renovation_totals,
     htmx_self_employed_label,
 )
+from .documents import document_view
 from .shared import (
     resume_draft,
     save_progress,
@@ -51,4 +52,6 @@ __all__ = [
     # Save & resume
     "save_progress",
     "resume_draft",
+    # Staff document access
+    "document_view",
 ]

@@ -7,6 +7,7 @@ organized fieldsets, inline documents, and automatic status audit logging.
 
 from django import forms
 from django.contrib import admin, messages
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
@@ -27,11 +28,12 @@ class DocumentInline(TabularInline):
 
     @display(description="View")
     def view_file(self, instance):
-        if not instance.file:
+        if not instance.pk or not instance.file:
             return "—"
+        url = reverse("applications:document_view", args=[instance.pk])
         return format_html(
             '<a href="{}" target="_blank" rel="noopener">Open</a>',
-            instance.file.url,
+            url,
         )
 
 

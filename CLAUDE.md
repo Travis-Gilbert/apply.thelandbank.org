@@ -557,20 +557,21 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Document uploads (S3/B2) | Open | File fields exist but no storage backend wired |
-| Email (SendGrid/Resend) | Open | django-anymail installed, not configured |
-| Wire accordion views to models | Open | Section validators need to save to ApplicationDraft |
-| Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing |
+| Document uploads (S3) | Done | django-storages + boto3 configured; storage API used in upload + move; pre-signed URL view for staff |
+| Email (Resend) | Done | django-anymail configured; HTML + text templates for magic link, submission confirmation, staff notification, status changes |
+| Accordion views → models | Done | section_validate saves to ApplicationDraft.form_data; submit_application hydrates Application model |
+| Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing refinement |
+| Design upgrade (3 batches) | Done | Typography, mobile craft, visual polish — all deployed |
+| S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
+| Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
 
 ## Next Step
 
-Design upgrade is deployed. Three critical-path items remain for end-to-end MVP:
-1. **Document uploads** — wire S3/Backblaze B2 storage backend via django-storages. File fields
-   exist on models but no storage configured. Pre-signed URLs needed for staff viewing.
-2. **Email integration** — django-anymail with Resend is installed but not configured. Need
-   save-and-resume email, submission confirmation, and staff notification templates.
-3. **Wire accordion views to models** — `applications/views/accordion.py` section validators
-   need to save validated data to `ApplicationDraft` and create `Application` on final submit.
+Core backend wiring is complete. Remaining for production deployment:
+1. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+2. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+3. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
+4. **Staff dashboard polish** — document viewer links in admin, status badges
 
 ---
 

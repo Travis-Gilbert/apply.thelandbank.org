@@ -11,6 +11,7 @@ import shutil
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
@@ -159,8 +160,7 @@ def _handle_documents_step(
     if request.method == "POST":
         uploaded = {}
         file_errors = {}
-        upload_dir = os.path.join(settings.MEDIA_ROOT, "drafts", str(draft.token))
-        os.makedirs(upload_dir, exist_ok=True)
+        draft_prefix = f"drafts/{draft.token}"
 
         for doc_type in all_doc_types:
             file = request.FILES.get(doc_type)
@@ -175,13 +175,11 @@ def _handle_documents_step(
                 safe_name = "".join(
                     c for c in file.name if c.isalnum() or c in ".-_"
                 ) or "upload"
-                file_path = os.path.join(upload_dir, f"{doc_type}_{safe_name}")
-                with open(file_path, "wb+") as dest:
-                    for chunk in file.chunks():
-                        dest.write(chunk)
+                dest_path = f"{draft_prefix}/{doc_type}_{safe_name}"
+                saved_path = default_storage.save(dest_path, file)
                 uploaded[doc_type] = {
                     "filename": file.name,
-                    "path": os.path.relpath(file_path, settings.MEDIA_ROOT),
+                    "path": saved_path,
                 }
             elif form_data.get("uploads", {}).get(doc_type):
                 # Keep previously uploaded file

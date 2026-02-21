@@ -1,0 +1,14 @@
+<p>New application submitted:</p>
+
+<table style="border-collapse: collapse; margin: 16px 0;">
+  <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Reference:</td><td>{{ application.reference_number }}</td></tr>
+  <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Applicant:</td><td>{{ application.full_name }}</td></tr>
+  <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Email:</td><td><a href="mailto:{{ application.email }}">{{ application.email }}</a></td></tr>
+  <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Phone:</td><td>{{ application.phone }}</td></tr>
+  <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Property:</td><td>{{ application.property_address }}</td></tr>
+  <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Program:</td><td>{{ application.get_program_type_display }}</td></tr>
+  {% if application.offer_amount %}<tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Purchase Type:</td><td>{{ application.get_purchase_type_display }}</td></tr>
+  <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Offer:</td><td>${{ application.offer_amount|floatformat:2 }}</td></tr>{% endif %}
+</table>
+
+<p><a href="{{ admin_url }}" style="background-color: #2e7d32; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Review in Admin</a></p>

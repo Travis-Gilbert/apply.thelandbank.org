@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_htmx",
     "anymail",
+    "storages",
     # Local apps
     "applications",
 ]
@@ -143,9 +144,27 @@ STORAGES = {
 
 
 # Media files (uploaded documents, images)
+# Uses S3 in production when AWS_STORAGE_BUCKET_NAME is set,
+# falls back to local filesystem for development.
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")
+if AWS_STORAGE_BUCKET_NAME:
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    }
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
+    AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN", "")
+    AWS_DEFAULT_ACL = None  # Private by default — access via pre-signed URLs only
+    AWS_S3_FILE_OVERWRITE = False  # Never overwrite existing files
+    AWS_QUERYSTRING_EXPIRE = 900  # Pre-signed URLs expire in 15 minutes
+    AWS_S3_OBJECT_PARAMETERS = {
+        "CacheControl": "max-age=86400",
+    }
 
 
 # Django REST Framework

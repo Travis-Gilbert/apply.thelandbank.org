@@ -70,4 +70,10 @@ urlpatterns = [
     # ── Save & resume ────────────────────────────────────────────
     path("save/", views.save_progress, name="save_progress"),
     path("resume/<uuid:token>/", views.resume_draft, name="resume"),
+    # ── Staff document access (pre-signed URLs) ────────────────
+    path(
+        "documents/<int:document_id>/view/",
+        views.document_view,
+        name="document_view",
+    ),
 ]

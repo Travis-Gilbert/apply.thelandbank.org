@@ -11,6 +11,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from ..forms import EligibilityForm, IdentityForm, PropertyForm
@@ -189,19 +190,20 @@ def save_progress(request):
         )
 
     resume_url = request.build_absolute_uri(f"/apply/resume/{draft.token}/")
+    context = {
+        "first_name": draft.form_data.get("first_name", ""),
+        "property_address": draft.form_data.get("property_address", "your property"),
+        "resume_url": resume_url,
+        "expires_at": draft.expires_at.strftime("%B %d, %Y"),
+    }
 
     try:
         send_mail(
             subject="Continue Your GCLBA Application",
-            message=(
-                f"You can continue your application at any time using this link:\n\n"
-                f"{resume_url}\n\n"
-                f"This link expires on {draft.expires_at.strftime('%B %d, %Y')}.\n\n"
-                "Genesee County Land Bank Authority\n"
-                "(810) 257-3088"
-            ),
+            message=render_to_string("emails/magic_link.txt", context),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[draft.email],
+            html_message=render_to_string("emails/magic_link.html", context),
         )
     except Exception:
         logger.exception("Failed to send magic link email to %s", draft.email)

@@ -1,0 +1,12 @@
+New application submitted:
+
+Reference: {{ application.reference_number }}
+Applicant: {{ application.full_name }}
+Email: {{ application.email }}
+Phone: {{ application.phone }}
+Property: {{ application.property_address }}
+Program: {{ application.get_program_type_display }}
+{% if application.offer_amount %}Purchase Type: {{ application.get_purchase_type_display }}
+Offer: ${{ application.offer_amount|floatformat:2 }}
+{% endif %}
+Review in admin: {{ admin_url }}
