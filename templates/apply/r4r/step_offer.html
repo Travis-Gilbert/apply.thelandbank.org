@@ -4,7 +4,7 @@
 
 {% block form_content %}
 <div class="section-card p-5 sm:p-7 space-y-5">
-    {% include "apply/_section_label.html" with text="Offer Details" %}
+    {% include "apply/_section_label.html" with text="Offer Details" icon="💰" %}
 
     <div class="p-4 rounded-xl bg-civic-blue-50 border border-civic-blue-100">
         <p class="text-sm text-civic-blue-800">
@@ -34,7 +34,7 @@
 
 <!-- Prior GCLBA Purchase -->
 <div class="section-card p-5 sm:p-7 space-y-4 mt-4">
-    {% include "apply/_section_label.html" with text="Prior GCLBA Purchase" blue=True %}
+    {% include "apply/_section_label.html" with text="Prior GCLBA Purchase" blue=True icon="🏡" %}
 
     <label class="flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer border-warm-300/60 hover:border-warm-400 has-[input:checked]:border-civic-green-600 has-[input:checked]:bg-civic-green-50/50">
         <input type="checkbox" name="{{ form.has_prior_gclba_purchase.html_name }}"

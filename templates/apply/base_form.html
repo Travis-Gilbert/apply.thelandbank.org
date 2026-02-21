@@ -3,19 +3,51 @@
 {% block title %}Step {{ current_step }} of {{ total_steps }} - GCLBA Application{% endblock %}
 
 {% block content %}
-<!-- Mobile sticky progress bar — pins below header on scroll -->
-<div class="lg:hidden sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 mb-4 transition-shadow"
-     style="background: linear-gradient(180deg, #F2EDE6 0%, rgba(242,237,230,0.95) 100%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0,0,0,0.06);">
-    <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2 flex-shrink-0">
-            <span class="w-7 h-7 rounded-full bg-civic-green-700 text-white flex items-center justify-center text-xs font-bold">{{ current_step }}</span>
-            <span class="text-sm font-semibold text-warm-900 truncate">{{ step_title }}</span>
+{# ── FULL PROGRESS STRIP (visible at page top) ────────────────── #}
+<div id="progress-strip" class="progress-strip lg:hidden -mx-4 sm:-mx-6">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3">
+        <div class="text-xs font-sans font-medium text-warm-500 tracking-wide mb-2">
+            Step {{ current_step }} of {{ total_steps }}
         </div>
-        <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:rgba(0,0,0,0.06)">
-            <div class="h-full rounded-full transition-all duration-500 ease-out bg-civic-green-600"
-                 style="width: {% widthratio current_step total_steps 100 %}%"></div>
+        <div class="flex gap-1.5 items-center">
+            {% for step in steps %}
+            <div class="flex-1 flex flex-col gap-1">
+                <div class="h-1 rounded-full transition-all duration-500 ease-out
+                    {% if forloop.counter <= current_step %}
+                        bg-civic-green-600
+                    {% else %}
+                        bg-warm-200/40
+                    {% endif %}">
+                </div>
+                <span class="text-[10px] font-sans text-center transition-colors
+                    {% if forloop.counter == current_step %}
+                        font-semibold text-civic-green-700
+                    {% elif forloop.counter < current_step %}
+                        text-warm-600
+                    {% else %}
+                        text-warm-400
+                    {% endif %}
+                    {% if forloop.counter != current_step %}hidden sm:block{% endif %}">
+                    {{ step.title }}
+                </span>
+            </div>
+            {% endfor %}
         </div>
-        <span id="step-count" class="text-[11px] text-warm-500 flex-shrink-0">{{ current_step }}/{{ total_steps }}</span>
+    </div>
+</div>
+
+{# ── COMPACT PROGRESS PILL (appears on scroll) ────────────────── #}
+<div id="progress-pill" class="progress-pill lg:hidden">
+    <div class="progress-pill-track">
+        <div class="progress-pill-fill"
+             style="width: {% widthratio current_step total_steps 100 %}%"></div>
+    </div>
+    <div class="progress-pill-label">
+        <div class="progress-pill-badge">
+            <span class="step-num">{{ current_step }}/{{ total_steps }}</span>
+            <span class="step-dot"></span>
+            <span>{{ step_title }}</span>
+        </div>
     </div>
 </div>
 
@@ -106,7 +138,7 @@
                         </span>
                     </div>
 
-                    <button type="submit" class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-lg text-sm font-semibold text-white bg-civic-green-700 hover:bg-civic-green-800 border border-civic-green-800 transition-all duration-200">
+                    <button type="submit" class="gclba-btn-primary flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-lg text-sm font-semibold">
                         {% block submit_label %}{% if is_last_step %}Submit Application{% else %}Continue{% endif %}{% endblock %}
                         {% if not is_last_step %}
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -117,12 +149,41 @@
         </form>
 
         <!-- Help text -->
-        <div class="mt-5 text-center">
-            <p class="text-xs text-warm-500" style="opacity:0.7">
-                Need help? Call (810) 257-3088
-                or email <a href="mailto:offers@thelandbank.org" class="text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
+        <div class="mt-5 text-center py-3 px-4 rounded-lg"
+             style="background: rgba(240, 236, 229, 0.4); border: 1px solid rgba(210, 204, 194, 0.2);">
+            <p class="text-xs text-warm-500" style="opacity: 0.85;">
+                Need help? Call <span class="font-mono text-[11px]">(810) 257-3088</span>
+                or email <a href="mailto:offers@thelandbank.org"
+                            class="font-mono text-[11px] text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
             </p>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    var strip = document.getElementById('progress-strip');
+    var pill = document.getElementById('progress-pill');
+    if (!strip || !pill) return;
+
+    var SCROLL_THRESHOLD = 120;
+    var ticking = false;
+
+    function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function() {
+            var scrolled = window.scrollY > SCROLL_THRESHOLD;
+            strip.classList.toggle('is-collapsed', scrolled);
+            pill.classList.toggle('is-visible', scrolled);
+            ticking = false;
+        });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
+</script>
 {% endblock %}

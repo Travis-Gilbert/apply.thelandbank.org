@@ -17,7 +17,7 @@
 
 <!-- Interior Costs -->
 <div class="section-card p-5 sm:p-7 space-y-4">
-    {% include "apply/_section_label.html" with text="Interior Costs" %}
+    {% include "apply/_section_label.html" with text="Interior Costs" icon="🏠" %}
 
     <div class="space-y-3">
         {% for name, field in form.interior_fields %}
@@ -41,7 +41,7 @@
 
 <!-- Exterior Costs -->
 <div class="section-card p-5 sm:p-7 space-y-4 mt-4">
-    {% include "apply/_section_label.html" with text="Exterior Costs" blue=True %}
+    {% include "apply/_section_label.html" with text="Exterior Costs" blue=True icon="🏗️" %}
 
     <div class="space-y-3">
         {% for name, field in form.exterior_fields %}

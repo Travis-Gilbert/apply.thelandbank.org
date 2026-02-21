@@ -38,19 +38,185 @@
         }
     </script>
     <style>
-        .section-card { background: rgba(255,255,255,0.72); border: 1px solid rgba(0,0,0,0.12); border-radius: 0.75rem; }
+        /* ── Warm Civic Background ───────────────────────── */
+        .civic-bg {
+            background-color: #f4f2ee;
+            background-image:
+                repeating-linear-gradient(
+                    0deg, transparent, transparent 31px,
+                    rgba(180, 170, 155, 0.045) 31px, rgba(180, 170, 155, 0.045) 32px
+                ),
+                repeating-linear-gradient(
+                    90deg, transparent, transparent 31px,
+                    rgba(180, 170, 155, 0.045) 31px, rgba(180, 170, 155, 0.045) 32px
+                ),
+                radial-gradient(
+                    circle 0.6px at 32px 32px,
+                    rgba(160, 150, 135, 0.06) 0.6px, transparent 0.6px
+                );
+            background-size: 32px 32px;
+            position: relative;
+        }
+        .civic-bg::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+        .civic-bg::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(210, 200, 185, 0.12) 100%);
+        }
+
+        /* Content above pseudo-elements */
+        main, header, footer, .sticky { position: relative; z-index: 1; }
+
+        /* ── Section Cards ───────────────────────────────── */
+        .section-card {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid rgba(210, 204, 194, 0.45);
+            border-radius: 0.75rem;
+            box-shadow:
+                0 1px 3px rgba(0,0,0,0.04),
+                0 4px 12px rgba(0,0,0,0.02),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
         .gclba-input { background: rgba(255,255,255,0.7); border: 1.5px solid #c4bfb7; border-radius: 0.5rem; padding: 0.625rem 0.875rem; font-size: 1rem; width: 100%; transition: all 0.15s; color: #2A2622; }
         @media (min-width: 640px) { .gclba-input { font-size: 0.875rem; } }
         .gclba-input::placeholder { color: #A09890; }
-        .gclba-input:focus { border-color: #2e7d32; box-shadow: 0 0 0 3px #f0f7f1; outline: none; }
+        .gclba-input:focus { border-color: #2e7d32; box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.08); outline: none; background-color: #fff; }
         .gclba-input.has-error { border-color: #dc2626; }
         .gclba-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237A746C' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; }
         /* Mobile: prevent iOS zoom on focus (requires 16px+ font-size) */
         @media (max-width: 639px) {
             select.gclba-input, textarea.gclba-input { font-size: 1rem; }
         }
+
+        /* ── Input Focus Ring ────────────────────────────── */
+        input:focus, select:focus, textarea:focus {
+            border-color: #2e7d32 !important;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.08) !important;
+            background-color: #fff !important;
+            outline: none;
+        }
+        input:not(:focus), select:not(:focus), textarea:not(:focus) {
+            background-color: #fafaf8;
+        }
+
+        /* ── Step Entrance Animation ─────────────────────── */
         @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-step { animation: fadeSlideIn 0.3s ease-out; }
+        .animate-step { animation: fadeSlideIn 0.4s ease forwards; }
+        @keyframes stepIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Primary Button ──────────────────────────────── */
+        .gclba-btn-primary {
+            background: linear-gradient(180deg, #2e7d32 0%, #256b29 100%);
+            border: 1px solid #1f5c36;
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+            transition: all 0.2s ease;
+        }
+        .gclba-btn-primary:hover {
+            background: linear-gradient(180deg, #339637 0%, #2e7d32 100%);
+            box-shadow: 0 2px 6px rgba(46,125,50,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        /* ── Sticky Collapsing Progress Bar ──────────────── */
+        .progress-strip {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid rgba(200, 192, 180, 0.3);
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .progress-strip.is-collapsed {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-100%);
+        }
+        .progress-pill {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(-100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .progress-pill.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .progress-pill-track {
+            height: 3px;
+            background: rgba(200, 192, 180, 0.25);
+            width: 100%;
+        }
+        .progress-pill-fill {
+            height: 100%;
+            background: #2e7d32;
+            border-radius: 0 2px 2px 0;
+            transition: width 0.5s ease-out;
+        }
+        .progress-pill-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0 8px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(200, 192, 180, 0.2);
+        }
+        .progress-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(210, 204, 194, 0.5);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            color: #5a5550;
+        }
+        .progress-pill-badge .step-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2e7d32;
+        }
+        .progress-pill-badge .step-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #ccc7bf;
+        }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         .animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
@@ -60,19 +226,23 @@
         .summary-bar {
             display: flex; align-items: center; gap: 0.75rem;
             height: 48px; padding: 0 1rem;
-            background: rgba(255,255,255,0.82);
-            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(210, 204, 194, 0.4);
             border-radius: 0.75rem;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             animation: fadeSlideIn 200ms ease;
         }
-        .summary-bar:hover { background: rgba(255,255,255,0.95); }
+        .summary-bar:hover { background: rgba(255,255,255,0.88); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 
         /* Expanded section card with numbered header + accent left border */
         .section-card-v2 {
-            background: rgba(255,255,255,0.72);
-            border: 1px solid rgba(0,0,0,0.12);
+            background: rgba(255,255,255,0.65);
+            border: 1px solid rgba(210, 204, 194, 0.45);
             border-radius: 0.75rem;
             overflow: hidden;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.02);
         }
         .section-card-v2-header {
             display: flex; align-items: center; gap: 0.75rem;
@@ -214,25 +384,27 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full font-sans flex flex-col min-h-screen" style="background: linear-gradient(180deg, #F2EDE6 0%, #EAE4DC 100%)"
+<body class="h-full font-sans flex flex-col min-h-screen civic-bg"
       hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <!-- Header -->
-    <header style="background: linear-gradient(to bottom, #3a9140, #2e7d32)">
-        <div class="max-w-4xl mx-auto px-4 py-5 sm:py-6 sm:px-6">
-            <div class="flex items-center justify-between">
-                <a href="{% url 'applications:step_identity' %}" class="flex items-center gap-3.5 sm:gap-5 min-w-0">
-                    <img src="{% static 'img/gclba-logo.jpg' %}" alt="Genesee County Land Bank" class="h-12 sm:h-16 w-auto flex-shrink-0 rounded-md" style="background:rgba(255,255,255,0.92); padding:4px;">
-                    <div class="min-w-0">
-                        <h1 class="font-heading text-base sm:text-xl font-bold text-white tracking-tight leading-tight">Genesee County Land Bank Authority</h1>
-                        <p class="text-[11px] sm:text-sm font-medium mt-0.5" style="color:rgba(255,255,255,0.7)">GCLBA Property Application Portal</p>
-                    </div>
-                </a>
-                <a href="https://www.thelandbank.org" target="_blank" rel="noopener" class="hidden sm:flex items-center gap-1.5 text-xs transition-colors hover:text-white flex-shrink-0" style="color:rgba(255,255,255,0.55)">
-                    thelandbank.org
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-                </a>
-            </div>
+    <header class="relative" style="background: linear-gradient(180deg, #1b4a38 0%, #22573f 100%); border-bottom: 3px solid #d4a843;">
+        {# Subtle diagonal texture overlay #}
+        <div class="absolute inset-0 pointer-events-none" style="opacity: 0.04; background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 21px);"></div>
+
+        <div class="relative max-w-4xl mx-auto px-4 py-4 sm:px-6 flex items-center justify-between">
+            <a href="{% url 'applications:step_identity' %}" class="flex items-center gap-3.5 min-w-0">
+                <img src="{% static 'img/gclba-logo.jpg' %}" alt="Genesee County Land Bank" class="h-10 sm:h-12 w-auto flex-shrink-0 rounded-lg" style="background:rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); padding:3px;">
+                <div class="min-w-0">
+                    <div class="font-heading font-bold text-white" style="font-size: 17px; letter-spacing: 0.01em; line-height: 1.2;">GCLBA</div>
+                    <div class="font-sans text-white/60" style="font-size: 11.5px; letter-spacing: 0.02em;">Genesee County Land Bank Authority</div>
+                </div>
+            </a>
+            <a href="https://www.thelandbank.org" target="_blank" rel="noopener"
+               class="hidden sm:flex text-white/55 hover:text-white/80 text-xs px-3 py-1.5 rounded-md transition-colors"
+               style="border: 1px solid rgba(255,255,255,0.1);">
+                thelandbank.org
+            </a>
         </div>
     </header>
 

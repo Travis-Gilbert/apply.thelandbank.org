@@ -5,7 +5,7 @@
 {% block form_content %}
 <!-- Intended Use + Sub-question -->
 <div class="section-card p-5 sm:p-7 space-y-5">
-    {% include "apply/_section_label.html" with text="Intended Use" %}
+    {% include "apply/_section_label.html" with text="Intended Use" icon="🏠" %}
 
     <div class="space-y-1.5">
         <label for="{{ form.intended_use.id_for_label }}" class="block text-sm font-medium text-warm-900">
@@ -37,7 +37,7 @@
 
 <!-- Renovation Plan -->
 <div class="section-card p-5 sm:p-7 space-y-5 mt-4">
-    {% include "apply/_section_label.html" with text="Renovation Plan" blue=True %}
+    {% include "apply/_section_label.html" with text="Renovation Plan" blue=True icon="🔨" %}
 
     <!-- Renovation Description -->
     <div class="space-y-1.5">

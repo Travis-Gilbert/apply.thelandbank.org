@@ -1,7 +1,13 @@
-{# {% include "apply/_section_label.html" with text="Personal Details" %} #}
-{# Add blue=True for blue variant: {% include "apply/_section_label.html" with text="Mailing Address" blue=True %} #}
-<div class="flex items-center gap-3 mb-5">
-    <p class="text-[11px] font-semibold uppercase tracking-widest
-        {% if blue %}text-civic-blue-600{% else %}text-civic-green-700{% endif %}">{{ text }}</p>
-    <div class="flex-1 h-px {% if blue %}bg-civic-blue-200{% else %}bg-warm-300/50{% endif %}"></div>
+{# {% include "apply/_section_label.html" with text="Personal Details" icon="👤" %} #}
+{# Add blue=True for blue variant: {% include "apply/_section_label.html" with text="Mailing Address" blue=True icon="📍" %} #}
+<div class="flex items-center gap-2.5 px-5 py-3 -mx-5 sm:-mx-7 -mt-5 sm:-mt-7 mb-5
+            border-b border-warm-200/40"
+     style="background: rgba(250, 248, 244, 0.5);">
+    {% if icon %}
+    <div class="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 text-xs"
+         style="background: {% if blue %}rgba(45, 106, 138, 0.06); border: 1px solid rgba(45, 106, 138, 0.12){% else %}rgba(46, 125, 50, 0.06); border: 1px solid rgba(46, 125, 50, 0.12){% endif %};">
+        {{ icon }}
+    </div>
+    {% endif %}
+    <h3 class="font-heading text-base font-semibold text-warm-900">{{ text }}</h3>
 </div>
