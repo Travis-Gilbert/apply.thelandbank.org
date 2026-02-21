@@ -1,3 +1,4 @@
+<!-- project-template: 48 -->
 # GCLBA Application Portal — CLAUDE.md
 
 ## What This Is
@@ -557,21 +558,29 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Document uploads (S3) | Done | django-storages + boto3 configured; storage API used in upload + move; pre-signed URL view for staff |
-| Email (Resend) | Done | django-anymail configured; HTML + text templates for magic link, submission confirmation, staff notification, status changes |
-| Accordion views → models | Done | section_validate saves to ApplicationDraft.form_data; submit_application hydrates Application model |
+| Logo: real GCLBA logo | Done | Converted JPEG→transparent PNG via Pillow; icon-only crop in header; deployed 2 commits (initial + improved thresholds) |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing refinement |
-| Design upgrade (3 batches) | Done | Typography, mobile craft, visual polish — all deployed |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
+| Scaffold improvements (local) | Open | Custom User model, DB indexes, requirements split, DRF/CORS removal — all LOCAL ONLY, not deployed. See warning below |
+
+**⚠ Scaffold deploy warning:** The scaffold changes include a migration reset (deleted 0002+0003, new 0001_initial with User model, new 0002_add_indexes). Railway's PostgreSQL has the OLD migration history. Pushing these changes without a migration plan will break the production database. Options: (a) `--fake` migrations on Railway, (b) squash into compatible migration, or (c) reset Railway DB if no real data yet.
 
 ## Next Step
 
-Core backend wiring is complete. Remaining for production deployment:
-1. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-2. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
-3. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
-4. **Staff dashboard polish** — document viewer links in admin, status badges
+1. **Plan scaffold deployment** — resolve migration conflict between local reset and Railway DB history before pushing structural changes
+2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+4. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
+5. **Staff dashboard polish** — document viewer links in admin, status badges
+
+### Future
+
+| Todo | Priority | Problem | Solution |
+|------|----------|---------|----------|
+| Vacant Lot program | Low | Phase 2 — requirements TBD | Build when GCLBA defines lot program rules |
+| FileMaker sync | Low | Staff currently dual-enter some data | API or CSV export TBD |
+| Spanish language version | Medium | Flint has Spanish-speaking residents | i18n after MVP launch |
 
 ---
 
@@ -585,6 +594,66 @@ Core backend wiring is complete. Remaining for production deployment:
 | Single-page accordion over multi-step wizard | Better UX: one page, HTMX validates per section, collapsed summaries show progress | 2026-02-20 |
 | Warm Civic Craft design: CSS-only textures + frosted glass | Colors (#2e7d32 green, #2d6a8a blue, #d4a843 gold), grid/noise/blur — no image assets, no build tooling | 2026-02-20 |
 | Header: full org name over acronym | First-time visitors don't know "GCLBA"; spell out "Genesee County Land Bank Authority" with "Property Application Portal" subtitle | 2026-02-20 |
+| Logo: icon-only crop (diamond+swoosh) in header, not full logo with text | Full logo text unreadably small at 48-56px header height; org name already displayed as HTML text | 2026-02-21 |
+| Surgical git commits for logo vs scaffold | Logo changes safe to deploy; scaffold changes (migration reset, User model, requirements split) would break Railway DB. Committed separately. | 2026-02-21 |
+| Scaffold changes uncommitted — need migration plan | Local has new 0001_initial (with User model) + 0002_add_indexes; Railway has old 0001+0002+0003. Must resolve before pushing. | 2026-02-21 |
+
+---
+
+## Project Instructions
+
+<!-- PROJECT INSTRUCTIONS START -->
+- Server-rendered only — no React, no SPA. HTMX for interactivity.
+- Plain language in all buyer-facing text. No legal jargon, no developer terms.
+- Fat models, thin views — validation and business logic in models.py.
+- Never expose raw S3/B2 URLs. All document access via pre-signed URL views.
+- font-mono restricted to dollar amounts, reference numbers, and property IDs only.
+- Mobile-first: 44px min touch targets, `inputmode` attributes on numeric fields.
+- All email templates must have both HTML and plain text versions.
+<!-- PROJECT INSTRUCTIONS END -->
+
+---
+
+## Architecture
+
+Two surfaces sharing one Django project:
+
+- **Buyer surface** (`/apply/`): Accordion-style form flow in `applications/views/accordion.py`. Each section validates via program-specific Django forms, saves progress to `ApplicationDraft.form_data` (JSON). Final submission hydrates a flat `Application` record + `Document` rows.
+- **Staff surface** (`/admin/`): django-unfold admin with status workflow, audit log (`StatusLog`), and pre-signed document viewing. Status changes can trigger buyer email notifications.
+
+Data flow: `ApplicationDraft` (in-progress) → `Application` (submitted) → `StatusLog` (audit trail)
+
+---
+
+## Files
+
+```
+applications/
+  admin.py                    # Admin UX + workflow actions (+ UserAdmin, local only)
+  admin_utils.py              # Unfold dashboard callbacks/badges
+  models.py                   # Application, Draft, Document, StatusLog (+ User model, local only)
+  status_notifications.py     # Status-email and note-requirement helpers
+  forms/                      # Program-specific form classes
+  views/                      # Accordion flow, shared steps, submission
+config/
+  settings.py                 # App config, Unfold, email, DB
+  urls.py                     # /apply + /admin routing
+static/
+  img/
+    gclba-logo-icon-400.png   # Header logo: 400x197 transparent PNG (diamond+swoosh)
+    gclba-logo-icon.png       # High-res source: 2083x1027 transparent PNG
+    gclba-logo-full.png       # Full logo with text: 2386x1724 transparent PNG
+    gclba-logo.svg            # Old hand-drawn SVG (no longer referenced)
+templates/
+  apply/                      # Buyer templates (v2 accordion)
+  emails/                     # Status-change email templates
+  base.html                   # Tailwind config, shared CSS, layout
+requirements/                 # (local only — not yet deployed)
+  base.txt                    # Shared dependencies
+  development.txt             # Dev extras (debug-toolbar, etc.)
+  production.txt              # Prod extras (gunicorn, whitenoise, etc.)
+docs/records/                 # Design decisions and feature specs
+```
 
 ---
 
