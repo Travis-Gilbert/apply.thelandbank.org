@@ -14,7 +14,8 @@
         </label>
         <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-warm-500 font-mono text-sm">$</span>
-            <input type="number" step="0.01" min="0" name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
+            <input type="number" step="0.01" min="0" inputmode="decimal"
+                   name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
                    value="{{ form.offer_amount.value|default:'' }}"
                    class="gclba-input pl-7 font-mono{% if form.offer_amount.errors %} has-error{% endif %}"
                    placeholder="0.00"
@@ -25,11 +26,27 @@
                    hx-trigger="input changed delay:500ms">
         </div>
         <div id="down-payment-min"></div>
+        <p id="offer-formatted" class="text-xs font-mono text-warm-400 mt-1 h-4" aria-hidden="true"></p>
         {% if form.offer_amount.errors %}
         <p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>
         {% endif %}
     </div>
 </div>
+
+<script>
+(function() {
+    var input = document.getElementById('{{ form.offer_amount.id_for_label }}');
+    var display = document.getElementById('offer-formatted');
+    if (!input || !display) return;
+    var fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    function update() {
+        var val = parseFloat(input.value);
+        display.textContent = (val > 0) ? fmt.format(val) : '';
+    }
+    input.addEventListener('input', update);
+    update();
+})();
+</script>
 
 <!-- Purchase Type -->
 <div class="section-card p-5 sm:p-7 space-y-5 mt-4">

@@ -308,6 +308,127 @@
             content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.08);
         }
 
+        /* ── 2B: Field Focus Label Color Shift ──────────── */
+        .space-y-1\.5:focus-within > label:first-child {
+            color: #256929;
+            transition: color 0.15s ease;
+        }
+        .space-y-1\.5 > label:first-child {
+            transition: color 0.15s ease;
+        }
+        .space-y-1\.5:focus-within .text-warm-500 {
+            opacity: 1;
+            transition: opacity 0.15s ease;
+        }
+
+        /* ── 2C: Progress Bar Spark Animation ──────────── */
+        @keyframes progressSpark {
+            0%   { left: -30%; opacity: 0; }
+            20%  { opacity: 0.6; }
+            100% { left: 110%; opacity: 0; }
+        }
+        .progress-pill-fill.just-advanced::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -30%;
+            width: 30%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: progressSpark 600ms ease-out forwards;
+        }
+        .progress-pill-fill { position: relative; overflow: hidden; }
+
+        @keyframes stepBounce {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+        .step-num.just-advanced {
+            animation: stepBounce 300ms ease;
+        }
+
+        /* ── 2D: Scroll-Aware Card Reveal ──────────────── */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── 2E: Touch Feedback :active States ─────────── */
+        .ack-card:active {
+            background-color: rgba(46,125,50,0.04);
+            transition: background-color 100ms;
+        }
+        .gclba-btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 2px rgba(46,125,50,0.4);
+            transition: transform 100ms, box-shadow 100ms;
+        }
+        .summary-bar button:active {
+            background: rgba(0,0,0,0.06);
+            transition: background 100ms;
+        }
+        .touch-label:active {
+            transform: scale(0.97);
+            transition: transform 100ms;
+        }
+        .continue-btn:active {
+            transform: scale(0.97);
+            transition: transform 100ms;
+        }
+        [type="radio"]:checked + label:active,
+        .program-card:active {
+            transform: scale(0.97);
+            transition: transform 100ms;
+        }
+
+        /* ── 2A: Fixed Bottom Nav on Mobile ────────────── */
+        @media (max-width: 639px) {
+            .mobile-fixed-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 45;
+                background: rgba(255,255,255,0.92);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(210, 204, 194, 0.4);
+                box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+                padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+                animation: slideUpNav 300ms ease forwards;
+            }
+            .mobile-fixed-nav.is-last-step {
+                border-top: 3px solid #d4a843;
+            }
+            @keyframes slideUpNav {
+                from { transform: translateY(100%); }
+                to   { transform: translateY(0); }
+            }
+            /* Spacer to prevent content overlap */
+            .mobile-nav-spacer {
+                height: calc(140px + env(safe-area-inset-bottom, 0px));
+            }
+        }
+        @media (min-width: 640px) {
+            .mobile-nav-spacer { display: none; }
+        }
+
+        /* ── Reduced Motion ────────────────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            .reveal-on-scroll { opacity: 1; transform: none; transition: none; }
+            .progress-pill-fill.just-advanced::after { animation: none; }
+            .step-num.just-advanced { animation: none; }
+            .mobile-fixed-nav { animation: none; }
+            .animate-step { animation: none; }
+            .animate-scale-in { animation: none; }
+        }
+
         /* ── Mobile Optimizations ─────────────────────── */
 
         /* Touch targets: 44px minimum for radio/checkbox labels */
