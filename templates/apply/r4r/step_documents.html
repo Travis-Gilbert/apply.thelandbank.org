@@ -43,10 +43,8 @@
 
             {% if uploaded and doc_type in uploaded %}
             <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-civic-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                </svg>
-                <span class="text-sm font-medium text-civic-green-700">Uploaded</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-civic-green-600"><path class="doc-check-draw is-drawn" d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="text-sm font-medium text-civic-green-700 doc-filename-reveal">Uploaded</span>
             </div>
             {% endif %}
 

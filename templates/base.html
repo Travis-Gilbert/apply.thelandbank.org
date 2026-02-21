@@ -419,6 +419,80 @@
             .mobile-nav-spacer { display: none; }
         }
 
+        /* ── 3A: Confirmation Confetti ──────────────────── */
+        @keyframes confettiFall {
+            0%   { opacity: 0.9; transform: translateY(-10px) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(85vh) rotate(720deg); }
+        }
+
+        /* ── 3B: Success Icon Pulse Ring ───────────────── */
+        .confirmation-pulse-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid var(--pulse-color, #2E7D32);
+            opacity: 0;
+            animation: pulseRing 1s ease-out 0.4s 2;
+        }
+        @keyframes pulseRing {
+            0%   { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.6); }
+        }
+
+        /* ── 3D: Ack Progressive Satisfaction ──────────── */
+        .ack-counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(46, 125, 50, 0.08);
+            color: #2e7d32;
+            border: 1px solid rgba(46, 125, 50, 0.15);
+            transition: all 0.3s ease;
+        }
+        .ack-counter.all-checked {
+            background: rgba(46, 125, 50, 0.12);
+            color: #1b5e20;
+            border-color: rgba(46, 125, 50, 0.3);
+        }
+        @keyframes submitGlow {
+            0%, 100% { box-shadow: 0 1px 3px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.12); }
+            50%      { box-shadow: 0 0 16px rgba(46,125,50,0.3), 0 1px 3px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.12); }
+        }
+        .submit-glow {
+            animation: submitGlow 2s ease-in-out infinite;
+        }
+
+        /* ── 3E: Document Upload Checkmark Draw ────────── */
+        .doc-check-draw {
+            stroke-dasharray: 24;
+            stroke-dashoffset: 24;
+            transition: stroke-dashoffset 300ms ease;
+        }
+        .doc-check-draw.is-drawn {
+            stroke-dashoffset: 0;
+        }
+        @keyframes fadeSlideRight {
+            from { opacity: 0; transform: translateX(-8px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .doc-filename-reveal {
+            animation: fadeSlideRight 200ms ease 100ms both;
+        }
+
+        /* ── 3F: Info Card Left-Accent ─────────────────── */
+        .info-card-accent {
+            border-left: 3px solid;
+            border-radius: 0.75rem;
+            padding-left: 1rem;
+        }
+        .info-card-accent-blue  { border-left-color: #2d6a8a; }
+        .info-card-accent-green { border-left-color: #2e7d32; }
+        .info-card-accent-amber { border-left-color: #d4a843; }
+
         /* ── Reduced Motion ────────────────────────────── */
         @media (prefers-reduced-motion: reduce) {
             .reveal-on-scroll { opacity: 1; transform: none; transition: none; }
@@ -427,6 +501,10 @@
             .mobile-fixed-nav { animation: none; }
             .animate-step { animation: none; }
             .animate-scale-in { animation: none; }
+            .confetti-container { display: none; }
+            .confirmation-pulse-ring { animation: none; }
+            .submit-glow { animation: none; }
+            .doc-filename-reveal { animation: none; opacity: 1; transform: none; }
         }
 
         /* ── Mobile Optimizations ─────────────────────── */

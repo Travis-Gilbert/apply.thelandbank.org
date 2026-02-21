@@ -13,6 +13,10 @@
 <div class="section-card p-5 sm:p-7 space-y-4">
     {% include "apply/_section_label.html" with text="Acknowledgments" icon="✅" %}
 
+    <div class="flex items-center justify-between -mt-2 mb-2">
+        <span id="ack-counter" class="ack-counter" role="status" aria-live="polite">0 of 6 acknowledged</span>
+    </div>
+
     <!-- Sold As-Is -->
     <label class="ack-card flex items-start gap-3 p-4 rounded-xl border-2 border-warm-300/60 transition-all cursor-pointer hover:border-warm-400">
         <input type="checkbox" name="{{ form.ack_sold_as_is.html_name }}"
@@ -81,10 +85,31 @@
 </div>
 
 <!-- Closing info -->
-<div class="p-4 rounded-xl bg-civic-green-50 border border-civic-green-200 mt-4">
+<div class="p-4 rounded-xl bg-civic-green-50 border border-civic-green-200 mt-4 info-card-accent info-card-accent-green">
     <p class="text-sm text-civic-green-800">
         <strong>By submitting this application,</strong> you agree to all acknowledgments above.
         Payment is due in full at closing via cashier's check or money order. Closing must occur within 21 days of offer acceptance.
     </p>
 </div>
+
+<script>
+(function() {
+    var boxes = document.querySelectorAll('.ack-card input[type="checkbox"]');
+    var counter = document.getElementById('ack-counter');
+    var submitBtn = document.querySelector('button[type="submit"]');
+    var total = boxes.length;
+    function update() {
+        var checked = document.querySelectorAll('.ack-card input[type="checkbox"]:checked').length;
+        if (counter) {
+            counter.textContent = checked + ' of ' + total + ' acknowledged';
+            counter.classList.toggle('all-checked', checked === total);
+        }
+        if (submitBtn) {
+            submitBtn.classList.toggle('submit-glow', checked === total);
+        }
+    }
+    boxes.forEach(function(box) { box.addEventListener('change', update); });
+    update();
+})();
+</script>
 {% endblock %}

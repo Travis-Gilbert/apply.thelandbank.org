@@ -1,28 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Application — Not Eligible{% endblock %}
+{% block title %}Application — Unable to Continue{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto text-center py-12 px-4">
-    <!-- Alert Icon -->
-    <div class="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
-        <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    <!-- Alert Icon — amber (informational, not punitive) -->
+    <div class="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-6"
+         style="background: #FFF8E1; border: 1px solid #FFE082;">
+        <svg class="w-10 h-10" fill="none" stroke="#F9A825" viewBox="0 0 24 24" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
         </svg>
     </div>
 
-    <h2 class="font-heading text-3xl font-bold text-warm-900 mb-4">We're Sorry</h2>
-
-    <p class="text-warm-600 mb-6">
-        Based on your responses, you are not eligible to purchase property through the
-        Genesee County Land Bank at this time.
-    </p>
+    <h2 class="font-heading text-3xl font-bold text-warm-900 mb-3">Unable to Continue</h2>
+    <p class="text-warm-500 text-sm mb-6">This doesn't have to be permanent.</p>
 
     <!-- Explanation -->
-    <div class="section-card p-6 text-left space-y-5 mb-8">
+    <div class="section-card p-6 text-left space-y-5 mb-8 info-card-accent info-card-accent-amber">
         <div>
-            <h3 class="font-heading text-lg font-semibold text-warm-900 mb-2">Why was I disqualified?</h3>
-            <p class="text-sm text-warm-600">
+            <h3 class="font-heading text-lg font-semibold text-warm-900 mb-2">Why can't I continue?</h3>
+            <p class="text-sm text-warm-600 leading-relaxed">
                 The Land Bank cannot sell to you if you have delinquent property taxes or if you
                 have been through tax foreclosure with the Genesee County Treasurer in the last
                 five years.
@@ -30,28 +27,38 @@
         </div>
         <div class="border-t border-warm-200 pt-4">
             <h3 class="font-heading text-lg font-semibold text-warm-900 mb-2">What can I do?</h3>
-            <p class="text-sm text-warm-600">
+            <p class="text-sm text-warm-600 leading-relaxed">
                 If you believe this determination was made in error, or if you have resolved
-                your tax obligations, please contact our office directly.
+                your tax obligations, please contact our office directly. We're happy to help.
             </p>
         </div>
     </div>
 
-    <!-- Contact Info -->
-    <div class="space-y-2">
-        <p class="font-heading text-lg font-medium text-warm-900">Genesee County Land Bank Authority</p>
-        <p class="text-sm text-warm-500">452 S. Saginaw St., Flint, MI 48502</p>
-        <p class="text-sm text-warm-500">(810) 257-3088</p>
-        <p>
-            <a href="mailto:offers@thelandbank.org" class="text-sm text-civic-green-700 hover:underline hover:text-civic-green-800">
-                offers@thelandbank.org
-            </a>
-        </p>
+    <!-- Contact — phone as tappable button on mobile -->
+    <div class="space-y-4">
+        <a href="tel:8102573088"
+           class="flex items-center justify-center gap-2 w-full sm:w-auto sm:inline-flex mx-auto px-6 py-3.5 rounded-xl text-base font-semibold text-white transition-colors"
+           style="background: #2e7d32;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            Call (810) 257-3088
+        </a>
+        <div class="text-sm text-warm-500 space-y-1">
+            <p>Genesee County Land Bank Authority</p>
+            <p class="text-[11px]">452 S. Saginaw St., Flint, MI 48502</p>
+            <p>
+                <a href="mailto:offers@thelandbank.org" class="text-civic-blue-600 hover:underline">
+                    offers@thelandbank.org
+                </a>
+            </p>
+        </div>
     </div>
 
     <div class="mt-8">
-        <a href="https://www.thelandbank.org" class="text-civic-green-700 hover:underline hover:text-civic-green-800 text-sm">
-            &larr; Return to thelandbank.org
+        <a href="https://www.thelandbank.org"
+           class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium text-warm-600 transition-colors"
+           style="border: 1.5px solid rgba(210, 204, 194, 0.5); background: rgba(255,255,255,0.5);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Return to thelandbank.org
         </a>
     </div>
 </div>
