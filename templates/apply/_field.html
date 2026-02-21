@@ -1,8 +1,8 @@
 {# Include with: {% include "apply/_field.html" with field=form.first_name label="First Name" required=True %} #}
-{# Optional: placeholder, hint, type (defaults to text), maxlength #}
+{# Optional: placeholder, hint, type (defaults to text), maxlength, autocomplete, autocapitalize #}
 <div class="space-y-1.5">
-    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-warm-900">
-        {{ label }}{% if required %} <span class="text-red-500">*</span>{% endif %}
+    <label for="{{ field.id_for_label }}" class="block text-sm {% if required %}font-medium text-warm-900{% else %}font-normal text-warm-600{% endif %}">
+        {{ label }}{% if required %} <span class="text-red-500">*</span>{% elif not required %} <span class="text-warm-400 text-xs font-normal">(optional)</span>{% endif %}
     </label>
     <input type="{{ type|default:'text' }}"
            name="{{ field.html_name }}"
@@ -11,6 +11,8 @@
            {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
            {% if required %}required{% endif %}
            {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+           {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+           {% if autocapitalize %}autocapitalize="{{ autocapitalize }}"{% endif %}
            class="gclba-input{% if field.errors %} has-error{% endif %}">
     {% if hint %}
     <p class="text-xs text-warm-500">{{ hint }}</p>

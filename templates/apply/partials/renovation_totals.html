@@ -1,16 +1,17 @@
-<div class="section-card p-5 sm:p-6">
-    <div class="space-y-3">
-        <div class="flex justify-between items-center text-sm">
-            <span class="text-warm-600">Interior Subtotal</span>
-            <span class="font-mono font-semibold text-warm-900">${{ interior_subtotal|default:"0.00" }}</span>
+<div class="section-card overflow-hidden">
+    <div class="p-5 sm:p-6 space-y-3">
+        <div class="flex justify-between items-center">
+            <span class="text-sm text-warm-600">Interior Subtotal</span>
+            <span class="font-mono font-bold text-warm-900 text-lg">${{ interior_subtotal|default:"0.00" }}</span>
         </div>
-        <div class="flex justify-between items-center text-sm">
-            <span class="text-warm-600">Exterior Subtotal</span>
-            <span class="font-mono font-semibold text-warm-900">${{ exterior_subtotal|default:"0.00" }}</span>
+        <div class="flex justify-between items-center">
+            <span class="text-sm text-warm-600">Exterior Subtotal</span>
+            <span class="font-mono font-bold text-warm-900 text-lg">${{ exterior_subtotal|default:"0.00" }}</span>
         </div>
-        <div class="flex justify-between items-center text-base pt-3 border-t-2 border-civic-green-200">
-            <span class="font-semibold text-warm-900">Total Renovation Costs</span>
-            <span class="font-mono font-bold text-civic-green-700 text-lg">${{ reno_total|default:"0.00" }}</span>
-        </div>
+    </div>
+    <div class="flex justify-between items-center px-5 sm:px-6 py-4 border-t-2 border-civic-green-600"
+         style="background: linear-gradient(180deg, rgba(232,245,233,0.6) 0%, rgba(232,245,233,0.3) 100%);">
+        <span class="font-heading font-bold text-warm-900 text-base">Total Renovation Costs</span>
+        <span class="font-mono font-extrabold text-civic-green-700 text-xl tracking-tight">${{ reno_total|default:"0.00" }}</span>
     </div>
 </div>

@@ -101,12 +101,15 @@
     <!-- Form content area -->
     <div class="flex-1 min-w-0 animate-step">
         <!-- Step header -->
-        <div class="mb-5 sm:mb-7">
-            <div class="flex items-center gap-2.5 sm:gap-3 mb-2">
-                <span class="hidden lg:inline-flex items-center justify-center w-8 h-8 rounded-full bg-civic-green-700 text-white text-xs font-bold">{{ current_step }}</span>
-                <h2 class="text-xl sm:text-2xl lg:text-[28px] font-bold font-heading text-warm-900">{{ step_title }}</h2>
+        <div class="mb-6 sm:mb-8">
+            <div class="flex items-center gap-3 sm:gap-3.5 mb-2.5">
+                <span class="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-full bg-civic-green-700 text-white text-sm font-bold shadow-sm">{{ current_step }}</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-[32px] font-bold font-heading text-warm-900 leading-tight">{{ step_title }}</h2>
             </div>
-            <p class="text-sm leading-relaxed text-warm-600 lg:pl-11">{% block step_subtitle %}{% endblock %}</p>
+            <div class="lg:pl-[3.25rem]">
+                <div class="w-10 h-1 rounded-full bg-civic-green-600 mb-3"></div>
+                <p class="text-[15px] leading-relaxed text-warm-600">{% block step_subtitle %}{% endblock %}</p>
+            </div>
         </div>
 
         <!-- Step form -->
