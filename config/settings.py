@@ -57,8 +57,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third-party
-    "rest_framework",
-    "corsheaders",
     "django_htmx",
     "anymail",
     "storages",
@@ -70,7 +68,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -167,28 +164,12 @@ if AWS_STORAGE_BUCKET_NAME:
     }
 
 
-# Django REST Framework
-
-REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 25,
-}
-
-
-# CORS — only needed if a separate frontend exists (currently server-rendered)
-
-CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS",
-    "https://apply.thelandbank.org",
-).split(",")
-
-
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Custom user model — always define at project start
+AUTH_USER_MODEL = "applications.User"
 
 
 # Email — Resend via Anymail in production, console backend for development

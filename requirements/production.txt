@@ -1,0 +1,4 @@
+-r base.txt
+
+# WSGI server
+gunicorn==25.1.0

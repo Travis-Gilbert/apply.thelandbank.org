@@ -1,7 +1,8 @@
 """
 Models for the GCLBA Application Portal.
 
-Four models:
+Five models:
+- User: Custom user model (always define at project start — changing later is painful)
 - ApplicationDraft: Temporary storage for multi-step form (UUID token, JSONField)
 - Application: Final submitted application with all flat fields for admin filtering
 - Document: Typed file uploads per program requirements
@@ -13,9 +14,21 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+
+
+class User(AbstractUser):
+    """
+    Custom user model. Defined early so AUTH_USER_MODEL is set before
+    first migration. Add staff-specific fields here as needed (e.g.
+    department, phone extension, notification preferences).
+    """
+
+    class Meta:
+        db_table = "auth_user"
 
 
 class ApplicationDraft(models.Model):
@@ -413,6 +426,16 @@ class Application(models.Model):
 
     class Meta:
         ordering = ["-submitted_at"]
+        indexes = [
+            # Staff dashboard: filter by status (most common filter)
+            models.Index(fields=["status"], name="idx_app_status"),
+            # Staff dashboard: filter by status + program together
+            models.Index(fields=["status", "program_type"], name="idx_app_status_program"),
+            # Staff dashboard: sort by submission date
+            models.Index(fields=["-submitted_at"], name="idx_app_submitted"),
+            # Buyer lookup by email (for resume/status check)
+            models.Index(fields=["email"], name="idx_app_email"),
+        ]
 
     def __str__(self):
         return f"{self.reference_number} — {self.full_name}"

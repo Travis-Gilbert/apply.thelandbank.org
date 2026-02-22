@@ -7,14 +7,25 @@ organized fieldsets, inline documents, and automatic status audit logging.
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import display
 
-from .models import Application, ApplicationDraft, Document, StatusLog
+from .models import Application, ApplicationDraft, Document, StatusLog, User
 from .status_notifications import requires_transition_note, send_buyer_status_email
+
+
+# ── User Admin (required for autocomplete_fields on assigned_to) ──
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin, ModelAdmin):
+    """Custom User admin inheriting from both Django's UserAdmin and Unfold's ModelAdmin."""
+
+    pass
 
 # ── Inlines ──────────────────────────────────────────────────────
 
