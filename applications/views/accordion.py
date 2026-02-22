@@ -580,7 +580,7 @@ def section_validate(request, section_id):
     ctx = _section_context(draft, section_id, section_number, program_type, purchase_type)
     ctx["form"] = form
     template = _resolve_template(section_def, "expanded_template", program_type)
-    return render(request, template, ctx)
+    return _render_expanded_response(request, template, ctx, section_id)
 
 
 def _validate_eligibility_section(
@@ -618,7 +618,9 @@ def _validate_eligibility_section(
     # Validation failed
     ctx = _section_context(draft, "eligibility", section_index + 1, program_type, purchase_type)
     ctx["form"] = form
-    return render(request, "apply/v2/sections/eligibility_expanded.html", ctx)
+    return _render_expanded_response(
+        request, "apply/v2/sections/eligibility_expanded.html", ctx, "eligibility"
+    )
 
 
 def _validate_documents_section(
@@ -705,7 +707,7 @@ def _validate_documents_section(
         "has_file_upload": True,
     })
     template = _resolve_template(section_def, "expanded_template", program_type)
-    return render(request, template, ctx)
+    return _render_expanded_response(request, template, ctx, section_id)
 
 
 # ── Section edit (re-expand) ─────────────────────────────────────────
@@ -740,7 +742,9 @@ def section_edit(request, section_id):
             "program_color": meta["color"],
             "select_url": reverse("applications:section_program_select"),
         }
-        return render(request, "apply/v2/sections/program_expanded.html", ctx)
+        return _render_expanded_response(
+            request, "apply/v2/sections/program_expanded.html", ctx, "program"
+        )
 
     # Build form from draft data
     form_instance = _build_form_for_section(section_id, program_type, form_data)
@@ -759,7 +763,7 @@ def section_edit(request, section_id):
         })
 
     template = _resolve_template(section_def, "expanded_template", program_type)
-    return render(request, template, ctx)
+    return _render_expanded_response(request, template, ctx, section_id)
 
 
 # ── Disqualified page ────────────────────────────────────────────────
@@ -778,7 +782,18 @@ def _render_transition(
     """
     Render the collapsed summary of the current section + expanded next section.
 
-    Uses hx-swap-oob to update multiple targets in one response.
+    The button's hx-target points to #section-{current_section_id} with
+    hx-swap="outerHTML".  We return:
+      1. Collapsed summary of current section  (primary swap content)
+      2. Expanded next section                 (primary swap content)
+      3. Progress bar                          (hx-swap-oob — element exists)
+
+    Items 1+2 are the PRIMARY response (no hx-swap-oob) so HTMX replaces
+    the old expanded section with both elements via outerHTML.  The next
+    section doesn't need to pre-exist in the DOM.
+
+    Neither collapsed nor expanded templates include the outer
+    <div id="section-..."> wrapper — that's always added here.
     """
     form_data = draft.form_data or {}
     section_def = SECTION_DEFS[current_section_id]
@@ -792,11 +807,17 @@ def _render_transition(
         "edit_url": reverse("applications:section_edit", args=[current_section_id]),
     }
     collapsed_template = _resolve_template(section_def, "collapsed_template", program_type)
-    collapsed_html = render(request, collapsed_template, collapsed_ctx).content.decode()
+    collapsed_inner = render(request, collapsed_template, collapsed_ctx).content.decode()
+    # Collapsed templates render only the inner summary-bar — add the id wrapper
+    collapsed_html = (
+        f'<div id="section-{current_section_id}" '
+        f'class="accordion-section accordion-gap">'
+        f'{collapsed_inner}</div>'
+    )
 
     # Next section (expanded)
     next_index = current_index + 1
-    next_html = ""
+    next_section_html = ""
     if next_index < len(section_order):
         next_section_id = section_order[next_index]
         next_section_def = SECTION_DEFS[next_section_id]
@@ -819,9 +840,15 @@ def _render_transition(
             })
 
         next_template = _resolve_template(next_section_def, "expanded_template", program_type)
-        next_html = render(request, next_template, next_ctx).content.decode()
+        next_inner = render(request, next_template, next_ctx).content.decode()
+        # Expanded templates don't include the outer id wrapper — add it here
+        next_section_html = (
+            f'<div id="section-{next_section_id}" '
+            f'class="accordion-section accordion-gap-active">'
+            f'{next_inner}</div>'
+        )
 
-    # Progress bar update
+    # Progress bar update (OOB — this element already exists in the DOM)
     progress_html = render(
         request,
         "apply/v2/_progress_bar.html",
@@ -833,32 +860,37 @@ def _render_transition(
         },
     ).content.decode()
 
-    # Assemble response
-    html = f"""
-    <div id="section-{current_section_id}" class="accordion-section accordion-gap" hx-swap-oob="outerHTML:#section-{current_section_id}">
-        {collapsed_html}
-    </div>
-    """
-
-    if next_html:
-        next_section_id = section_order[next_index]
-        html += f"""
-    <div id="section-{next_section_id}" class="accordion-section accordion-gap-active" hx-swap-oob="outerHTML:#section-{next_section_id}">
-        {next_html}
-    </div>
-    """
-
-    html += f"""
-    <div id="progress-bar" hx-swap-oob="innerHTML:#progress-bar">
-        {progress_html}
-    </div>
-    """
+    # Assemble response:
+    # - Collapsed + next section are PRIMARY content (replace hx-target via outerHTML)
+    # - Progress bar is OOB (updates existing #progress-bar element)
+    html = collapsed_html + next_section_html
+    html += (
+        f'<div id="progress-bar" hx-swap-oob="innerHTML:#progress-bar">'
+        f'{progress_html}</div>'
+    )
 
     response = HttpResponse(html)
     # Trigger scroll to next section
     if next_index < len(section_order):
         response["HX-Trigger"] = f'{{"scrollToSection": "section-{section_order[next_index]}"}}'
     return response
+
+
+def _render_expanded_response(request, template, ctx, section_id):
+    """Render an expanded section wrapped in its outer ``#section-{id}`` div.
+
+    All HTMX responses that return an expanded section must include the
+    outer wrapper so that subsequent ``hx-target="#section-..."`` lookups
+    still work after ``outerHTML`` swap.
+    """
+    inner = render(request, template, ctx).content.decode()
+    gap = "" if section_id == "program" else " accordion-gap-active"
+    html = (
+        f'<div id="section-{section_id}" '
+        f'class="accordion-section{gap}">'
+        f'{inner}</div>'
+    )
+    return HttpResponse(html)
 
 
 def _build_form_for_section(section_id, program_type, form_data):
@@ -880,34 +912,21 @@ def _draft_step_to_section_index(draft, section_order):
     """
     Map the draft's current_step to the corresponding accordion section index.
 
-    The draft uses a linear step counter (1-indexed). We map this to the
-    section order index (0-indexed).
+    The draft stores current_step as "the next step to work on" (1-indexed).
+    After completing section at index ``i``, the validators set
+    ``current_step = max(current_step, i + 2)`` — that is, index+1 (to
+    make it 1-indexed) plus 1 (to advance to the *next* step).
+
+    So the reverse mapping is simply ``section_index = step - 1``.
     """
     step = draft.current_step or 1
 
-    # Step 1 = identity/contact (section index 1, but if no program yet, index 0)
     if not draft.form_data or not draft.form_data.get("program_type"):
-        return 0  # Show program selector
+        return 0  # No program selected yet — show program selector
 
-    # Map step → section index:
-    # step 1 = identity → section "contact" (index 1)
-    # step 2 = property → section "property" (index 2)
-    # step 3 = eligibility → section "eligibility" (index 3)
-    # step 4+ = program-specific → section index 4+
-
-    # The draft.current_step represents the step the user is ON (not completed).
-    # In section_order, index 0 = program (always completed if we have program_type)
-    if step <= 1:
-        return 1  # Contact section
-    if step == 2:
-        return 2  # Property section
-    if step == 3:
-        return 3  # Eligibility section
-
-    # Steps 4+ map to section_order[4+], but section_order includes "program" at index 0
-    # and shared sections at 1-3. Program-specific sections start at index 4.
-    program_step = step - 3  # 1-indexed within program steps
-    section_index = 3 + program_step  # account for program + shared sections
+    # Program (index 0) is always completed if we have a program_type,
+    # so the earliest valid section is index 1 (contact).
+    section_index = max(1, step - 1)
 
     # Clamp to valid range
     return min(section_index, len(section_order) - 1)
