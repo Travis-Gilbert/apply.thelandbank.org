@@ -2,11 +2,12 @@
 {# Include with: section_id, section_title, summary_text, program_color, edit_url #}
 {# NOTE: This renders ONLY the inner summary-bar div. The caller must add the    #}
 {# outer <div id="section-..."> wrapper (apply_page.html or _render_transition). #}
-<div class="summary-bar">
-    {# Checkmark #}
+<div class="summary-bar"
+     style="border-left: 3.5px solid {{ program_color|default:'#2E7D32' }}; background: linear-gradient(90deg, {{ program_color|default:'#2E7D32' }}0F 0%, rgba(255,255,255,0.88) 12%);">
+    {# Checkmark — filled circle in program color #}
     <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-         style="background: {{ program_color|default:'#2E7D32' }}15">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ program_color|default:'#2E7D32' }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+         style="background: {{ program_color|default:'#2E7D32' }}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 6L9 17l-5-5"/>
         </svg>
     </div>

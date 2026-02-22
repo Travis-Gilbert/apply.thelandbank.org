@@ -40,19 +40,19 @@
     <style>
         /* ── Warm Civic Background ───────────────────────── */
         .civic-bg {
-            background-color: #f4f2ee;
+            background-color: #ddd4c6;
             background-image:
                 repeating-linear-gradient(
                     0deg, transparent, transparent 31px,
-                    rgba(180, 170, 155, 0.045) 31px, rgba(180, 170, 155, 0.045) 32px
+                    rgba(180, 170, 155, 0.03) 31px, rgba(180, 170, 155, 0.03) 32px
                 ),
                 repeating-linear-gradient(
                     90deg, transparent, transparent 31px,
-                    rgba(180, 170, 155, 0.045) 31px, rgba(180, 170, 155, 0.045) 32px
+                    rgba(180, 170, 155, 0.03) 31px, rgba(180, 170, 155, 0.03) 32px
                 ),
                 radial-gradient(
                     circle 0.6px at 32px 32px,
-                    rgba(160, 150, 135, 0.06) 0.6px, transparent 0.6px
+                    rgba(160, 150, 135, 0.04) 0.6px, transparent 0.6px
                 );
             background-size: 32px 32px;
             position: relative;
@@ -65,7 +65,7 @@
             z-index: 0;
             opacity: 0.35;
             mix-blend-mode: multiply;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
             background-size: 200px 200px;
         }
         .civic-bg::after {
@@ -231,18 +231,17 @@
         .summary-bar {
             display: flex; align-items: center; gap: 0.75rem;
             height: 48px; padding: 0 1rem;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.88);
             border: 1px solid rgba(210, 204, 194, 0.4);
             border-radius: 0.75rem;
-            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             animation: fadeSlideIn 200ms ease;
         }
-        .summary-bar:hover { background: rgba(255,255,255,0.88); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .summary-bar:hover { background: rgba(255,255,255,0.95); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
 
         /* Expanded section card with numbered header + accent left border */
         .section-card-v2 {
-            background: rgba(255,255,255,0.65);
+            background: rgba(255,255,255,0.92);
             border: 1px solid rgba(210, 204, 194, 0.45);
             border-radius: 0.75rem;
             overflow: hidden;
@@ -252,24 +251,27 @@
         .section-card-v2-header {
             display: flex; align-items: center; gap: 0.75rem;
             padding: 1.25rem 1.25rem 0;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
         }
 
         /* Section expand/collapse animation */
         .section-body { max-height: 0; overflow: hidden; transition: max-height 250ms ease; }
         .section-body.expanded { max-height: 3000px; }
 
-        /* Continue button: outlined in program accent */
+        /* Continue button: filled in program accent */
         .continue-btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
             padding: 0.625rem 1.5rem;
-            border: 1.5px solid currentColor;
+            border: 1.5px solid transparent;
             border-radius: 0.625rem;
             font-size: 0.875rem; font-weight: 600;
-            background: transparent;
+            color: #fff !important;
             transition: all 150ms;
             cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
         }
-        .continue-btn:hover { background: rgba(0,0,0,0.04); }
+        .continue-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08); }
 
         /* Document capture buttons — square aspect */
         .doc-capture-btn {
@@ -297,7 +299,7 @@
 
         /* Spacing between accordion items */
         .accordion-gap { margin-top: 0.5rem; }       /* 8px between collapsed bars */
-        .accordion-gap-active { margin-top: 1.25rem; } /* 20px before active section */
+        .accordion-gap-active { margin-top: 1.75rem; } /* 28px before active section */
 
         /* Section transition divider */
         .section-divider {
@@ -626,7 +628,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer style="background:#EAE5DD; border-top:1px solid rgba(0,0,0,0.07)">
+    <footer style="background:#d5cdc0; border-top:1px solid rgba(0,0,0,0.07)">
         <div class="max-w-3xl mx-auto px-4 py-4 sm:py-5 sm:px-6">
             <div class="flex flex-col items-center gap-2 text-xs text-warm-600">
                 <div class="flex items-center gap-2">
