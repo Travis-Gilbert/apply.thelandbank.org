@@ -1,5 +1,5 @@
 {# Property information — expanded section #}
-<div class="section-card-v2" style="border-left: 3px solid {{ program_color|default:'#2E7D32' }}">
+<div class="section-card-v2" style="border-left: 4px solid {{ program_color|default:'#2E7D32' }}; box-shadow: 0 0 0 1px {{ program_color|default:'#2E7D32' }}1F, 0 4px 20px {{ program_color|default:'#2E7D32' }}1A, 0 8px 40px rgba(0,0,0,0.04)">
     <div class="section-card-v2-header">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
               style="background: {{ program_color|default:'#2E7D32' }}">{{ section_number }}</span>
@@ -63,7 +63,7 @@
                         hx-swap="outerHTML"
                         hx-disabled-elt="this"
                         class="continue-btn"
-                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                        style="background: {{ program_color }}; border-color: {{ program_color }}">
                     Continue
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
