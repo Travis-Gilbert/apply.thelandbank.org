@@ -1,9 +1,7 @@
 """
 URL patterns for the buyer-facing application form.
 
-V2 (accordion): Single page at /apply/ with HTMX section endpoints.
-V1 (wizard): Legacy multi-step flow preserved at /apply/v1/.
-HTMX endpoints are shared between both versions.
+Single-page accordion at /apply/ with HTMX section endpoints.
 """
 
 from django.urls import path
@@ -13,7 +11,7 @@ from . import views
 app_name = "applications"
 
 urlpatterns = [
-    # ── V2 accordion flow (primary) ──────────────────────────────
+    # ── Accordion flow ──────────────────────────────────────────
     path("", views.apply_page, name="apply_page"),
     path(
         "section/<str:section_id>/validate/",
@@ -31,12 +29,7 @@ urlpatterns = [
         name="section_program_select",
     ),
     path("disqualified/", views.disqualified, name="disqualified_v2"),
-    # ── V1 wizard (legacy, kept for reference) ───────────────────
-    path("v1/", views.step_identity, name="step_identity"),
-    path("v1/property/", views.step_property, name="step_property"),
-    path("v1/eligibility/", views.step_eligibility, name="step_eligibility"),
-    path("v1/step/<int:step_num>/", views.program_step, name="program_step"),
-    # ── HTMX partial endpoints (shared) ──────────────────────────
+    # ── HTMX partial endpoints ──────────────────────────────────
     path(
         "htmx/purchase-type-fields/",
         views.htmx_purchase_type_fields,
@@ -70,7 +63,7 @@ urlpatterns = [
     # ── Save & resume ────────────────────────────────────────────
     path("save/", views.save_progress, name="save_progress"),
     path("resume/<uuid:token>/", views.resume_draft, name="resume"),
-    # ── Staff document access (pre-signed URLs) ────────────────
+    # ── Staff document access (pre-signed URLs) ──────────────────
     path(
         "documents/<int:document_id>/view/",
         views.document_view,

@@ -626,7 +626,7 @@ def _validate_documents_section(
     program_type, purchase_type, meta
 ):
     """Handle document upload validation."""
-    from .dispatcher import (
+    from .shared import (
         ALLOWED_EXTENSIONS,
         ALLOWED_MIME_TYPES,
         MAX_UPLOAD_SIZE,
@@ -750,7 +750,7 @@ def section_edit(request, section_id):
 
     # For document sections, add doc-specific context
     if section_def.get("is_documents"):
-        from .dispatcher import _get_optional_docs, _get_required_docs
+        from .shared import _get_optional_docs, _get_required_docs
         ctx.update({
             "required_docs": _get_required_docs(program_type, purchase_type, form_data),
             "optional_docs": _get_optional_docs(program_type),
@@ -810,7 +810,7 @@ def _render_transition(
 
         # Document sections need extra context
         if next_section_def.get("is_documents"):
-            from .dispatcher import _get_optional_docs, _get_required_docs
+            from .shared import _get_optional_docs, _get_required_docs
             next_ctx.update({
                 "required_docs": _get_required_docs(program_type, purchase_type, form_data),
                 "optional_docs": _get_optional_docs(program_type),
