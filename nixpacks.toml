@@ -1,8 +1,5 @@
 [phases.setup]
 nixPkgs = ["python313", "gcc"]
 
-[phases.install]
-cmds = ["pip install -r requirements/production.txt"]
-
 [start]
-cmd = "python manage.py collectstatic --noinput && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"
+cmd = "python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"
