@@ -1,9 +1,9 @@
 {# Contact information — expanded section #}
-<div class="section-card-v2" style="border-left: 4px solid {{ program_color|default:'#2E7D32' }}; box-shadow: 0 0 0 1px {{ program_color|default:'#2E7D32' }}1F, 0 4px 20px {{ program_color|default:'#2E7D32' }}1A, 0 8px 40px rgba(0,0,0,0.04)">
-    <div class="section-card-v2-header">
-        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-              style="background: {{ program_color|default:'#2E7D32' }}">{{ section_number }}</span>
-        <h3 class="text-lg font-bold font-heading text-warm-900">{{ section_title }}</h3>
+<div class="section-card-v2">
+    <div class="section-card-v2-header" style="background: {{ program_color|default:'#2E7D32' }}; border-radius: 0.875rem 0.875rem 0 0;">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style="background: rgba(255,255,255,0.2); color: #fff;">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-white">{{ section_title }}</h3>
     </div>
 
     <div class="section-body expanded">

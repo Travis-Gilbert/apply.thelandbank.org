@@ -38,23 +38,9 @@
         }
     </script>
     <style>
-        /* ── Warm Civic Background ───────────────────────── */
+        /* ── Warm Linen Background ──────────────────────── */
         .civic-bg {
-            background-color: #ddd4c6;
-            background-image:
-                repeating-linear-gradient(
-                    0deg, transparent, transparent 31px,
-                    rgba(180, 170, 155, 0.03) 31px, rgba(180, 170, 155, 0.03) 32px
-                ),
-                repeating-linear-gradient(
-                    90deg, transparent, transparent 31px,
-                    rgba(180, 170, 155, 0.03) 31px, rgba(180, 170, 155, 0.03) 32px
-                ),
-                radial-gradient(
-                    circle 0.6px at 32px 32px,
-                    rgba(160, 150, 135, 0.04) 0.6px, transparent 0.6px
-                );
-            background-size: 32px 32px;
+            background-color: #F5F2ED;
             position: relative;
         }
         .civic-bg::before {
@@ -63,10 +49,10 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
-            opacity: 0.35;
+            opacity: 0.45;
             mix-blend-mode: multiply;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
-            background-size: 200px 200px;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            background-size: 256px 256px;
         }
         .civic-bg::after {
             content: '';
@@ -74,7 +60,7 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
-            background: radial-gradient(ellipse at center, transparent 50%, rgba(210, 200, 185, 0.12) 100%);
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(210, 200, 185, 0.08) 100%);
         }
 
         /* Content above pseudo-elements */
@@ -227,32 +213,31 @@
 
         /* ── Accordion v2 ───────────────────────────────── */
 
-        /* Summary bar: collapsed section (48px) */
+        /* Summary bar: collapsed section (40px — compact to create hierarchy) */
         .summary-bar {
-            display: flex; align-items: center; gap: 0.75rem;
-            height: 48px; padding: 0 1rem;
-            background: rgba(255,255,255,0.88);
-            border: 1px solid rgba(210, 204, 194, 0.4);
-            border-radius: 0.75rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 0.5rem;
+            height: 40px; padding: 0 0.75rem;
+            background: rgba(255,255,255,0.75);
+            border: 1px solid rgba(210, 204, 194, 0.3);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
             animation: fadeSlideIn 200ms ease;
         }
-        .summary-bar:hover { background: rgba(255,255,255,0.95); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+        .summary-bar:hover { background: rgba(255,255,255,0.9); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 
-        /* Expanded section card with numbered header + accent left border */
+        /* Expanded section card — heavy shadow for elevation hierarchy */
         .section-card-v2 {
-            background: rgba(255,255,255,0.92);
-            border: 1px solid rgba(210, 204, 194, 0.45);
-            border-radius: 0.75rem;
+            background: rgba(255,255,255,0.97);
+            border: 1px solid rgba(210, 204, 194, 0.35);
+            border-radius: 0.875rem;
             overflow: hidden;
-            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 12px 48px rgba(0,0,0,0.05);
         }
+        /* Header band: colored via inline style in each template */
         .section-card-v2-header {
             display: flex; align-items: center; gap: 0.75rem;
-            padding: 1.25rem 1.25rem 0;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 0.875rem 1.25rem;
+            border-bottom: none;
         }
 
         /* Section expand/collapse animation */
@@ -298,8 +283,8 @@
         .accordion-section { scroll-margin-top: 60px; }
 
         /* Spacing between accordion items */
-        .accordion-gap { margin-top: 0.5rem; }       /* 8px between collapsed bars */
-        .accordion-gap-active { margin-top: 1.75rem; } /* 28px before active section */
+        .accordion-gap { margin-top: 0.25rem; }       /* 4px between collapsed bars */
+        .accordion-gap-active { margin-top: 2rem; }   /* 32px before active section */
 
         /* Section transition divider */
         .section-divider {
@@ -406,7 +391,7 @@
                 animation: slideUpNav 300ms ease forwards;
             }
             .mobile-fixed-nav.is-last-step {
-                border-top: 3px solid #d4a843;
+                border-top: 3px solid #2d6a8a;
             }
             @keyframes slideUpNav {
                 from { transform: translateY(100%); }
@@ -493,7 +478,7 @@
         }
         .info-card-accent-blue  { border-left-color: #2d6a8a; }
         .info-card-accent-green { border-left-color: #2e7d32; }
-        .info-card-accent-amber { border-left-color: #d4a843; }
+        .info-card-accent-amber { border-left-color: #2d6a8a; }
 
         /* ── Reduced Motion ────────────────────────────── */
         @media (prefers-reduced-motion: reduce) {
@@ -594,11 +579,11 @@
       hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <!-- Header -->
-    <header class="relative" style="background: linear-gradient(180deg, #1b4a38 0%, #22573f 100%); border-bottom: 3px solid #d4a843;">
+    <header class="relative" style="background: linear-gradient(180deg, #1b4a38 0%, #22573f 100%); border-bottom: 3px solid #2d6a8a;">
         {# Subtle diagonal texture overlay #}
         <div class="absolute inset-0 pointer-events-none" style="opacity: 0.04; background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 21px);"></div>
 
-        <div class="relative max-w-4xl mx-auto px-4 py-4 sm:px-6 flex items-center justify-between">
+        <div class="relative max-w-4xl mx-auto px-4 py-5 sm:py-6 sm:px-6 flex items-center justify-between">
             <a href="{% url 'applications:apply_page' %}" class="flex items-center gap-3.5 min-w-0">
                 <img src="{% static 'img/gclba-logo.png' %}" alt="Genesee County Land Bank" class="h-10 sm:h-12 w-auto flex-shrink-0" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25));">
                 <div class="min-w-0">
@@ -628,7 +613,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer style="background:#d5cdc0; border-top:1px solid rgba(0,0,0,0.07)">
+    <footer style="background:#EDE9E3; border-top:1px solid rgba(0,0,0,0.06)">
         <div class="max-w-3xl mx-auto px-4 py-4 sm:py-5 sm:px-6">
             <div class="flex flex-col items-center gap-2 text-xs text-warm-600">
                 <div class="flex items-center gap-2">
