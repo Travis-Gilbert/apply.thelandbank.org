@@ -89,6 +89,16 @@
         if (target && target.classList && target.classList.contains('accordion-gap-active')) {
             scrollToSection(target.id);
         }
+
+        // Scroll to first validation error if present
+        if (target) {
+            var firstError = target.querySelector('.has-error, .text-red-600');
+            if (firstError) {
+                setTimeout(function() {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+            }
+        }
     });
 
     // ── Document capture JS ────────────────────────────────────
@@ -103,6 +113,16 @@
             if (filenameEl) filenameEl.textContent = file.name;
             if (preview) preview.classList.remove('hidden');
             if (buttons) buttons.classList.add('hidden');
+
+            // Clear the document error banner (server-side validation errors)
+            // Walk up to the section body and remove any error div
+            var section = input.closest('.section-body');
+            if (section) {
+                var errorBanner = section.querySelector('.border-red-200.bg-red-50\\/60, .border-red-200');
+                if (errorBanner && errorBanner.querySelector('.text-red-800')) {
+                    errorBanner.remove();
+                }
+            }
         }
     };
 

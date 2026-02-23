@@ -30,36 +30,11 @@ class R4ROfferForm(forms.Form):
         min_value=Decimal("1.00"),
         label="Offer Amount ($)",
     )
-    intended_use = forms.ChoiceField(
-        choices=Application.IntendedUse.choices,
-        label="How do you plan to use this property?",
-    )
-    first_home_or_moving = forms.ChoiceField(
-        choices=[("", "— Select —")] + list(Application.FirstHomeOrMoving.choices),
-        required=False,
-        label="Is this your first home purchase, or are you moving to Michigan?",
-        help_text="Only applies if intended use is Renovate & Move In",
-    )
     has_prior_gclba_purchase = forms.BooleanField(
         required=False,
         label="I have previously purchased property from GCLBA",
         help_text="If yes, you will need to provide proof of investment in your prior purchase",
     )
-
-    def clean(self):
-        cleaned = super().clean()
-        intended_use = cleaned.get("intended_use")
-
-        if (
-            intended_use == Application.IntendedUse.RENOVATE_MOVE_IN
-            and not cleaned.get("first_home_or_moving")
-        ):
-            self.add_error(
-                "first_home_or_moving",
-                "Please indicate if this is a first home purchase or relocation.",
-            )
-
-        return cleaned
 
 
 class R4RLineItemsForm(forms.Form):

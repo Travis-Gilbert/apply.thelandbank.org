@@ -60,6 +60,12 @@ urlpatterns = [
         views.htmx_progress_bar,
         name="htmx_progress_bar",
     ),
+    # ── Confirmation ────────────────────────────────────────────
+    path(
+        "confirmation/<str:ref>/",
+        views.confirmation_page,
+        name="confirmation",
+    ),
     # ── Save & resume ────────────────────────────────────────────
     path("save/", views.save_progress, name="save_progress"),
     path("resume/<uuid:token>/", views.resume_draft, name="resume"),

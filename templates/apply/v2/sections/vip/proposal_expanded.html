@@ -40,15 +40,17 @@
                         <input type="radio" name="{{ form.vip_q2_prior_purchases.html_name }}" value="{{ value }}"
                                {% if form.vip_q2_prior_purchases.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
                                class="border-warm-300 focus:ring-2"
-                               style="color: {{ program_color }}">
+                               style="color: {{ program_color }}"
+                               onchange="document.getElementById('q2-detail').style.display = this.value === 'True' ? '' : 'none'">
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
                     {% endfor %}
                 </div>
                 {% if form.vip_q2_prior_purchases.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q2_prior_purchases.errors.0 }}</p>{% endif %}
 
-                {# Conditional detail #}
-                <div class="space-y-1.5">
+                {# Conditional detail — shown only when "Yes" is selected #}
+                <div id="q2-detail" class="space-y-1.5"
+                     style="{% if form.vip_q2_prior_purchases.value|stringformat:'s' != 'True' %}display: none{% endif %}">
                     <label for="{{ form.vip_q2_prior_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q2_prior_detail.label }}
                     </label>
@@ -95,15 +97,17 @@
                         <input type="radio" name="{{ form.vip_q5_has_experience.html_name }}" value="{{ value }}"
                                {% if form.vip_q5_has_experience.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
                                class="border-warm-300 focus:ring-2"
-                               style="color: {{ program_color }}">
+                               style="color: {{ program_color }}"
+                               onchange="document.getElementById('q5-detail').style.display = this.value === 'True' ? '' : 'none'">
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
                     {% endfor %}
                 </div>
                 {% if form.vip_q5_has_experience.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q5_has_experience.errors.0 }}</p>{% endif %}
 
-                {# Conditional detail #}
-                <div class="space-y-1.5">
+                {# Conditional detail — shown only when "Yes" is selected #}
+                <div id="q5-detail" class="space-y-1.5"
+                     style="{% if form.vip_q5_has_experience.value|stringformat:'s' != 'True' %}display: none{% endif %}">
                     <label for="{{ form.vip_q5_experience_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q5_experience_detail.label }}
                     </label>

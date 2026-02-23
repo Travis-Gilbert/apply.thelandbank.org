@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block title %}Application Submitted — {{ application.reference_number }}{% endblock %}
 
@@ -48,12 +49,17 @@
                    style="color: {{ program_color|default:'#2E7D32' }}">{{ application.reference_number }}</p>
             </div>
             <div class="w-px h-12 self-center" style="border-left: 2px dashed rgba(0,0,0,0.1);"></div>
-            <div class="flex-shrink-0 text-warm-400">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 14l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            <button type="button" class="flex-shrink-0 text-warm-400 hover:text-warm-600 transition-colors relative"
+                    onclick="navigator.clipboard.writeText('{{ application.reference_number }}').then(function(){var b=event.currentTarget;b.querySelector('.copy-icon').classList.add('hidden');b.querySelector('.check-icon').classList.remove('hidden');setTimeout(function(){b.querySelector('.copy-icon').classList.remove('hidden');b.querySelector('.check-icon').classList.add('hidden');},1500);});"
+                    title="Copy reference number">
+                <svg class="copy-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-            </div>
+                <svg class="check-icon hidden" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: {{ program_color|default:'#2E7D32' }}">
+                    <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -120,7 +126,7 @@
             {% if application.offer_amount %}
             <div class="flex justify-between items-baseline pt-2 border-t border-warm-200/60">
                 <span>Offer</span>
-                <span class="font-mono font-bold text-warm-900 text-base">${{ application.offer_amount|floatformat:2 }}</span>
+                <span class="font-mono font-bold text-warm-900 text-base">${{ application.offer_amount|floatformat:2|intcomma }}</span>
             </div>
             {% endif %}
             {% if application.purchase_type == "land_contract" %}
@@ -130,28 +136,24 @@
             </div>
             <div class="flex justify-between items-baseline">
                 <span>Down Payment</span>
-                <span class="font-mono font-bold text-warm-900 text-base">${{ application.down_payment_amount|floatformat:2 }}</span>
+                <span class="font-mono font-bold text-warm-900 text-base">${{ application.down_payment_amount|floatformat:2|intcomma }}</span>
             </div>
             {% endif %}
             {% if application.reno_total %}
             <div class="flex justify-between items-baseline">
                 <span>Renovation Estimate</span>
-                <span class="font-mono font-bold text-warm-900 text-base">${{ application.reno_total|floatformat:2 }}</span>
+                <span class="font-mono font-bold text-warm-900 text-base">${{ application.reno_total|floatformat:2|intcomma }}</span>
             </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- Contact -->
-    <div class="space-y-2.5">
-        <p class="text-sm text-warm-500">Questions? Contact us:</p>
-        <p class="text-warm-700">
-            <a href="tel:8102573088" class="hover:underline">(810) 257-3088</a>
-            <span class="text-warm-300 mx-1.5">&middot;</span>
-            <a href="mailto:offers@thelandbank.org" class="hover:underline" style="color: {{ program_color|default:'#2E7D32' }}">
-                offers@thelandbank.org
-            </a>
-        </p>
-    </div>
+    <!-- Start new application link -->
+    <a href="{% url 'applications:apply_page' %}"
+       class="inline-flex items-center gap-1.5 text-sm font-medium hover:underline underline-offset-2 transition-colors"
+       style="color: {{ program_color|default:'#2E7D32' }}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Start a new application
+    </a>
 </div>
 {% endblock %}

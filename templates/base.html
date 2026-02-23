@@ -545,6 +545,11 @@
             .file-upload-zone { min-height: 80px; padding: 1.25rem; }
         }
 
+        /* Hide number input spinners on renovation fields */
+        input[data-reno-group]::-webkit-outer-spin-button,
+        input[data-reno-group]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[data-reno-group] { -moz-appearance: textfield; }
+
         /* Renovation line items: stack label above input at narrow widths */
         @media (max-width: 400px) {
             .reno-line-item {

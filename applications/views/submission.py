@@ -12,8 +12,10 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.db import transaction
-from django.shortcuts import render
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 
 from ..models import Application, Document
@@ -152,7 +154,15 @@ def submit_application(request, draft):
     if "draft_token" in request.session:
         del request.session["draft_token"]
 
-    return render(request, "apply/confirmation.html", {"application": app})
+    # Store reference number in session so confirmation page can verify access
+    request.session["confirmed_ref"] = app.reference_number
+
+    # HX-Redirect tells HTMX to do a full-page redirect instead of a partial swap.
+    # This prevents the old accordion sections from bleeding through on the confirmation page.
+    confirmation_url = reverse("applications:confirmation", args=[app.reference_number])
+    response = HttpResponse(status=200)
+    response["HX-Redirect"] = confirmation_url
+    return response
 
 
 def _move_documents(draft, app, data):
@@ -244,4 +254,18 @@ def _send_staff_notification(app):
     except Exception:
         logger.exception("Failed to send staff notification for %s", app.reference_number)
 
+
+def confirmation_page(request, ref):
+    """
+    Render the post-submission confirmation page.
+
+    Only accessible if the session contains the matching reference number
+    (set during submit_application). This prevents random URL guessing.
+    """
+    if request.session.get("confirmed_ref") != ref:
+        from django.shortcuts import redirect
+        return redirect("applications:apply_page")
+
+    app = get_object_or_404(Application, reference_number=ref)
+    return render(request, "apply/confirmation.html", {"application": app})
 

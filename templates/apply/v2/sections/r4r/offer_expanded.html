@@ -32,57 +32,24 @@
                 {% if form.offer_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>{% endif %}
             </div>
 
-            {# Intended use dropdown #}
-            <div class="space-y-1.5">
-                <label for="{{ form.intended_use.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                    How do you plan to use this property? <span class="text-red-500 text-xs">*</span>
-                </label>
-                <select name="{{ form.intended_use.html_name }}" id="{{ form.intended_use.id_for_label }}"
-                        class="gclba-input gclba-select" style="min-height: 44px;"
-                        hx-post="{% url 'applications:htmx_intended_use_fields' %}"
-                        hx-target="#intended-use-fields"
-                        hx-swap="innerHTML"
-                        hx-include="closest form">
-                    <option value="">— Select —</option>
-                    {% for value, label in form.intended_use.field.choices %}
-                    <option value="{{ value }}" {% if form.intended_use.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                {% if form.intended_use.errors %}<p class="text-xs text-red-600 font-medium">{{ form.intended_use.errors.0 }}</p>{% endif %}
-            </div>
-
-            {# Conditional first home / moving field #}
-            <div id="intended-use-fields">
-                {% if form.intended_use.value == "renovate_move_in" or form_data.intended_use == "renovate_move_in" %}
-                <div class="space-y-1.5 animate-step">
-                    <label for="{{ form.first_home_or_moving.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        Is this your first home purchase, or are you moving to Michigan? <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <select name="{{ form.first_home_or_moving.html_name }}" id="{{ form.first_home_or_moving.id_for_label }}"
-                            class="gclba-input gclba-select">
-                        <option value="">— Select —</option>
-                        {% for value, label in form.first_home_or_moving.field.choices %}
-                        {% if value %}
-                        <option value="{{ value }}" {% if form.first_home_or_moving.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
-                    {% if form.first_home_or_moving.errors %}<p class="text-xs text-red-600 font-medium">{{ form.first_home_or_moving.errors.0 }}</p>{% endif %}
-                </div>
-                {% endif %}
-            </div>
-
             {# Prior GCLBA purchase #}
-            <label class="touch-label items-start p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
-                <input type="checkbox" name="{{ form.has_prior_gclba_purchase.html_name }}"
-                       {% if form.has_prior_gclba_purchase.value %}checked{% endif %}
-                       class="mt-0.5 rounded border-warm-300 focus:ring-2 flex-shrink-0"
-                       style="color: {{ program_color }}">
-                <div>
-                    <span class="text-sm text-warm-900">{{ form.has_prior_gclba_purchase.label }}</span>
-                    <p class="text-xs text-warm-500 mt-0.5">{{ form.has_prior_gclba_purchase.help_text }}</p>
+            <div class="space-y-2">
+                <label class="touch-label items-start p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
+                    <input type="checkbox" name="{{ form.has_prior_gclba_purchase.html_name }}"
+                           {% if form.has_prior_gclba_purchase.value %}checked{% endif %}
+                           class="mt-0.5 rounded border-warm-300 focus:ring-2 flex-shrink-0"
+                           style="color: {{ program_color }}"
+                           onchange="document.getElementById('prior-purchase-note').style.display = this.checked ? '' : 'none'">
+                    <div>
+                        <span class="text-sm text-warm-900">{{ form.has_prior_gclba_purchase.label }}</span>
+                        <p class="text-xs text-warm-500 mt-0.5">{{ form.has_prior_gclba_purchase.help_text }}</p>
+                    </div>
+                </label>
+                <div id="prior-purchase-note" class="ml-7 p-3 rounded-lg border text-xs text-warm-600 leading-relaxed"
+                     style="border-color: {{ program_color }}30; background: {{ program_color }}08;{% if not form.has_prior_gclba_purchase.value %} display: none{% endif %}">
+                    You'll be asked to upload proof of investment in your previously purchased GCLBA property in the Documents step.
                 </div>
-            </label>
+            </div>
 
             {# Continue button #}
             <div class="flex justify-end pt-2">
