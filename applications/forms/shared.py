@@ -8,8 +8,15 @@ Steps 1-3 are identical regardless of program:
 """
 
 from django import forms
+from django.core.validators import RegexValidator
 
 from ..models import Application
+
+# Accepts: (810) 555-0123, 810-555-0123, 810.555.0123, 8105550123, +1 810-555-0123
+_phone_validator = RegexValidator(
+    regex=r"^\+?1?\s*[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$",
+    message="Enter a valid phone number, e.g. (810) 555-0123",
+)
 
 
 class IdentityForm(forms.Form):
@@ -18,7 +25,11 @@ class IdentityForm(forms.Form):
     first_name = forms.CharField(max_length=100, label="First Name")
     last_name = forms.CharField(max_length=100, label="Last Name")
     email = forms.EmailField(label="Email Address")
-    phone = forms.CharField(max_length=20, label="Phone Number")
+    phone = forms.CharField(
+        max_length=20,
+        label="Phone Number",
+        validators=[_phone_validator],
+    )
     preferred_contact = forms.ChoiceField(
         choices=Application.PreferredContact.choices,
         initial=Application.PreferredContact.EMAIL,
@@ -26,7 +37,23 @@ class IdentityForm(forms.Form):
     )
     mailing_address = forms.CharField(max_length=255, label="Mailing Address")
     city = forms.CharField(max_length=100, label="City")
-    state = forms.CharField(max_length=2, initial="MI", label="State")
+    state = forms.ChoiceField(
+        choices=[
+            ("AL", "AL"), ("AK", "AK"), ("AZ", "AZ"), ("AR", "AR"), ("CA", "CA"),
+            ("CO", "CO"), ("CT", "CT"), ("DE", "DE"), ("FL", "FL"), ("GA", "GA"),
+            ("HI", "HI"), ("ID", "ID"), ("IL", "IL"), ("IN", "IN"), ("IA", "IA"),
+            ("KS", "KS"), ("KY", "KY"), ("LA", "LA"), ("ME", "ME"), ("MD", "MD"),
+            ("MA", "MA"), ("MI", "MI"), ("MN", "MN"), ("MS", "MS"), ("MO", "MO"),
+            ("MT", "MT"), ("NE", "NE"), ("NV", "NV"), ("NH", "NH"), ("NJ", "NJ"),
+            ("NM", "NM"), ("NY", "NY"), ("NC", "NC"), ("ND", "ND"), ("OH", "OH"),
+            ("OK", "OK"), ("OR", "OR"), ("PA", "PA"), ("RI", "RI"), ("SC", "SC"),
+            ("SD", "SD"), ("TN", "TN"), ("TX", "TX"), ("UT", "UT"), ("VT", "VT"),
+            ("VA", "VA"), ("WA", "WA"), ("WV", "WV"), ("WI", "WI"), ("WY", "WY"),
+            ("DC", "DC"),
+        ],
+        initial="MI",
+        label="State",
+    )
     zip_code = forms.CharField(max_length=10, label="ZIP Code")
     purchasing_entity_name = forms.CharField(
         max_length=200,

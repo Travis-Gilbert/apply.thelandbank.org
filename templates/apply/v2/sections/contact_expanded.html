@@ -85,14 +85,19 @@
                     <input type="text" name="{{ form.city.html_name }}" id="{{ form.city.id_for_label }}"
                            value="{{ form.city.value|default:'' }}" required
                            placeholder="Flint" class="gclba-input{% if form.city.errors %} has-error{% endif %}">
+                    {% if form.city.errors %}<p class="text-xs text-red-600 font-medium">{{ form.city.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="space-y-1.5">
                     <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-warm-900">
                         State <span class="text-red-500 text-xs">*</span>
                     </label>
-                    <input type="text" name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}"
-                           value="{{ form.state.value|default:'MI' }}" required maxlength="2"
-                           class="gclba-input{% if form.state.errors %} has-error{% endif %}">
+                    <select name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}"
+                            class="gclba-input gclba-select{% if form.state.errors %} has-error{% endif %}" style="min-height: 44px;">
+                        {% for value, label in form.state.field.choices %}
+                        <option value="{{ value }}" {% if form.state.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.state.errors %}<p class="text-xs text-red-600 font-medium">{{ form.state.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="space-y-1.5">
                     <label for="{{ form.zip_code.id_for_label }}" class="block text-sm font-medium text-warm-900">
@@ -101,6 +106,7 @@
                     <input type="text" name="{{ form.zip_code.html_name }}" id="{{ form.zip_code.id_for_label }}"
                            value="{{ form.zip_code.value|default:'' }}" required maxlength="10" inputmode="numeric"
                            placeholder="48502" class="gclba-input{% if form.zip_code.errors %} has-error{% endif %}">
+                    {% if form.zip_code.errors %}<p class="text-xs text-red-600 font-medium">{{ form.zip_code.errors.0 }}</p>{% endif %}
                 </div>
             </div>
 
@@ -115,7 +121,7 @@
                         hx-swap="outerHTML"
                         hx-disabled-elt="this"
                         class="continue-btn"
-                        style="color: {{ program_color }}; border-color: {{ program_color }}">
+                        style="background: {{ program_color }}; border-color: {{ program_color }}">
                     Continue
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>

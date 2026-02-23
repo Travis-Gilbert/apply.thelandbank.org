@@ -790,7 +790,32 @@ def section_edit(request, section_id):
         })
 
     template = _resolve_template(section_def, "expanded_template", program_type)
-    return _render_expanded_response(request, template, ctx, section_id)
+    response = _render_expanded_response(request, template, ctx, section_id)
+
+    # Collapse the currently active section (if different from the one being edited)
+    active_index = _draft_step_to_section_index(draft, section_order)
+    if active_index < len(section_order) and section_order[active_index] != section_id:
+        active_section_id = section_order[active_index]
+        active_def = SECTION_DEFS[active_section_id]
+        collapsed_ctx = {
+            "section_id": active_section_id,
+            "section_title": active_def["title"],
+            "summary_text": _build_summary(active_section_id, form_data),
+            "program_color": meta["color"],
+            "edit_url": reverse("applications:section_edit", args=[active_section_id]),
+        }
+        collapsed_tmpl = _resolve_template(active_def, "collapsed_template", program_type)
+        collapsed_inner = render(request, collapsed_tmpl, collapsed_ctx).content.decode()
+        oob_html = (
+            f'<div id="section-{active_section_id}" '
+            f'hx-swap-oob="outerHTML:#section-{active_section_id}" '
+            f'class="accordion-section accordion-gap">'
+            f'{collapsed_inner}</div>'
+        )
+        # Append OOB swap to the response
+        response.content = response.content + oob_html.encode()
+
+    return response
 
 
 # ── Disqualified page ────────────────────────────────────────────────

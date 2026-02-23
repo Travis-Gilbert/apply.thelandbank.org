@@ -20,6 +20,7 @@ from .htmx import (
     htmx_self_employed_label,
 )
 from .documents import document_view
+from .submission import confirmation_page
 from .shared import (
     resume_draft,
     save_progress,
@@ -42,6 +43,8 @@ __all__ = [
     # Save & resume
     "save_progress",
     "resume_draft",
+    # Confirmation
+    "confirmation_page",
     # Staff document access
     "document_view",
 ]
