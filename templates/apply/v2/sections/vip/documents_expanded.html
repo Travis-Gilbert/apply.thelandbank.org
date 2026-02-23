@@ -34,17 +34,17 @@
             </div>
 
             {# Pre-approval letter (if using construction financing) #}
-            {% include "apply/v2/_document_capture.html" with field_name="pre_approval_letter" label="Construction Loan Pre-Approval" required=False hint="Pre-approval letter from your lender if using construction financing." existing_file=uploaded.pre_approval_letter %}
+            {% include "apply/v2/_document_capture.html" with field_name="vip_preapproval" label="Construction Loan Pre-Approval" required=False hint="Pre-approval letter from your lender if using construction financing." existing_file=uploaded.vip_preapproval %}
 
             {# Portfolio photos #}
-            {% include "apply/v2/_file_upload.html" with field_name="portfolio_photos" label="Portfolio — Renovation Photos" hint="Before/after photos of previous renovation projects. You may upload multiple files." existing_file=uploaded.portfolio_photos %}
+            {% include "apply/v2/_file_upload.html" with field_name="vip_portfolio_photo" label="Portfolio — Renovation Photos" hint="Before/after photos of previous renovation projects. You may upload multiple files." existing_file=uploaded.vip_portfolio_photo %}
 
             {# Letters of support #}
-            {% include "apply/v2/_file_upload.html" with field_name="letters_of_support" label="Letters of Support" hint="Letters from community organizations, neighbors, or references. You may upload multiple files." existing_file=uploaded.letters_of_support %}
+            {% include "apply/v2/_file_upload.html" with field_name="vip_support_letter" label="Letters of Support" hint="Letters from community organizations, neighbors, or references. You may upload multiple files." existing_file=uploaded.vip_support_letter %}
 
             {# Continue button #}
             <div class="flex justify-end pt-2">
-                <button type="submit"
+                <button type="button"
                         hx-post="{{ validate_url }}"
                         hx-target="#section-{{ section_id }}"
                         hx-swap="outerHTML"

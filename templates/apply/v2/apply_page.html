@@ -8,7 +8,7 @@
 </div>
 
 {# Accordion container — all sections rendered here #}
-<form method="post" enctype="multipart/form-data" id="accordion-form">
+<form method="post" enctype="multipart/form-data" id="accordion-form" onsubmit="return false;">
     {% csrf_token %}
     <div id="accordion-container" class="mt-4 space-y-0">
         {% for section in sections %}

@@ -8,6 +8,14 @@
 
     <div class="section-body expanded">
         <div class="px-5 pt-4 pb-6 space-y-4">
+            {% if doc_errors %}
+            <div class="p-4 rounded-xl border border-red-200 bg-red-50/60">
+                {% for error in doc_errors %}
+                <p class="text-sm text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <p class="text-sm text-warm-600 leading-relaxed">
                 Please review and acknowledge each statement below. All acknowledgments are required to submit your application.
             </p>
@@ -38,7 +46,7 @@
 
             {# Submit button (filled, not outlined) #}
             <div class="pt-3">
-                <button type="submit"
+                <button type="button"
                         hx-post="{{ validate_url }}"
                         hx-target="#section-{{ section_id }}"
                         hx-swap="outerHTML"
