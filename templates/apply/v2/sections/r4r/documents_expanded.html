@@ -23,18 +23,18 @@
             {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds — Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds %}
 
             {# Proof of funds OR financing for renovation costs #}
-            {% include "apply/v2/_document_capture.html" with field_name="proof_of_reno_funds" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.proof_of_reno_funds %}
+            {% include "apply/v2/_document_capture.html" with field_name="reno_funding_proof" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.reno_funding_proof %}
 
             {# Prior GCLBA investment proof (conditional) #}
             {% if form_data.has_prior_gclba_purchase %}
             <div class="animate-step">
-                {% include "apply/v2/_document_capture.html" with field_name="proof_of_prior_investment" label="Proof of Prior GCLBA Investment" required=True hint="Photos, receipts, or other documentation showing investment in your previously purchased GCLBA property." existing_file=uploaded.proof_of_prior_investment %}
+                {% include "apply/v2/_document_capture.html" with field_name="prior_investment_proof" label="Proof of Prior GCLBA Investment" required=True hint="Photos, receipts, or other documentation showing investment in your previously purchased GCLBA property." existing_file=uploaded.prior_investment_proof %}
             </div>
             {% endif %}
 
             {# Continue button #}
             <div class="flex justify-end pt-2">
-                <button type="submit"
+                <button type="button"
                         hx-post="{{ validate_url }}"
                         hx-target="#section-{{ section_id }}"
                         hx-swap="outerHTML"

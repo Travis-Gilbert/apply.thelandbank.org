@@ -561,15 +561,42 @@ def section_validate(request, section_id):
         form_data.update(cleaned)
         draft.form_data = form_data
 
-        # Update draft's current_step
+        # Check if this is the last section (acks = submit)
+        if section_id == "acks":
+            # Guard: verify all required documents before allowing submission
+            from .shared import _get_required_docs
+            uploads = form_data.get("uploads", {})
+            required_docs = _get_required_docs(program_type, purchase_type, form_data)
+            missing = [d for d in required_docs if d not in uploads]
+            if missing:
+                # Save form data but do NOT advance current_step
+                draft.save()
+                doc_labels = {
+                    "photo_id": "Photo ID",
+                    "proof_of_funds": "Proof of Funds",
+                    "proof_of_income": "Proof of Income",
+                    "proof_of_down_payment": "Proof of Down Payment",
+                    "reno_funding_proof": "Renovation Funding Documentation",
+                    "prior_investment_proof": "Prior GCLBA Investment Proof",
+                }
+                names = [doc_labels.get(d, d.replace("_", " ").title()) for d in missing]
+                ctx = _section_context(draft, section_id, section_number, program_type, purchase_type)
+                ctx["form"] = form
+                ctx["doc_errors"] = ["Missing required documents: " + ", ".join(names) + ". Please go back to the Documents section to upload them."]
+                template = _resolve_template(section_def, "expanded_template", program_type)
+                return _render_expanded_response(request, template, ctx, section_id)
+
+            # Docs present — advance step and submit
+            overall_step = section_index + 1  # 1-indexed
+            draft.current_step = max(draft.current_step, overall_step + 1)
+            draft.save()
+            from .submission import submit_application
+            return submit_application(request, draft)
+
+        # Non-acks sections: advance step normally
         overall_step = section_index + 1  # 1-indexed
         draft.current_step = max(draft.current_step, overall_step + 1)
         draft.save()
-
-        # Check if this is the last section (acks = submit)
-        if section_id == "acks":
-            from .submission import submit_application
-            return submit_application(request, draft)
 
         return _render_transition(
             request, draft, section_id, section_index, section_order,

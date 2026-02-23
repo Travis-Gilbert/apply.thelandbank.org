@@ -3,21 +3,24 @@
 {# For final section (acks): use is_submit=True for a filled Submit button #}
 <div class="flex justify-end pt-4">
     {% if is_submit %}
-    <button type="submit"
-            formaction="{{ validate_url }}"
+    <button type="button"
+            hx-post="{{ validate_url }}"
+            hx-target="#section-{{ section_id }}"
+            hx-swap="outerHTML"
+            hx-include="closest form"
             class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white transition-all duration-200"
             style="background: {{ program_color|default:'#2E7D32' }}"
             hx-disabled-elt="this">
         Submit Application
     </button>
     {% else %}
-    <button type="submit"
-            formaction="{{ validate_url }}"
+    <button type="button"
             class="continue-btn"
             style="color: {{ program_color|default:'#2E7D32' }}; border-color: {{ program_color|default:'#2E7D32' }}"
             hx-post="{{ validate_url }}"
             hx-target="#section-{{ section_id }}"
             hx-swap="outerHTML"
+            hx-include="closest form"
             hx-disabled-elt="this"
             hx-indicator="#spinner-{{ section_id }}">
         Continue
