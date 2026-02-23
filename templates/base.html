@@ -583,18 +583,13 @@
         {# Subtle diagonal texture overlay #}
         <div class="absolute inset-0 pointer-events-none" style="opacity: 0.04; background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 21px);"></div>
 
-        <div class="relative max-w-4xl mx-auto px-4 py-5 sm:py-6 sm:px-6 flex items-center justify-between">
-            <a href="{% url 'applications:apply_page' %}" class="flex items-center gap-3.5 min-w-0">
+        <div class="relative max-w-4xl mx-auto px-4 py-5 sm:py-6 sm:px-6">
+            <a href="https://www.thelandbank.org" target="_blank" rel="noopener" class="flex items-center gap-3.5 min-w-0 group">
                 <img src="{% static 'img/gclba-logo.png' %}" alt="Genesee County Land Bank" class="h-10 sm:h-12 w-auto flex-shrink-0" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25));">
                 <div class="min-w-0">
-                    <div class="font-heading font-bold text-white" style="font-size: 17px; letter-spacing: 0.01em; line-height: 1.2;">Genesee County Land Bank Authority</div>
+                    <div class="font-heading font-bold text-white group-hover:text-white/90 transition-colors" style="font-size: 17px; letter-spacing: 0.01em; line-height: 1.2;">Genesee County Land Bank Authority</div>
                     <div class="font-sans text-white/60" style="font-size: 11.5px; letter-spacing: 0.02em;">Property Application Portal</div>
                 </div>
-            </a>
-            <a href="https://www.thelandbank.org" target="_blank" rel="noopener"
-               class="hidden sm:flex text-white/55 hover:text-white/80 text-xs px-3 py-1.5 rounded-md transition-colors"
-               style="border: 1px solid rgba(255,255,255,0.1);">
-                thelandbank.org
             </a>
         </div>
     </header>
