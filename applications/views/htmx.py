@@ -144,12 +144,14 @@ def htmx_property_search(request):
         return HttpResponse("")
 
     # Try address match first (normalized for fuzzy matching)
+    # Exclude vacant_lot — program not yet implemented, buyers would hit dead end
     normalized = Property.normalize_address(q)
     results = list(
         Property.objects.filter(
             status="available",
             address_normalized__icontains=normalized,
-        )[:8]
+        )
+        .exclude(program_type="vacant_lot")[:8]
     )
 
     # Fall back to parcel ID match if no address hits
@@ -158,7 +160,8 @@ def htmx_property_search(request):
             Property.objects.filter(
                 status="available",
                 parcel_id__icontains=q,
-            )[:8]
+            )
+            .exclude(program_type="vacant_lot")[:8]
         )
 
     # Import here to avoid circular import at module level

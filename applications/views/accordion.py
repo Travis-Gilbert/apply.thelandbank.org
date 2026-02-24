@@ -62,6 +62,17 @@ PROGRAM_META = {
         "color": "#1565C0",
         "color_light": "#E3F2FD",
     },
+    "vacant_lot": {
+        "name": "Vacant Lot",
+        "icon": "",
+        "icon_svg": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7B8794" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
+        "tagline": "Vacant lots for purchase",
+        "description": "Empty lots available for purchase",
+        "note": "Program details coming soon.",
+        "time": "5-10 minutes",
+        "color": "#7B8794",
+        "color_light": "#F0F4F8",
+    },
 }
 
 # ── Section definitions ─────────────────────────────────────────────

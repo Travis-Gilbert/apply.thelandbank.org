@@ -1,9 +1,13 @@
 """
-Shared CSV import utility for Property records.
+Shared import utilities for Property records.
 
-Used by both the management command (CLI) and the admin action (UI).
-Handles flexible column mapping, duplicate detection by parcel_id,
-and optional replace mode that withdraws existing available properties.
+Used by both management commands (CLI) and admin actions (UI).
+Supports two formats:
+  - CSV: flexible column mapping, dedup by parcel_id
+  - Excel (.xlsx): FileMaker export format, filters to GCLB-owned properties,
+    infers program type from Structure Flag
+
+Both support optional replace mode that withdraws existing available properties.
 """
 
 import csv
@@ -197,4 +201,180 @@ def import_properties_from_csv(csv_file, replace_existing=False, batch_label="")
         except Exception as e:
             result["errors"].append(f"Row {row_num}: {e}")
 
+    return result
+
+
+# ── Excel (FileMaker) import ────────────────────────────────────────
+
+
+def _infer_program_type(program_raw, structure_flag):
+    """
+    Determine program type from explicit column or Structure Flag.
+
+    Priority: explicit Program Type > Structure Flag inference.
+    Structure=Yes → featured_homes (has a house)
+    Structure=No  → vacant_lot (empty lot)
+
+    Returns None if neither source provides a valid program type.
+    """
+    if program_raw:
+        resolved = _resolve_program(program_raw)
+        if resolved:
+            return resolved
+        # Explicit value was set but unrecognized — return None so caller logs error
+        return None
+
+    if structure_flag == "Yes":
+        return Application.ProgramType.FEATURED_HOMES
+    elif structure_flag == "No":
+        return Application.ProgramType.VACANT_LOT
+
+    # Neither program type nor structure flag available
+    return None
+
+
+def import_properties_from_excel(excel_file, replace_existing=False, batch_label=""):
+    """
+    Import GCLB-owned properties from a FileMaker Excel export.
+
+    Expected columns (by header name):
+        Street Address, City State Zip, GCLB Owned, Structure Flag,
+        Minimum Bid, Program Type
+
+    Only rows where "GCLB Owned" == "Yes" are imported.
+    Program type is inferred from Structure Flag when not explicitly set.
+    Deduplication on reimport uses address_normalized since no parcel_id
+    is available in the FileMaker export.
+
+    Args:
+        excel_file: File path (str) or file-like object (Django UploadedFile).
+        replace_existing: If True, withdraw current available properties first.
+        batch_label: Optional label for this import batch.
+
+    Returns:
+        dict with keys: created, updated, skipped, errors (list of strings)
+    """
+    import openpyxl
+
+    result = {"created": 0, "updated": 0, "skipped": 0, "errors": []}
+
+    # Load workbook — handle file path or file-like object
+    try:
+        wb = openpyxl.load_workbook(excel_file, read_only=True)
+    except Exception as e:
+        result["errors"].append(f"Could not open Excel file: {e}")
+        return result
+
+    # Find the right sheet — try "Properties" first, fall back to first sheet
+    if "Properties" in wb.sheetnames:
+        ws = wb["Properties"]
+    else:
+        ws = wb[wb.sheetnames[0]]
+
+    # Read headers from first row
+    header_row = None
+    for row in ws.iter_rows(min_row=1, max_row=1, values_only=True):
+        header_row = row
+        break
+
+    if not header_row:
+        result["errors"].append("Excel file is empty or has no header row.")
+        wb.close()
+        return result
+
+    # Build column index map from headers
+    col_idx = {}
+    for i, h in enumerate(header_row):
+        if h:
+            col_idx[str(h).strip()] = i
+
+    # Validate required columns
+    required = ["Street Address"]
+    for col_name in required:
+        if col_name not in col_idx:
+            result["errors"].append(
+                f"Missing required column: '{col_name}'. "
+                f"Found: {', '.join(col_idx.keys())}"
+            )
+            wb.close()
+            return result
+
+    if not batch_label:
+        batch_label = f"excel-{timezone.now().strftime('%Y%m%d-%H%M%S')}"
+
+    # Optionally withdraw existing available properties
+    if replace_existing:
+        Property.objects.filter(status=Property.Status.AVAILABLE).update(
+            status=Property.Status.WITHDRAWN
+        )
+
+    idx_addr = col_idx["Street Address"]
+    idx_city = col_idx.get("City State Zip")
+    idx_owned = col_idx.get("GCLB Owned")
+    idx_structure = col_idx.get("Structure Flag")
+    idx_bid = col_idx.get("Minimum Bid")
+    idx_program = col_idx.get("Program Type")
+
+    for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+        if not row or not any(row):
+            continue
+
+        # Filter: only GCLB-owned properties
+        owned = str(row[idx_owned]).strip() if idx_owned is not None and row[idx_owned] else ""
+        if owned != "Yes":
+            result["skipped"] += 1
+            continue
+
+        # Extract address
+        street = str(row[idx_addr]).strip() if row[idx_addr] else ""
+        if not street:
+            result["errors"].append(f"Row {row_num}: missing Street Address")
+            continue
+
+        # Combine street + city for a complete address
+        city = ""
+        if idx_city is not None and row[idx_city]:
+            city = str(row[idx_city]).strip()
+        address = f"{street}, {city}" if city else street
+
+        # Program type
+        program_raw = str(row[idx_program]).strip() if idx_program is not None and row[idx_program] else ""
+        structure = str(row[idx_structure]).strip() if idx_structure is not None and row[idx_structure] else ""
+        program_type = _infer_program_type(program_raw, structure)
+        if not program_type:
+            result["errors"].append(
+                f"Row {row_num}: cannot determine program type "
+                f"(program='{program_raw}', structure='{structure}')"
+            )
+            continue
+
+        # Listing price from Minimum Bid
+        listing_price = None
+        if idx_bid is not None and row[idx_bid]:
+            listing_price = _parse_price(str(row[idx_bid]))
+            # Skip zero bids — they're not real prices
+            if listing_price is not None and listing_price == 0:
+                listing_price = None
+
+        # Upsert by address_normalized (no parcel_id in FileMaker export)
+        normalized = Property.normalize_address(address)
+        try:
+            prop, created = Property.objects.update_or_create(
+                address_normalized=normalized,
+                defaults={
+                    "address": address,
+                    "program_type": program_type,
+                    "listing_price": listing_price,
+                    "status": Property.Status.AVAILABLE,
+                    "csv_batch": batch_label,
+                },
+            )
+            if created:
+                result["created"] += 1
+            else:
+                result["updated"] += 1
+        except Exception as e:
+            result["errors"].append(f"Row {row_num}: {e}")
+
+    wb.close()
     return result

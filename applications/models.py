@@ -55,13 +55,14 @@ class Property(models.Model):
     address_normalized = models.CharField(
         max_length=255,
         editable=False,
-        db_index=True,
+        unique=True,
         help_text="Lowercase, standardized abbreviations for fuzzy matching",
     )
     parcel_id = models.CharField(
         max_length=50,
-        unique=True,
-        help_text="Genesee County parcel ID number",
+        null=True,
+        blank=True,
+        help_text="Genesee County parcel ID number (null allowed for imports without parcel data)",
     )
     program_type = models.CharField(
         max_length=30,
@@ -96,9 +97,18 @@ class Property(models.Model):
                 name="idx_prop_program_status",
             ),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["parcel_id"],
+                condition=models.Q(parcel_id__isnull=False),
+                name="unique_parcel_id_when_set",
+            ),
+        ]
 
     def __str__(self):
-        return f"{self.address} ({self.parcel_id})"
+        if self.parcel_id:
+            return f"{self.address} ({self.parcel_id})"
+        return self.address
 
     def save(self, *args, **kwargs):
         self.address_normalized = self.normalize_address(self.address)
