@@ -7,6 +7,16 @@
     {% include "apply/v2/_progress_bar.html" with completed_count=completed_count total_count=total_sections program_color=program_color program_name=program_name %}
 </div>
 
+{# Welcome message — sets a warm, encouraging tone #}
+<div class="mt-4 mb-5 text-center">
+    <h2 class="font-heading text-xl sm:text-2xl font-bold text-warm-900">
+        Let's get started on your application
+    </h2>
+    <p class="text-sm text-warm-500 mt-1.5 max-w-md mx-auto">
+        Fill out each section below. Your progress is saved automatically, and you can return anytime to finish.
+    </p>
+</div>
+
 {# Accordion container — all sections rendered here #}
 <form method="post" enctype="multipart/form-data" id="accordion-form" onsubmit="return false;">
     {% csrf_token %}
@@ -16,25 +26,22 @@
                 {# Collapsed summary bar #}
                 <div id="section-{{ section.id }}" class="accordion-section accordion-gap">
                     <div class="summary-bar">
-                        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                             style="background: {{ program_color }}15">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ program_color }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-600">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 6L9 17l-5-5"/>
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <span class="text-sm font-semibold text-warm-800">{{ section.title }}</span>
+                            <div class="text-sm font-semibold text-warm-800 leading-tight">{{ section.title }}</div>
                             {% if section.summary %}
-                            <span class="text-warm-500 mx-1.5">&middot;</span>
-                            <span class="text-sm text-warm-500 truncate">{{ section.summary }}</span>
+                            <div class="text-xs text-warm-500 truncate leading-tight mt-0.5">{{ section.summary }}</div>
                             {% endif %}
                         </div>
                         <button type="button"
                                 hx-get="{{ section.edit_url }}"
                                 hx-target="#section-{{ section.id }}"
                                 hx-swap="outerHTML"
-                                class="text-xs font-medium flex-shrink-0 px-2.5 py-1 rounded-md transition-colors hover:bg-warm-100"
-                                style="color: {{ program_color }}">
+                                class="text-xs font-medium flex-shrink-0 px-2.5 py-1 rounded-md transition-colors text-warm-500 hover:text-warm-700 hover:bg-warm-100">
                             Edit
                         </button>
                     </div>

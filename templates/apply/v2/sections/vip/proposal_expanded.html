@@ -1,13 +1,16 @@
 {# VIP Spotlight proposal — 8 structured questions #}
-<div class="section-card-v2">
-    <div class="section-card-v2-header" style="background: {{ program_color }}; border-radius: 0.875rem 0.875rem 0 0;">
+<div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
+    <div class="px-5 pt-5 flex items-center gap-3">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: rgba(255,255,255,0.2); color: #fff;">{{ section_number }}</span>
-        <h3 class="text-lg font-bold font-heading text-white">{{ section_title }}</h3>
+              style="background: {{ program_color|default:'#2E7D32' }}12; color: {{ program_color|default:'#2E7D32' }};">{{ section_number }}</span>
+        <div>
+            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
+            <p class="text-[13px] text-warm-500 mt-0.5">Your development proposal for this property</p>
+        </div>
     </div>
 
     <div class="section-body expanded">
-        <div class="px-5 pt-4 pb-6 space-y-6">
+        <div class="px-5 pt-3 pb-6 space-y-6">
             {# Scoring criteria callout #}
             <div class="p-4 rounded-xl border bg-opacity-5" style="border-color: {{ program_color }}40; background: {{ program_color }}08">
                 <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: {{ program_color }}">How VIP Proposals Are Evaluated</p>
@@ -169,6 +172,11 @@
                           class="gclba-input{% if form.vip_q8_additional_info.errors %} has-error{% endif %}">{{ form.vip_q8_additional_info.value|default:"" }}</textarea>
                 {% if form.vip_q8_additional_info.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q8_additional_info.errors.0 }}</p>{% endif %}
             </div>
+
+            {# Progress nudge #}
+            <p class="text-xs text-warm-400 text-center pt-1">
+                Great proposal — just upload your supporting documents and you're nearly done.
+            </p>
 
             {# Continue button #}
             <div class="flex justify-end pt-2">

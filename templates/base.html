@@ -89,7 +89,7 @@
         .gclba-input { background: rgba(255,255,255,0.7); border: 1.5px solid #c4bfb7; border-radius: 0.5rem; padding: 0.625rem 0.875rem; font-size: 1rem; width: 100%; transition: all 0.15s; color: #2A2622; }
         @media (min-width: 640px) { .gclba-input { font-size: 0.875rem; } }
         .gclba-input::placeholder { color: #A09890; }
-        .gclba-input:focus { border-color: #2e7d32; box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.08); outline: none; background-color: #fff; }
+        .gclba-input:focus { border-color: #2d6a8a; box-shadow: 0 0 0 3px rgba(45, 106, 138, 0.10); outline: none; background-color: #fff; }
         .gclba-input.has-error { border-color: #dc2626; }
         .gclba-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237A746C' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; }
         /* Mobile: prevent iOS zoom on focus (requires 16px+ font-size) */
@@ -97,15 +97,22 @@
             select.gclba-input, textarea.gclba-input { font-size: 1rem; }
         }
 
-        /* ── Input Focus Ring ────────────────────────────── */
+        /* ── Input Focus Ring (civic-blue for neutral interaction) ─ */
         input:focus, select:focus, textarea:focus {
-            border-color: #2e7d32 !important;
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.08) !important;
+            border-color: #2d6a8a !important;
+            box-shadow: 0 0 0 3px rgba(45, 106, 138, 0.10) !important;
             background-color: #fff !important;
             outline: none;
         }
         input:not(:focus), select:not(:focus), textarea:not(:focus) {
             background-color: #fafaf8;
+        }
+
+        /* ── Field Group Divider ────────────────────────── */
+        .field-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(210, 204, 194, 0.5) 20%, rgba(210, 204, 194, 0.5) 80%, transparent);
+            margin: 0.5rem 0;
         }
 
         /* ── Step Entrance Animation ─────────────────────── */
@@ -213,17 +220,17 @@
 
         /* ── Accordion v2 ───────────────────────────────── */
 
-        /* Summary bar: collapsed section (40px — compact to create hierarchy) */
+        /* Summary bar: collapsed completed section */
         .summary-bar {
-            display: flex; align-items: center; gap: 0.5rem;
-            height: 40px; padding: 0 0.75rem;
-            background: rgba(255,255,255,0.75);
+            display: flex; align-items: center; gap: 0.625rem;
+            min-height: 48px; padding: 0.5rem 0.875rem;
+            background: rgba(255,255,255,0.82);
             border: 1px solid rgba(210, 204, 194, 0.3);
-            border-radius: 0.5rem;
+            border-radius: 0.625rem;
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
             animation: fadeSlideIn 200ms ease;
         }
-        .summary-bar:hover { background: rgba(255,255,255,0.9); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .summary-bar:hover { background: rgba(255,255,255,0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
         /* Expanded section card — heavy shadow for elevation hierarchy */
         .section-card-v2 {
@@ -244,34 +251,56 @@
         .section-body { max-height: 0; overflow: hidden; transition: max-height 250ms ease; }
         .section-body.expanded { max-height: 3000px; }
 
-        /* Continue button: filled in program accent */
+        /* Continue button: civic-blue for navigation; Submit stays program-color */
         .continue-btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
             padding: 0.625rem 1.5rem;
-            border: 1.5px solid transparent;
+            background: #2d6a8a !important;
+            border: 1.5px solid #2d6a8a !important;
             border-radius: 0.625rem;
             font-size: 0.875rem; font-weight: 600;
             color: #fff !important;
             transition: all 150ms;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(45,106,138,0.18), 0 2px 8px rgba(45,106,138,0.10);
         }
-        .continue-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08); }
+        .continue-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(45,106,138,0.25), 0 4px 12px rgba(45,106,138,0.12); }
 
-        /* Document capture buttons — square aspect */
+        /* Acknowledgment cards — individual bordered items with checked state */
+        .ack-card {
+            padding: 0.875rem 1rem;
+            border: 1.5px solid rgba(210, 204, 194, 0.5);
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.5);
+            transition: border-color 200ms, background-color 200ms, box-shadow 200ms;
+        }
+        .ack-card:has(:checked) {
+            border-color: #b8ddb9;
+            background-color: rgba(232, 245, 233, 0.35);
+            box-shadow: 0 0 0 1px rgba(184, 221, 185, 0.3);
+        }
+
+        /* Radio/checkbox card selected state (purchase type, etc.) */
+        label.touch-label:has(input[type="radio"]:checked) {
+            border-color: #2d6a8a !important;
+            background: rgba(45, 106, 138, 0.06) !important;
+            box-shadow: 0 0 0 1px rgba(45, 106, 138, 0.15);
+        }
+
+        /* Document capture buttons — warm dashed squares */
         .doc-capture-btn {
             aspect-ratio: 1 / 1;
             max-width: 140px; width: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
-            border: 2px dashed rgba(0,0,0,0.15);
+            border: 2px dashed rgba(45, 106, 138, 0.25);
             border-radius: 0.75rem;
-            background: rgba(255,255,255,0.5);
+            background: rgba(45, 106, 138, 0.03);
             cursor: pointer;
             transition: all 150ms;
             padding: 1rem;
             text-align: center;
         }
-        .doc-capture-btn:hover { border-color: rgba(0,0,0,0.3); background: rgba(255,255,255,0.8); }
+        .doc-capture-btn:hover { border-color: rgba(45, 106, 138, 0.45); background: rgba(45, 106, 138, 0.06); }
 
         /* Entity dropdown (LLC/Trust collapsible) */
         .entity-dropdown summary { cursor: pointer; list-style: none; }
@@ -283,7 +312,7 @@
         .accordion-section { scroll-margin-top: 60px; }
 
         /* Spacing between accordion items */
-        .accordion-gap { margin-top: 0.25rem; }       /* 4px between collapsed bars */
+        .accordion-gap { margin-top: 0.375rem; }      /* 6px between collapsed bars */
         .accordion-gap-active { margin-top: 2rem; }   /* 32px before active section */
 
         /* Section transition divider */
@@ -366,7 +395,8 @@
         }
         .continue-btn:active {
             transform: scale(0.97);
-            transition: transform 100ms;
+            box-shadow: 0 1px 2px rgba(45,106,138,0.4);
+            transition: transform 100ms, box-shadow 100ms;
         }
         [type="radio"]:checked + label:active,
         .program-card:active {

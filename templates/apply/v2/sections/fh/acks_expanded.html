@@ -17,24 +17,26 @@
             {% endif %}
 
             <p class="text-sm text-warm-600 leading-relaxed">
-                Please review and acknowledge each statement below. All acknowledgments are required to submit your application.
+                You're almost done! Please confirm each item below, then submit.
             </p>
 
-            {# Acknowledgment checkboxes #}
+            {# Acknowledgment cards #}
             <div class="space-y-3">
                 {% for field in form %}
-                <label class="touch-label items-start p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
-                    <input type="checkbox" name="{{ field.html_name }}"
-                           {% if field.value %}checked{% endif %} required
-                           class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200 flex-shrink-0">
-                    <span class="text-sm text-warm-800 leading-relaxed">{{ field.label }}</span>
-                </label>
+                <div class="ack-card">
+                    <label class="touch-label items-start gap-3">
+                        <input type="checkbox" name="{{ field.html_name }}"
+                               {% if field.value %}checked{% endif %} required
+                               class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200 flex-shrink-0">
+                        <span class="text-sm text-warm-700 leading-relaxed">{{ field.label }}</span>
+                    </label>
+                </div>
                 {% if field.errors %}<p class="text-xs text-red-600 font-medium ml-10">{{ field.errors.0 }}</p>{% endif %}
                 {% endfor %}
             </div>
 
             {# Closing info callout #}
-            <div class="p-4 rounded-xl border border-warm-200 bg-warm-50/50 mt-4">
+            <div class="p-4 rounded-xl border border-warm-200 bg-warm-50/50 mt-2">
                 <p class="text-xs font-semibold text-warm-700 uppercase tracking-wider mb-2">Closing Information</p>
                 <ul class="text-xs text-warm-600 space-y-1 leading-relaxed">
                     <li>&#8226; Payment due in full at closing via cashier's check or money order</li>
@@ -44,7 +46,7 @@
                 </ul>
             </div>
 
-            {# Submit button (filled, not outlined) #}
+            {# Submit button (filled, program-color — intentionally green for "final action") #}
             <div class="pt-3">
                 <button type="button"
                         hx-post="{{ validate_url }}"

@@ -1,13 +1,16 @@
 {# Eligibility gate — expanded section #}
-<div class="section-card-v2">
-    <div class="section-card-v2-header" style="background: {{ program_color|default:'#2E7D32' }}; border-radius: 0.875rem 0.875rem 0 0;">
+<div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
+    <div class="px-5 pt-5 flex items-center gap-3">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: rgba(255,255,255,0.2); color: #fff;">{{ section_number }}</span>
-        <h3 class="text-lg font-bold font-heading text-white">{{ section_title }}</h3>
+              style="background: {{ program_color|default:'#2E7D32' }}12; color: {{ program_color|default:'#2E7D32' }};">{{ section_number }}</span>
+        <div>
+            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
+            <p class="text-[13px] text-warm-500 mt-0.5">A quick eligibility check</p>
+        </div>
     </div>
 
     <div class="section-body expanded">
-        <div class="px-5 pt-4 pb-6 space-y-5">
+        <div class="px-5 pt-3 pb-6 space-y-5">
             {# Warning callout #}
             <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/60">
                 <div class="flex items-start gap-3">
