@@ -55,6 +55,7 @@ def submit_application(request, draft):
         property_address=data.get("property_address", ""),
         parcel_id=data.get("parcel_id", ""),
         program_type=program_type,
+        property_ref_id=data.get("property_id") or None,
         attended_open_house=data.get("attended_open_house", False),
         # Eligibility
         has_delinquent_taxes=data.get("has_delinquent_taxes", False),

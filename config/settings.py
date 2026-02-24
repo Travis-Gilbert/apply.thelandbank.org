@@ -301,6 +301,29 @@ UNFOLD = {
                 ],
             },
             {
+                "title": "Property Inventory",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "All Properties",
+                        "icon": "home_work",
+                        "link": reverse_lazy("admin:applications_property_changelist"),
+                        "badge": "applications.admin_utils.available_properties_badge",
+                    },
+                    {
+                        "title": "Available",
+                        "icon": "check_circle",
+                        "link": "/admin/applications/property/?status__exact=available",
+                    },
+                    {
+                        "title": "Under Offer",
+                        "icon": "handshake",
+                        "link": "/admin/applications/property/?status__exact=under_offer",
+                    },
+                ],
+            },
+            {
                 "title": "System",
                 "separator": True,
                 "collapsible": True,

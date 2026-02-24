@@ -1,14 +1,16 @@
 """
 Models for the GCLBA Application Portal.
 
-Five models:
+Six models:
 - User: Custom user model (always define at project start — changing later is painful)
+- Property: Inventory of Land Bank properties loaded via CSV
 - ApplicationDraft: Temporary storage for multi-step form (UUID token, JSONField)
 - Application: Final submitted application with all flat fields for admin filtering
 - Document: Typed file uploads per program requirements
 - StatusLog: Audit trail for every status change
 """
 
+import re
 import uuid
 from datetime import timedelta
 from decimal import Decimal
@@ -29,6 +31,119 @@ class User(AbstractUser):
 
     class Meta:
         db_table = "auth_user"
+
+
+class Property(models.Model):
+    """
+    A Land Bank property available for purchase.
+
+    Populated via CSV import (weekly upload by staff). The normalized
+    address field powers buyer-side autocomplete matching. Parcel ID
+    is the unique identifier from Genesee County records.
+    """
+
+    class Status(models.TextChoices):
+        AVAILABLE = "available", "Available"
+        UNDER_OFFER = "under_offer", "Under Offer"
+        SOLD = "sold", "Sold"
+        WITHDRAWN = "withdrawn", "Withdrawn"
+
+    address = models.CharField(
+        max_length=255,
+        help_text="Property address as it appears in the listing",
+    )
+    address_normalized = models.CharField(
+        max_length=255,
+        editable=False,
+        db_index=True,
+        help_text="Lowercase, standardized abbreviations for fuzzy matching",
+    )
+    parcel_id = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Genesee County parcel ID number",
+    )
+    program_type = models.CharField(
+        max_length=30,
+        # Choices set after Application class is defined (forward reference)
+        help_text="Which program this property is listed under",
+    )
+    listing_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Listed price in dollars (optional)",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.AVAILABLE,
+    )
+    imported_at = models.DateTimeField(auto_now_add=True)
+    csv_batch = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Identifier for the CSV import batch",
+    )
+
+    class Meta:
+        ordering = ["address"]
+        verbose_name_plural = "properties"
+        indexes = [
+            models.Index(
+                fields=["program_type", "status"],
+                name="idx_prop_program_status",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.address} ({self.parcel_id})"
+
+    def save(self, *args, **kwargs):
+        self.address_normalized = self.normalize_address(self.address)
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def normalize_address(address):
+        """
+        Normalize an address for consistent matching.
+
+        Lowercases, strips extra whitespace, and standardizes common
+        abbreviations (Street→st, Avenue→ave, etc.) so that
+        '1234 Elm Street' matches '1234 elm st'.
+        """
+        if not address:
+            return ""
+        text = address.lower().strip()
+        text = re.sub(r"\s+", " ", text)
+
+        abbreviations = {
+            "street": "st",
+            "avenue": "ave",
+            "boulevard": "blvd",
+            "drive": "dr",
+            "court": "ct",
+            "place": "pl",
+            "lane": "ln",
+            "road": "rd",
+            "circle": "cir",
+            "north": "n",
+            "south": "s",
+            "east": "e",
+            "west": "w",
+            "northeast": "ne",
+            "northwest": "nw",
+            "southeast": "se",
+            "southwest": "sw",
+        }
+        words = text.split()
+        words = [abbreviations.get(w, w) for w in words]
+        return " ".join(words)
+
+
+# Fix forward reference — Property.program_type uses Application.ProgramType choices,
+# but Application is defined below. We'll patch it after Application is defined.
 
 
 class ApplicationDraft(models.Model):
@@ -178,6 +293,14 @@ class Application(models.Model):
 
     # ── Section 2: Property Info ────────────────────────────────
 
+    property_ref = models.ForeignKey(
+        Property,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="applications",
+        help_text="Linked property from inventory (null if manually entered)",
+    )
     property_address = models.CharField(
         max_length=255,
         blank=True,
@@ -572,6 +695,10 @@ class Application(models.Model):
             else:
                 next_num = 1
             return f"{prefix}{next_num:04d}"
+
+
+# Patch forward reference: Property.program_type uses Application's ProgramType choices
+Property._meta.get_field("program_type").choices = Application.ProgramType.choices
 
 
 class Document(models.Model):

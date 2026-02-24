@@ -31,24 +31,33 @@ from .shared import _get_draft
 PROGRAM_META = {
     "featured_homes": {
         "name": "Featured Homes",
-        "icon": "\U0001F3E0",       # 🏠
+        "icon": "",
+        "icon_svg": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
         "tagline": "Move-in ready homes at affordable prices",
+        "description": "Homes available for immediate sale",
+        "note": "Cash or land contract. All homes sold as-is.",
         "time": "10-15 minutes",
         "color": "#2E7D32",
         "color_light": "#E8F5E9",
     },
     "ready_for_rehab": {
         "name": "Ready for Rehab",
-        "icon": "\U0001F528",       # 🔨
+        "icon": "",
+        "icon_svg": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F57C00" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0s-.83-2.17 0-3L12 9"/><path d="M17.64 15L22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V6.5L15.5 4H12l-2 2v3l2.5 3h1.7c.85 0 1.65.33 2.25.93l1.25 1.25"/></svg>',
         "tagline": "Homes that need renovation at lower costs",
+        "description": "As-is homes sold at lower purchase prices",
+        "note": "Cash only. Detailed cost estimates required.",
         "time": "15-20 minutes",
         "color": "#F57C00",
         "color_light": "#FFF3E0",
     },
     "vip_spotlight": {
         "name": "VIP Spotlight",
-        "icon": "\u2B50",           # ⭐
+        "icon": "",
+        "icon_svg": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>',
         "tagline": "Unique properties evaluated by proposal",
+        "description": "Select properties reviewed by proposal",
+        "note": "Scored on plan, experience, financing, and neighborhood benefit.",
         "time": "20-30 minutes",
         "color": "#1565C0",
         "color_light": "#E3F2FD",
@@ -63,9 +72,16 @@ PROGRAM_META = {
 # Section order is dynamic — determined by program_type + purchase_type.
 
 SECTION_DEFS = {
+    "property_search": {
+        "title": "Find Your Property",
+        "form": "PropertySearchForm",
+        "expanded_template": "apply/v2/sections/property_search_expanded.html",
+        "collapsed_template": "apply/v2/sections/property_search_collapsed.html",
+    },
+    # Legacy — kept for backwards compat with old drafts
     "program": {
         "title": "Select a Program",
-        "form": None,  # Handled by card click, not a form
+        "form": None,
         "expanded_template": "apply/v2/sections/program_expanded.html",
         "collapsed_template": "apply/v2/sections/program_collapsed.html",
     },
@@ -171,25 +187,25 @@ SECTION_DEFS = {
 
 SECTION_ORDER = {
     ("featured_homes", "cash"): [
-        "program", "contact", "property", "eligibility",
+        "property_search", "contact", "eligibility",
         "offer", "documents", "renovation", "acks",
     ],
     ("featured_homes", "land_contract"): [
-        "program", "contact", "property", "eligibility",
+        "property_search", "contact", "eligibility",
         "offer", "documents", "renovation", "homebuyer_ed", "acks",
     ],
     ("ready_for_rehab", "cash"): [
-        "program", "contact", "property", "eligibility",
+        "property_search", "contact", "eligibility",
         "offer", "documents", "line_items", "renovation", "acks",
     ],
     ("vip_spotlight", "cash"): [
-        "program", "contact", "property", "eligibility",
+        "property_search", "contact", "eligibility",
         "proposal", "documents", "acks",
     ],
 }
 
-# Before program is selected, show only the program section
-DEFAULT_SECTION_ORDER = ["program"]
+# Before property/program is determined, show only the property search
+DEFAULT_SECTION_ORDER = ["property_search"]
 
 
 def _get_section_order(program_type, purchase_type="cash"):
@@ -224,10 +240,20 @@ def _resolve_form_class(section_def, program_type):
 
 def _build_summary(section_id, form_data):
     """Build a one-line summary string for a collapsed section."""
+    if section_id == "property_search":
+        addr = form_data.get("property_address", "")
+        program_type = form_data.get("program_type", "")
+        meta = PROGRAM_META.get(program_type, {})
+        program_name = meta.get("name", "")
+        if addr and program_name:
+            return f"{addr} \u00b7 {program_name}"
+        return addr or program_name
+
+    # Legacy handlers for old drafts
     if section_id == "program":
         program_type = form_data.get("program_type", "")
         meta = PROGRAM_META.get(program_type, {})
-        return f"{meta.get('icon', '')} {meta.get('name', program_type)}"
+        return meta.get("name", program_type)
 
     if section_id == "contact":
         first = form_data.get("first_name", "")
@@ -317,7 +343,7 @@ def _section_context(draft, section_id, section_number, program_type, purchase_t
     section_order = _get_section_order(program_type, purchase_type)
     total_sections = len(section_order)
 
-    return {
+    ctx = {
         "section_id": section_id,
         "section_number": section_number,
         "section_title": section_def["title"],
@@ -336,6 +362,12 @@ def _section_context(draft, section_id, section_number, program_type, purchase_t
         "edit_url": reverse("applications:section_edit", args=[section_id]),
     }
 
+    # Property search needs program metadata for info cards and fallback picker
+    if section_id == "property_search":
+        ctx["programs"] = PROGRAM_META
+
+    return ctx
+
 
 # ── Main page view ──────────────────────────────────────────────────
 
@@ -343,7 +375,7 @@ def apply_page(request):
     """
     GET /apply/ — render the accordion page.
 
-    On first visit: shows only the program selector (expanded).
+    On first visit: shows only the property search section (expanded).
     On resume: rebuilds collapsed summaries for completed sections,
     expands the current section.
     """
@@ -376,7 +408,7 @@ def apply_page(request):
         elif i == active_index:
             # Active — render as expanded section with form
             form_instance = _build_form_for_section(section_id, program_type, form_data)
-            sections.append({
+            expanded = {
                 "id": section_id,
                 "state": "expanded",
                 "number": i + 1,
@@ -384,7 +416,11 @@ def apply_page(request):
                 "form": form_instance,
                 "template": _resolve_template(section_def, "expanded_template", program_type),
                 "validate_url": reverse("applications:section_validate", args=[section_id]),
-            })
+            }
+            # Property search needs program metadata for cards and info display
+            if section_id == "property_search":
+                expanded["programs"] = PROGRAM_META
+            sections.append(expanded)
         # Future sections: not rendered at all
 
     ctx = {
@@ -448,8 +484,8 @@ def section_program_select(request):
             "program_type": program_key,
             "program_color": meta["color"],
             "program_name": meta["name"],
-            "program_icon": meta["icon"],
-            "summary_text": f"{meta['icon']} {meta['name']}",
+            "program_icon": "",
+            "summary_text": meta["name"],
             "edit_url": reverse("applications:section_edit", args=["program"]),
         },
     ).content.decode()
@@ -505,6 +541,12 @@ def section_validate(request, section_id):
 
     draft = _get_draft(request)
     form_data = draft.form_data or {}
+
+    # Property search is special — it determines the program, which affects
+    # everything downstream.  Handle it before we resolve section_order.
+    if section_id == "property_search":
+        return _validate_property_search_section(request, draft)
+
     program_type = form_data.get("program_type", "featured_homes")
     purchase_type = form_data.get("purchase_type", "cash")
     section_order = _get_section_order(program_type, purchase_type)
@@ -650,6 +692,60 @@ def _validate_eligibility_section(
     )
 
 
+def _validate_property_search_section(request, draft):
+    """
+    Handle property search validation — the opening section.
+
+    This is special because it determines the program, which affects the
+    entire section order for the rest of the application.  After validation:
+    1. Sets program_type + purchase_type on the draft
+    2. Resolves the full section order
+    3. Returns collapsed property_search + expanded contact section
+    """
+    form_data = draft.form_data or {}
+    form = app_forms.PropertySearchForm(request.POST)
+
+    if form.is_valid():
+        cleaned = _serialize_cleaned_data(form.cleaned_data)
+        program_type = cleaned["program_type"]
+
+        # Set default purchase type (may change later in the offer section)
+        if program_type == "ready_for_rehab":
+            purchase_type = "cash"
+        elif program_type == "vip_spotlight":
+            purchase_type = "cash"
+        else:
+            purchase_type = "cash"
+
+        form_data.update(cleaned)
+        form_data["purchase_type"] = purchase_type
+        draft.form_data = form_data
+        draft.program_type = program_type
+        draft.current_step = max(draft.current_step, 2)
+        draft.save()
+
+        meta = PROGRAM_META[program_type]
+        section_order = _get_section_order(program_type, purchase_type)
+
+        return _render_transition(
+            request, draft, "property_search", 0, section_order,
+            program_type, purchase_type, meta
+        )
+
+    # Validation failed — re-render with errors
+    ctx = _section_context(
+        draft, "property_search", 1,
+        form_data.get("program_type", ""),
+        form_data.get("purchase_type", "cash"),
+    )
+    ctx["form"] = form
+    ctx["programs"] = PROGRAM_META
+    return _render_expanded_response(
+        request, "apply/v2/sections/property_search_expanded.html",
+        ctx, "property_search"
+    )
+
+
 def _validate_documents_section(
     request, draft, section_id, section_index, section_order,
     program_type, purchase_type, meta
@@ -760,7 +856,18 @@ def section_edit(request, section_id):
     section_number = section_index + 1
     section_def = SECTION_DEFS[section_id]
 
-    # Special case: program edit returns the selector
+    # Special case: property_search edit returns the search form with existing data
+    if section_id == "property_search":
+        form_instance = _build_form_for_section("property_search", program_type, form_data)
+        ctx = _section_context(draft, "property_search", 1, program_type, purchase_type)
+        ctx["form"] = form_instance
+        ctx["programs"] = PROGRAM_META
+        return _render_expanded_response(
+            request, "apply/v2/sections/property_search_expanded.html",
+            ctx, "property_search"
+        )
+
+    # Legacy: program edit returns the selector (for old drafts)
     if section_id == "program":
         ctx = {
             "section_id": "program",
@@ -936,7 +1043,7 @@ def _render_expanded_response(request, template, ctx, section_id):
     still work after ``outerHTML`` swap.
     """
     inner = render(request, template, ctx).content.decode()
-    gap = "" if section_id == "program" else " accordion-gap-active"
+    gap = "" if section_id in ("program", "property_search") else " accordion-gap-active"
     html = (
         f'<div id="section-{section_id}" '
         f'class="accordion-section{gap}">'

@@ -2,14 +2,14 @@
 Admin utility functions for the Unfold dashboard.
 
 Provides:
-- Dashboard stat cards (applications by status, recent submissions)
+- Dashboard stat cards (applications by status, recent submissions, property inventory)
 - Environment badge (DEVELOPMENT / PRODUCTION)
-- Sidebar badge showing pending review count
+- Sidebar badges showing pending review count and available property count
 """
 
 from django.conf import settings
 
-from applications.models import Application
+from applications.models import Application, Property
 
 
 def environment_callback(request):
@@ -34,6 +34,17 @@ def pending_count_badge(request):
     Returns a string to display, or empty string for no badge.
     """
     count = Application.objects.filter(status="received").count()
+    if count > 0:
+        return str(count)
+    return ""
+
+
+def available_properties_badge(request):
+    """
+    Sidebar badge showing number of available properties.
+    Returns a string to display, or empty string for no badge.
+    """
+    count = Property.objects.filter(status="available").count()
     if count > 0:
         return str(count)
     return ""
@@ -80,6 +91,16 @@ def dashboard_callback(request, context):
         Application.objects.order_by("-submitted_at")[:5]
         .values("id", "reference_number", "first_name", "last_name", "property_address", "status", "submitted_at")
     )
+
+    # Property inventory
+    property_counts = dict(
+        Property.objects.filter(status=Property.Status.AVAILABLE)
+        .values_list("program_type")
+        .annotate(count=Count("id"))
+        .values_list("program_type", "count")
+    )
+    total_available = sum(property_counts.values())
+    unlisted_apps = Application.objects.filter(property_ref__isnull=True).count()
 
     context.update(
         {
@@ -132,6 +153,12 @@ def dashboard_callback(request, context):
             "needs_more_info": needs_more_info,
             "recent_week_count": recent_count,
             "recent_applications": recent_apps,
+            # Property inventory
+            "property_stats": {
+                "total_available": total_available,
+                "by_program": property_counts,
+                "unlisted_applications": unlisted_apps,
+            },
         }
     )
     return context

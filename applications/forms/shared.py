@@ -1,10 +1,11 @@
 """
 Shared forms used across all four program paths.
 
-Steps 1-3 are identical regardless of program:
-  Step 1: IdentityForm — applicant contact info
-  Step 2: PropertyForm — property + program selection
+  Step 1: PropertySearchForm — address autocomplete + auto-program routing
+  Step 2: IdentityForm — applicant contact info
   Step 3: EligibilityForm — hard disqualifier gate
+
+Legacy PropertyForm kept for reference but no longer used in the accordion.
 """
 
 from django import forms
@@ -92,6 +93,60 @@ class PropertyForm(forms.Form):
         widget=forms.DateInput(attrs={"type": "date"}),
         label="Date of visit (if applicable)",
     )
+
+
+class PropertySearchForm(forms.Form):
+    """
+    Step 1: Find Your Property — address autocomplete + program auto-routing.
+
+    Buyer types an address → HTMX autocomplete → selects a property → program
+    auto-fills from the Property model.  If the property isn't in the database,
+    the buyer picks a program manually via fallback cards.
+    """
+
+    property_address = forms.CharField(max_length=255, label="Property Address")
+    parcel_id = forms.CharField(max_length=50, required=False, label="Parcel ID")
+    property_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
+    program_type = forms.ChoiceField(
+        choices=Application.ProgramType.choices,
+        required=False,
+        widget=forms.HiddenInput,
+    )
+    attended_open_house = forms.BooleanField(
+        required=False,
+        label="I have attended an open house or visited this property",
+    )
+    open_house_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date"}),
+        label="Date of visit (if applicable)",
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        property_id = cleaned.get("property_id")
+        program_type = cleaned.get("program_type")
+
+        if property_id:
+            from ..models import Property
+
+            try:
+                prop = Property.objects.get(id=property_id, status="available")
+                # Property is the authoritative source for program + parcel
+                cleaned["program_type"] = prop.program_type
+                cleaned["parcel_id"] = prop.parcel_id
+                cleaned["property_address"] = prop.address
+            except Property.DoesNotExist:
+                raise forms.ValidationError(
+                    "This property is no longer available. Please select another."
+                )
+        elif not program_type:
+            raise forms.ValidationError(
+                "Please select a property from the suggestions, "
+                "or choose a program manually."
+            )
+
+        return cleaned
 
 
 class EligibilityForm(forms.Form):

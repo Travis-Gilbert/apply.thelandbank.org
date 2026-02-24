@@ -60,6 +60,11 @@ urlpatterns = [
         views.htmx_progress_bar,
         name="htmx_progress_bar",
     ),
+    path(
+        "htmx/property-search/",
+        views.htmx_property_search,
+        name="htmx_property_search",
+    ),
     # ── Confirmation ────────────────────────────────────────────
     path(
         "confirmation/<str:ref>/",
