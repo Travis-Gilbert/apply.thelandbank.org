@@ -1,0 +1,172 @@
+{# Property search — opening section with address autocomplete + program auto-routing #}
+<div class="section-card-v2">
+    <div class="section-card-v2-header" style="background: #2E7D32; border-radius: 0.875rem 0.875rem 0 0;">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style="background: rgba(255,255,255,0.2); color: #fff;">1</span>
+        <h3 class="text-lg font-bold font-heading text-white">Find Your Property</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-5">
+            <p class="text-sm text-warm-600">
+                Enter the property address you're interested in. We'll show you which program it's listed under.
+            </p>
+
+            {# ── Property address with autocomplete ── #}
+            <div class="space-y-1.5 relative">
+                <label for="id_property_address" class="block text-sm font-medium text-warm-900">
+                    Property Address <span class="text-red-500 text-xs">*</span>
+                </label>
+                <div class="relative">
+                    <input type="text"
+                           name="property_address"
+                           id="id_property_address"
+                           value="{{ form.property_address.value|default:'' }}"
+                           required
+                           autocomplete="off"
+                           placeholder="Start typing an address..."
+                           class="gclba-input pr-10{% if form.property_address.errors %} has-error{% endif %}"
+                           hx-get="{% url 'applications:htmx_property_search' %}"
+                           hx-trigger="input changed delay:300ms"
+                           hx-target="#property-results"
+                           hx-swap="innerHTML"
+                           hx-indicator="#search-spinner"
+                           onfocus="document.getElementById('property-results').style.display=''"
+                           oninput="clearPropertySelection()">
+                    {# Search icon / spinner #}
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-warm-400">
+                        <svg id="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <svg id="search-spinner" class="htmx-indicator animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                        </svg>
+                    </div>
+                </div>
+                {% if form.property_address.errors %}
+                <p class="text-xs text-red-600 font-medium">{{ form.property_address.errors.0 }}</p>
+                {% endif %}
+
+                {# Autocomplete results dropdown #}
+                <div id="property-results" class="absolute z-20 w-full mt-1"></div>
+            </div>
+
+            {# ── Program info card (hidden until property/program selected) ── #}
+            {% for key, meta in programs.items %}
+            <div id="info-card-{{ key }}" class="program-info-card hidden rounded-xl border-2 p-4 transition-all duration-200"
+                 style="border-color: {{ meta.color }}30; background: {{ meta.color }}06;">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                         style="background: {{ meta.color }}15;">
+                        {{ meta.icon_svg|safe }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold font-heading" style="color: {{ meta.color }};">{{ meta.name }}</h4>
+                        <p class="text-xs text-warm-600 mt-0.5">{{ meta.description }}</p>
+                        <p class="text-[11px] text-warm-400 mt-0.5">{{ meta.note }}</p>
+                        <div class="flex items-center gap-1.5 mt-1.5">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warm-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span class="text-[11px] text-warm-400">{{ meta.time }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# ── Form-level errors ── #}
+            {% if form.non_field_errors %}
+            <div class="rounded-lg border border-red-200 bg-red-50/60 px-4 py-3">
+                {% for error in form.non_field_errors %}
+                <p class="text-sm text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# ── Parcel ID (auto-filled from selection or manual entry) ── #}
+            <div class="space-y-1.5">
+                <div class="flex items-baseline justify-between">
+                    <label for="id_parcel_id" class="block text-sm font-medium text-warm-900">
+                        Parcel ID
+                    </label>
+                    <span class="text-[11px] text-warm-400">Optional</span>
+                </div>
+                <input type="text" name="parcel_id" id="id_parcel_id"
+                       value="{{ form.parcel_id.value|default:'' }}"
+                       placeholder="e.g. 41-08-123-456" class="gclba-input font-mono{% if form.parcel_id.errors %} has-error{% endif %}">
+                <p class="text-xs text-warm-500">Auto-filled when you select a property, or enter manually</p>
+            </div>
+
+            {# ── Open house checkbox + date ── #}
+            <div class="space-y-3">
+                <label class="touch-label items-start">
+                    <input type="checkbox" name="attended_open_house"
+                           {% if form.attended_open_house.value %}checked{% endif %}
+                           class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200"
+                           onchange="document.getElementById('open-house-date-row').style.display = this.checked ? '' : 'none'">
+                    <span class="text-sm text-warm-900">I have attended an open house or visited this property</span>
+                </label>
+
+                <div id="open-house-date-row" class="space-y-1.5 ml-7"
+                     style="{% if not form.attended_open_house.value %}display: none{% endif %}">
+                    <label for="id_open_house_date" class="block text-sm font-medium text-warm-700">
+                        Date of visit
+                    </label>
+                    <input type="date" name="open_house_date" id="id_open_house_date"
+                           value="{{ form.open_house_date.value|default:'' }}"
+                           class="gclba-input max-w-[200px]{% if form.open_house_date.errors %} has-error{% endif %}">
+                </div>
+            </div>
+
+            {# ── Hidden fields ── #}
+            <input type="hidden" name="property_id" id="id_property_id" value="{{ form.property_id.value|default:'' }}">
+            <input type="hidden" name="program_type" id="id_program_type" value="{{ form.program_type.value|default:'' }}">
+
+            {# ── Manual program picker fallback ── #}
+            <div id="manual-picker" class="hidden">
+                <div class="field-divider"></div>
+                <p class="text-sm text-warm-600 mb-3">Select the program this property is listed under:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {% for key, meta in programs.items %}
+                    <button type="button"
+                            onclick="selectProgram('{{ key }}')"
+                            id="program-card-{{ key }}"
+                            class="group w-full text-left p-4 rounded-xl border-2 bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer min-h-[56px]"
+                            style="border-color: rgba(0,0,0,0.08);"
+                            onmouseover="this.style.borderColor='{{ meta.color }}'"
+                            onmouseout="if(!this.classList.contains('ring-2'))this.style.borderColor='rgba(0,0,0,0.08)'">
+                        <div class="flex flex-col gap-2 program-card-inner">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background: {{ meta.color }}15">
+                                {{ meta.icon_svg|safe }}
+                            </div>
+                            <div class="program-card-text min-w-0">
+                                <h4 class="text-sm font-bold font-heading text-warm-900">{{ meta.name }}</h4>
+                                <p class="text-xs text-warm-600 leading-relaxed">{{ meta.description }}</p>
+                                <p class="text-[11px] text-warm-400 leading-snug mt-0.5">{{ meta.note }}</p>
+                            </div>
+                        </div>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# ── Progress nudge ── #}
+            <p class="text-xs text-warm-400 text-center pt-1">
+                Next up: your contact information.
+            </p>
+
+            {# ── Continue button ── #}
+            <div class="flex justify-end pt-2">
+                <button type="button"
+                        hx-post="{{ validate_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        class="continue-btn"
+                        style="background: #2d6a8a; border-color: #2d6a8a;">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

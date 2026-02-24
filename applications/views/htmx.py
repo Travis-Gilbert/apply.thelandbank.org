@@ -129,6 +129,54 @@ def htmx_progress_bar(request):
     )
 
 
+def htmx_property_search(request):
+    """
+    HTMX autocomplete: search available properties by address or parcel ID.
+
+    Triggered by: hx-get on property_address input (debounced 300ms)
+    Target: #property-results container
+    Returns: dropdown of matching properties, or empty if < 3 chars
+    """
+    from ..models import Property
+
+    q = request.GET.get("property_address", "").strip()
+    if len(q) < 3:
+        return HttpResponse("")
+
+    # Try address match first (normalized for fuzzy matching)
+    normalized = Property.normalize_address(q)
+    results = list(
+        Property.objects.filter(
+            status="available",
+            address_normalized__icontains=normalized,
+        )[:8]
+    )
+
+    # Fall back to parcel ID match if no address hits
+    if not results:
+        results = list(
+            Property.objects.filter(
+                status="available",
+                parcel_id__icontains=q,
+            )[:8]
+        )
+
+    # Import here to avoid circular import at module level
+    from .accordion import PROGRAM_META
+
+    # Build display-friendly results
+    for r in results:
+        meta = PROGRAM_META.get(r.program_type, {})
+        r.program_name = meta.get("name", r.program_type)
+        r.program_color = meta.get("color", "#666")
+
+    return render(
+        request,
+        "apply/partials/property_results.html",
+        {"results": results, "query": q},
+    )
+
+
 def htmx_self_employed_label(request):
     """
     Swap income document label based on self-employed checkbox.

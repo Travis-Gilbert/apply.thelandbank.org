@@ -14,7 +14,7 @@
         </div>
         <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: rgba(0,0,0,0.06)">
             <div class="h-full rounded-full transition-all duration-500 ease-out"
-                 style="width: {% widthratio completed_count total_count 100 %}%; background: #2d6a8a">
+                 style="width: {% widthratio completed_count total_count 100 %}%; background: {{ program_color|default:'#2d6a8a' }}">
             </div>
         </div>
         <span class="text-[11px] text-warm-500 flex-shrink-0 tabular-nums font-mono">

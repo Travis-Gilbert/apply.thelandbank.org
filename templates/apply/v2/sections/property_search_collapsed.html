@@ -1,4 +1,4 @@
-{# Collapsed program summary bar #}
+{# Collapsed property search summary — "1234 Elm St · Featured Homes" #}
 <div class="summary-bar">
     <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
          style="background: {{ program_color }}15">
@@ -7,13 +7,15 @@
         </svg>
     </div>
     <div class="flex-1 min-w-0">
-        <span class="text-sm font-semibold text-warm-800">Program</span>
+        <span class="text-sm font-semibold text-warm-800">Property</span>
+        {% if summary_text %}
         <span class="text-warm-500 mx-1.5">&middot;</span>
-        <span class="text-sm text-warm-500">{{ program_name }}</span>
+        <span class="text-sm text-warm-500 truncate">{{ summary_text }}</span>
+        {% endif %}
     </div>
     <button type="button"
             hx-get="{{ edit_url }}"
-            hx-target="#section-program"
+            hx-target="#section-property_search"
             hx-swap="outerHTML"
             class="text-xs font-medium flex-shrink-0 px-2.5 py-1 rounded-md transition-colors hover:bg-warm-100"
             style="color: {{ program_color }}">

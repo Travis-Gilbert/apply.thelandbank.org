@@ -14,7 +14,8 @@ from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import display
 
-from .models import Application, ApplicationDraft, Document, StatusLog, User
+from .csv_import import import_properties_from_csv
+from .models import Application, ApplicationDraft, Document, Property, StatusLog, User
 from .status_notifications import requires_transition_note, send_buyer_status_email
 
 
@@ -26,6 +27,113 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     """Custom User admin inheriting from both Django's UserAdmin and Unfold's ModelAdmin."""
 
     pass
+
+
+# ── Property Admin ───────────────────────────────────────────────
+
+
+@admin.register(Property)
+class PropertyAdmin(ModelAdmin):
+    list_display = (
+        "address",
+        "parcel_id",
+        "display_program",
+        "display_status",
+        "listing_price_display",
+        "application_count",
+        "imported_at",
+    )
+    list_filter = ("program_type", "status", "csv_batch")
+    search_fields = ("address", "parcel_id")
+    readonly_fields = ("address_normalized", "imported_at")
+    list_per_page = 50
+    ordering = ("address",)
+    actions = ("import_csv_action", "mark_withdrawn", "mark_available")
+
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "address",
+                    "address_normalized",
+                    "parcel_id",
+                    "program_type",
+                    "listing_price",
+                    "status",
+                    "csv_batch",
+                    "imported_at",
+                ),
+            },
+        ),
+    )
+
+    def get_queryset(self, request):
+        from django.db.models import Count
+
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(_application_count=Count("applications"))
+        )
+
+    @display(
+        description="Program",
+        label={
+            Application.ProgramType.FEATURED_HOMES: "success",
+            Application.ProgramType.READY_FOR_REHAB: "warning",
+            Application.ProgramType.VIP_SPOTLIGHT: "info",
+            Application.ProgramType.VACANT_LOT: "info",
+        },
+    )
+    def display_program(self, instance):
+        return instance.program_type
+
+    @display(
+        description="Status",
+        label={
+            Property.Status.AVAILABLE: "success",
+            Property.Status.UNDER_OFFER: "warning",
+            Property.Status.SOLD: "info",
+            Property.Status.WITHDRAWN: "danger",
+        },
+    )
+    def display_status(self, instance):
+        return instance.status
+
+    @display(description="Price")
+    def listing_price_display(self, instance):
+        if instance.listing_price is None:
+            return "—"
+        return f"${instance.listing_price:,.2f}"
+
+    @display(description="Apps", ordering="_application_count")
+    def application_count(self, instance):
+        return instance._application_count
+
+    @admin.action(description="Import properties from CSV")
+    def import_csv_action(self, request, queryset):
+        """Placeholder — CSV import is handled via the changelist toolbar."""
+        self.message_user(
+            request,
+            "Use the management command: python manage.py import_properties <file.csv>",
+            level=messages.INFO,
+        )
+
+    @admin.action(description="Mark selected as Withdrawn")
+    def mark_withdrawn(self, request, queryset):
+        updated = queryset.exclude(status=Property.Status.WITHDRAWN).update(
+            status=Property.Status.WITHDRAWN
+        )
+        self.message_user(request, f"Marked {updated} properties as withdrawn.")
+
+    @admin.action(description="Mark selected as Available")
+    def mark_available(self, request, queryset):
+        updated = queryset.exclude(status=Property.Status.AVAILABLE).update(
+            status=Property.Status.AVAILABLE
+        )
+        self.message_user(request, f"Marked {updated} properties as available.")
+
 
 # ── Inlines ──────────────────────────────────────────────────────
 
@@ -227,6 +335,7 @@ class ApplicationAdmin(ModelAdmin):
             "Property & Program",
             {
                 "fields": (
+                    "property_ref",
                     "property_address",
                     "parcel_id",
                     "program_type",

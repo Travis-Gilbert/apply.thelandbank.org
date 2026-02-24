@@ -1,0 +1,29 @@
+{# Autocomplete dropdown — results from property search #}
+{% if results %}
+<div class="border border-warm-200 rounded-lg shadow-lg bg-white max-h-[240px] overflow-y-auto">
+    {% for result in results %}
+    <button type="button"
+            onclick="selectProperty({{ result.id }}, '{{ result.address|escapejs }}', '{{ result.parcel_id|escapejs }}', '{{ result.program_type|escapejs }}')"
+            class="w-full text-left px-4 py-3 hover:bg-warm-50 transition-colors border-b border-warm-100 last:border-b-0 focus:bg-warm-50 focus:outline-none"
+            data-property-result>
+        <div class="text-sm font-medium text-warm-900">{{ result.address }}</div>
+        <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-xs font-mono text-warm-400">{{ result.parcel_id }}</span>
+            <span class="text-warm-300">&middot;</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                  style="background: {{ result.program_color }}12; color: {{ result.program_color }};">
+                {{ result.program_name }}
+            </span>
+        </div>
+    </button>
+    {% endfor %}
+</div>
+{% elif query %}
+<div class="px-4 py-4 text-center">
+    <p class="text-sm text-warm-600 font-medium">Hmmm... looks like we don't own that one.</p>
+    <button type="button" onclick="showManualPicker()"
+            class="text-xs text-civic-blue-600 underline underline-offset-2 mt-1.5 hover:text-civic-blue-700">
+        Choose a program manually
+    </button>
+</div>
+{% endif %}

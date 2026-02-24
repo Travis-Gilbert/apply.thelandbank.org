@@ -108,6 +108,102 @@
         }
     });
 
+    // ── Property search: autocomplete + program routing ────────
+
+    // Helper: safely clear all child nodes from an element
+    function clearChildren(el) {
+        while (el && el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    // Called when buyer clicks a property from the autocomplete dropdown
+    window.selectProperty = function(id, address, parcelId, programType) {
+        // Fill form fields
+        document.getElementById('id_property_address').value = address;
+        document.getElementById('id_parcel_id').value = parcelId;
+        document.getElementById('id_property_id').value = id;
+        document.getElementById('id_program_type').value = programType;
+
+        // Close the autocomplete dropdown
+        clearChildren(document.getElementById('property-results'));
+
+        // Show the matching program info card, hide others
+        var cards = document.querySelectorAll('.program-info-card');
+        for (var i = 0; i < cards.length; i++) {
+            cards[i].classList.add('hidden');
+        }
+        var infoCard = document.getElementById('info-card-' + programType);
+        if (infoCard) infoCard.classList.remove('hidden');
+
+        // Hide the manual picker if it was showing
+        var picker = document.getElementById('manual-picker');
+        if (picker) picker.classList.add('hidden');
+    };
+
+    // Called when buyer edits the address input (clears prior selection)
+    window.clearPropertySelection = function() {
+        document.getElementById('id_property_id').value = '';
+        document.getElementById('id_program_type').value = '';
+
+        // Hide all info cards
+        var cards = document.querySelectorAll('.program-info-card');
+        for (var i = 0; i < cards.length; i++) {
+            cards[i].classList.add('hidden');
+        }
+    };
+
+    // Called from "Choose a program manually" link in no-results message
+    window.showManualPicker = function() {
+        // Close the autocomplete dropdown
+        clearChildren(document.getElementById('property-results'));
+
+        // Show the manual program card grid
+        var picker = document.getElementById('manual-picker');
+        if (picker) picker.classList.remove('hidden');
+
+        // Scroll to it
+        if (picker) {
+            setTimeout(function() {
+                picker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+    };
+
+    // Called when buyer clicks a program card in the manual picker
+    window.selectProgram = function(programType) {
+        // Set hidden program_type
+        document.getElementById('id_program_type').value = programType;
+        // Clear property_id since this is manual
+        document.getElementById('id_property_id').value = '';
+
+        // Show the matching info card
+        var cards = document.querySelectorAll('.program-info-card');
+        for (var i = 0; i < cards.length; i++) {
+            cards[i].classList.add('hidden');
+        }
+        var infoCard = document.getElementById('info-card-' + programType);
+        if (infoCard) infoCard.classList.remove('hidden');
+
+        // Highlight the selected program card, reset others
+        var allCards = document.querySelectorAll('[id^="program-card-"]');
+        for (var j = 0; j < allCards.length; j++) {
+            allCards[j].classList.remove('ring-2');
+            allCards[j].style.borderColor = 'rgba(0,0,0,0.08)';
+        }
+        var selected = document.getElementById('program-card-' + programType);
+        if (selected) {
+            selected.classList.add('ring-2');
+        }
+    };
+
+    // Close property dropdown when clicking outside
+    document.addEventListener('click', function(evt) {
+        var results = document.getElementById('property-results');
+        var input = document.getElementById('id_property_address');
+        if (results && input && !results.contains(evt.target) && evt.target !== input) {
+            clearChildren(results);
+        }
+    });
+
     // ── Document capture JS ────────────────────────────────────
 
     window.handleDocCapture = function(input, fieldName) {
