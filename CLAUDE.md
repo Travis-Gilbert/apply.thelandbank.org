@@ -404,17 +404,33 @@ Generated on final submission only. Example: GCLBA-2026-0001
 ## Design System
 
 ### Buyer-Facing
-- Civic green: #2e7d32 (primary), civic blue: #2d6a8a (accent)
 - Tailwind CSS via Play CDN (no build step, config in base.html `<script>`)
 - Fonts: Bitter (headings, `font-heading`), IBM Plex Sans (body, `font-sans`), JetBrains Mono (`font-mono`)
 - **font-mono rule:** ONLY on dollar amounts, reference numbers (GCLBA-YYYY-NNNN), property IDs, and numeric inputs. Never on phone numbers, emails, addresses, labels, or time phrases.
-- Each step = its own screen with progress bar
+- Accordion layout: one page, HTMX validates per section, collapsed summaries show progress
 - Mobile-first, large touch targets
 - Plain language labels throughout — no legal jargon
 - HTMX: conditional field reveal, renovation totals, step counter updates
 - Renovation line-item totals auto-calculate client-side as user types
 - Mobile: `inputmode="decimal"` on money fields, `inputmode="tel"` on phone, `inputmode="numeric"` on ZIP.
   Viewport uses `maximum-scale=1` to prevent iOS auto-zoom. All interactive elements 44px min touch target.
+
+**Color roles (strict separation):**
+
+| Color | Role | Elements |
+|-------|------|----------|
+| Civic blue #2d6a8a | Navigation & interaction | Continue buttons, progress bar, input focus rings, radio selected state, document upload boxes |
+| Civic green #2e7d32 | Completion & confirmation | Checkmarks on collapsed bars, ack cards when checked, Submit button, program header (opening section) |
+| Program color | Identity accent | Section header top border, section number badge |
+| Warm neutrals | Ambient | Summary bar "Edit" buttons, progress nudge text, field dividers |
+
+**Micro-UX patterns:**
+- Welcome message above accordion ("Let's get started on your application")
+- Progress nudges above Continue buttons (warm-gray, what comes next)
+- Field dividers (subtle gradient lines) between logical field groups
+- Ack cards: bordered cards that turn green when checkbox is checked (CSS `:has(:checked)`)
+- Light section headers: thin top border + tinted badge + warm subtitle (13 middle sections)
+- Bold green headers reserved for opening (Program) and closing (Acks) sections only
 
 ### Staff Dashboard
 - django-unfold base theme, primary overridden to #2B6553
@@ -558,7 +574,8 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Logo: real GCLBA logo | Done | Converted JPEG→transparent PNG via Pillow; icon-only crop in header; deployed 2 commits (initial + improved thresholds) |
+| Logo: real GCLBA logo | Done | Converted JPEG→transparent PNG via Pillow; icon-only crop in header |
+| Visual refresh: color roles + warmth | Done | Civic-blue for nav/interaction, green for completion, light headers, ack cards, progress nudges. 24 files, deployed. |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing refinement |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
@@ -578,6 +595,8 @@ AWS_S3_REGION_NAME
 
 | Todo | Priority | Problem | Solution |
 |------|----------|---------|----------|
+| Property CSV upload + auto-program routing | High | Buyers must know which program a property is in; staff re-enters data | Weekly CSV upload populates Property model; buyer types address → auto-selects program, pre-fills parcel ID. Improves admin too. Direct DB sync not feasible (office policy). |
+| Better icons/emojis across form | Medium | Current emoji icons (🏠🔧⭐) are basic; sections could feel more polished | Audit all icons in program cards, section headers, and upload boxes; consider SVG icon set |
 | Vacant Lot program | Low | Phase 2 — requirements TBD | Build when GCLBA defines lot program rules |
 | FileMaker sync | Low | Staff currently dual-enter some data | API or CSV export TBD |
 | Spanish language version | Medium | Flint has Spanish-speaking residents | i18n after MVP launch |
@@ -597,6 +616,9 @@ AWS_S3_REGION_NAME
 | Logo: icon-only crop (diamond+swoosh) in header, not full logo with text | Full logo text unreadably small at 48-56px header height; org name already displayed as HTML text | 2026-02-21 |
 | Surgical git commits for logo vs scaffold | Logo changes safe to deploy; scaffold changes (migration reset, User model, requirements split) would break Railway DB. Committed separately. | 2026-02-21 |
 | Scaffold changes uncommitted — need migration plan | Local has new 0001_initial (with User model) + 0002_add_indexes; Railway has old 0001+0002+0003. Must resolve before pushing. | 2026-02-21 |
+| Color role separation: blue=navigation, green=completion | Green was overused (buttons, progress, focus, checkmarks). Blue (#2d6a8a) now handles all interactive/nav elements; green reserved for completion signals only. | 2026-02-24 |
+| CSS `!important` for continue-btn color override | Single CSS rule overrides inline `style="background: {{ program_color }}"` across 13+ templates — avoids template-by-template edits. | 2026-02-24 |
+| Property data via CSV upload, not direct DB sync | Office policy restricts direct database access. Weekly CSV upload achieves same buyer UX (address → auto-program routing). | 2026-02-24 |
 
 ---
 
