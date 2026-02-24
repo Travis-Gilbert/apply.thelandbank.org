@@ -574,22 +574,22 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Logo: real GCLBA logo | Done | Converted JPEG→transparent PNG via Pillow; icon-only crop in header |
-| Visual refresh: color roles + warmth | Done | Civic-blue for nav/interaction, green for completion, light headers, ack cards, progress nudges. 24 files, deployed. |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing refinement |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
 | Scaffold improvements (local) | Open | Custom User model, DB indexes, requirements split, DRF/CORS removal — all LOCAL ONLY, not deployed. See warning below |
+| Better icons/emojis | Open | User feedback: current emoji icons are basic, better icons would help a lot |
 
 **⚠ Scaffold deploy warning:** The scaffold changes include a migration reset (deleted 0002+0003, new 0001_initial with User model, new 0002_add_indexes). Railway's PostgreSQL has the OLD migration history. Pushing these changes without a migration plan will break the production database. Options: (a) `--fake` migrations on Railway, (b) squash into compatible migration, or (c) reset Railway DB if no real data yet.
 
 ## Next Step
 
-1. **Plan scaffold deployment** — resolve migration conflict between local reset and Railway DB history before pushing structural changes
-2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
-4. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
-5. **Staff dashboard polish** — document viewer links in admin, status badges
+1. **Better icons/emojis** — audit program cards, section headers, upload boxes; consider SVG icon set or better emoji choices
+2. **Plan scaffold deployment** — resolve migration conflict between local reset and Railway DB history before pushing structural changes
+3. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+4. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+5. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
+6. **Staff dashboard polish** — document viewer links in admin, status badges
 
 ### Future
 
@@ -611,10 +611,6 @@ AWS_S3_REGION_NAME
 | Port 8199 for dev server | Avoids conflict with other local services | 2026-02-20 |
 | font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
 | Single-page accordion over multi-step wizard | Better UX: one page, HTMX validates per section, collapsed summaries show progress | 2026-02-20 |
-| Warm Civic Craft design: CSS-only textures + frosted glass | Colors (#2e7d32 green, #2d6a8a blue, #d4a843 gold), grid/noise/blur — no image assets, no build tooling | 2026-02-20 |
-| Header: full org name over acronym | First-time visitors don't know "GCLBA"; spell out "Genesee County Land Bank Authority" with "Property Application Portal" subtitle | 2026-02-20 |
-| Logo: icon-only crop (diamond+swoosh) in header, not full logo with text | Full logo text unreadably small at 48-56px header height; org name already displayed as HTML text | 2026-02-21 |
-| Surgical git commits for logo vs scaffold | Logo changes safe to deploy; scaffold changes (migration reset, User model, requirements split) would break Railway DB. Committed separately. | 2026-02-21 |
 | Scaffold changes uncommitted — need migration plan | Local has new 0001_initial (with User model) + 0002_add_indexes; Railway has old 0001+0002+0003. Must resolve before pushing. | 2026-02-21 |
 | Color role separation: blue=navigation, green=completion | Green was overused (buttons, progress, focus, checkmarks). Blue (#2d6a8a) now handles all interactive/nav elements; green reserved for completion signals only. | 2026-02-24 |
 | CSS `!important` for continue-btn color override | Single CSS rule overrides inline `style="background: {{ program_color }}"` across 13+ templates — avoids template-by-template edits. | 2026-02-24 |
