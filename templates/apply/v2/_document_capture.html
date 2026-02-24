@@ -33,11 +33,11 @@
     <div id="buttons-{{ field_name }}" class="flex gap-3 {% if existing_file %}hidden{% endif %}">
         {# Camera button (primary on mobile) #}
         <label class="doc-capture-btn doc-capture-btn-primary">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-warm-500">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-civic-blue-600">
                 <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle cx="12" cy="13" r="4"/>
             </svg>
-            <span class="text-xs sm:text-xs font-medium text-warm-600">Take Photo</span>
+            <span class="text-xs sm:text-xs font-medium text-civic-blue-600">Take Photo</span>
             <input type="file"
                    name="{{ field_name }}"
                    accept="{{ accept|default:'image/*,.pdf' }}"
@@ -48,13 +48,13 @@
 
         {# File picker button #}
         <label class="doc-capture-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-warm-500">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-civic-blue-500">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
                 <polyline points="14 2 14 8 20 8"/>
                 <line x1="12" y1="18" x2="12" y2="12"/>
                 <line x1="9" y1="15" x2="15" y2="15"/>
             </svg>
-            <span class="text-xs font-medium text-warm-500">Choose File</span>
+            <span class="text-xs font-medium text-civic-blue-500">Choose File</span>
             <input type="file"
                    name="{{ field_name }}"
                    accept="{{ accept|default:'image/*,.pdf' }}"

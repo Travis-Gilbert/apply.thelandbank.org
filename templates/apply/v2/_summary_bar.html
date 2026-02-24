@@ -1,33 +1,29 @@
-{# Collapsed section summary bar (40px — compact) #}
+{# Collapsed section summary bar — completed section indicator #}
 {# Include with: section_id, section_title, summary_text, program_color, edit_url #}
 {# NOTE: This renders ONLY the inner summary-bar div. The caller must add the    #}
 {# outer <div id="section-..."> wrapper (apply_page.html or _render_transition). #}
-<div class="summary-bar"
-     style="border-left: 3px solid {{ program_color|default:'#2E7D32' }}; background: linear-gradient(90deg, {{ program_color|default:'#2E7D32' }}0A 0%, rgba(255,255,255,0.75) 10%);">
-    {# Checkmark — filled circle in program color #}
-    <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-         style="background: {{ program_color|default:'#2E7D32' }}">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<div class="summary-bar">
+    {# Checkmark — green means complete, regardless of program #}
+    <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-600">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 6L9 17l-5-5"/>
         </svg>
     </div>
 
-    {# Title + summary #}
+    {# Title + summary — two-line layout for readability #}
     <div class="flex-1 min-w-0">
-        <span class="text-xs font-semibold text-warm-700">{{ section_title }}</span>
+        <div class="text-sm font-semibold text-warm-800 leading-tight">{{ section_title }}</div>
         {% if summary_text %}
-        <span class="text-warm-400 mx-1">&middot;</span>
-        <span class="text-xs text-warm-400 truncate">{{ summary_text }}</span>
+        <div class="text-xs text-warm-500 truncate leading-tight mt-0.5">{{ summary_text }}</div>
         {% endif %}
     </div>
 
-    {# Edit link #}
+    {# Edit link — neutral color, not program-colored #}
     <button type="button"
             hx-get="{{ edit_url }}"
             hx-target="#section-{{ section_id }}"
             hx-swap="outerHTML"
-            class="text-xs font-medium flex-shrink-0 px-2 py-0.5 rounded-md transition-colors hover:bg-warm-100"
-            style="color: {{ program_color|default:'#2E7D32' }}">
+            class="text-xs font-medium flex-shrink-0 px-2.5 py-1 rounded-md transition-colors text-warm-500 hover:text-warm-700 hover:bg-warm-100">
         Edit
     </button>
 </div>

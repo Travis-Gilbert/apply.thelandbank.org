@@ -1,13 +1,16 @@
 {# Featured Homes offer — expanded #}
-<div class="section-card-v2">
-    <div class="section-card-v2-header" style="background: {{ program_color }}; border-radius: 0.875rem 0.875rem 0 0;">
+<div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
+    <div class="px-5 pt-5 flex items-center gap-3">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: rgba(255,255,255,0.2); color: #fff;">{{ section_number }}</span>
-        <h3 class="text-lg font-bold font-heading text-white">{{ section_title }}</h3>
+              style="background: {{ program_color|default:'#2E7D32' }}12; color: {{ program_color|default:'#2E7D32' }};">{{ section_number }}</span>
+        <div>
+            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
+            <p class="text-[13px] text-warm-500 mt-0.5">Your purchase offer for this property</p>
+        </div>
     </div>
 
     <div class="section-body expanded">
-        <div class="px-5 pt-4 pb-6 space-y-5">
+        <div class="px-5 pt-3 pb-6 space-y-5">
             {# Purchase type radio #}
             <div class="space-y-2">
                 <p class="text-sm font-medium text-warm-900">
@@ -89,6 +92,11 @@
                 </div>
                 {% endif %}
             </div>
+
+            {# Progress nudge #}
+            <p class="text-xs text-warm-400 text-center pt-1">
+                Next: upload a few documents, then tell us about your renovation plans.
+            </p>
 
             {# Continue button #}
             <div class="flex justify-end pt-2">
