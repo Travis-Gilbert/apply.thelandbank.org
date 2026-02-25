@@ -1,5 +1,5 @@
 """
-Application submission — converts an ApplicationDraft into a real
+Application submission - converts an ApplicationDraft into a real
 Application with Documents, sends confirmation emails.
 """
 
@@ -147,7 +147,7 @@ def submit_application(request, draft):
             "email": draft.email,
         })
 
-    # Emails happen outside the transaction — non-critical side effects
+    # Emails happen outside the transaction - non-critical side effects
     _send_buyer_confirmation(app)
     _send_staff_notification(app)
 
@@ -177,30 +177,35 @@ def _move_documents(draft, app, data):
     now = timezone.now()
     dest_prefix = f"applications/{now.year}/{now.month:02d}"
 
-    for doc_type, info in uploads.items():
-        source_path = info.get("path", "")
-        if not source_path or not default_storage.exists(source_path):
-            continue
+    for doc_type, upload_value in uploads.items():
+        entries = upload_value if isinstance(upload_value, list) else [upload_value]
+        for info in entries:
+            if not isinstance(info, dict):
+                continue
 
-        # Sanitize the original filename for the destination path
-        safe_filename = "".join(
-            c for c in info["filename"] if c.isalnum() or c in ".-_"
-        ) or "upload"
-        dest_path = f"{dest_prefix}/{app.reference_number}_{safe_filename}"
+            source_path = info.get("path", "")
+            if not source_path or not default_storage.exists(source_path):
+                continue
 
-        # Read from source, save to destination via storage API
-        with default_storage.open(source_path, "rb") as source_file:
-            saved_path = default_storage.save(dest_path, source_file)
+            # Sanitize the original filename for the destination path
+            safe_filename = "".join(
+                c for c in info["filename"] if c.isalnum() or c in ".-_"
+            ) or "upload"
+            dest_path = f"{dest_prefix}/{app.reference_number}_{safe_filename}"
 
-        # Remove the draft copy
-        default_storage.delete(source_path)
+            # Read from source, save to destination via storage API
+            with default_storage.open(source_path, "rb") as source_file:
+                saved_path = default_storage.save(dest_path, source_file)
 
-        Document.objects.create(
-            application=app,
-            doc_type=doc_type,
-            file=saved_path,
-            original_filename=info["filename"],
-        )
+            # Remove the draft copy
+            default_storage.delete(source_path)
+
+            Document.objects.create(
+                application=app,
+                doc_type=doc_type,
+                file=saved_path,
+                original_filename=info["filename"],
+            )
 
     # Clean up empty draft directory (local filesystem only)
     draft_dir = os.path.join(settings.MEDIA_ROOT, "drafts", str(draft.token))
@@ -208,7 +213,7 @@ def _move_documents(draft, app, data):
         try:
             os.rmdir(draft_dir)  # Only removes if empty
         except OSError:
-            pass  # Directory not empty or doesn't exist — fine
+            pass  # Directory not empty or doesn't exist - fine
 
 
 def _send_buyer_confirmation(app):
@@ -227,7 +232,7 @@ def _send_buyer_confirmation(app):
 
     try:
         send_mail(
-            subject=f"GCLBA Application Received — {app.reference_number}",
+            subject=f"GCLBA Application Received - {app.reference_number}",
             message=render_to_string("emails/submission_confirmation.txt", context),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[app.email],
@@ -246,7 +251,7 @@ def _send_staff_notification(app):
 
     try:
         send_mail(
-            subject=f"New Application: {app.reference_number} — {app.full_name}",
+            subject=f"New Application: {app.reference_number} - {app.full_name}",
             message=render_to_string("emails/staff_notification.txt", context),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.STAFF_NOTIFICATION_EMAIL],
@@ -269,4 +274,3 @@ def confirmation_page(request, ref):
 
     app = get_object_or_404(Application, reference_number=ref)
     return render(request, "apply/confirmation.html", {"application": app})
-

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 
-{% block title %}Application Submitted — {{ application.reference_number }}{% endblock %}
+{% block title %}Application Submitted - {{ application.reference_number }}{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto text-center py-10 sm:py-14 px-4 relative overflow-hidden">
@@ -40,7 +40,7 @@
         <strong class="text-warm-900">{{ application.email }}</strong>.
     </p>
 
-    <!-- Reference Number — ticket stub -->
+    <!-- Reference Number - ticket stub -->
     <div class="section-card mx-auto max-w-sm mb-8 overflow-hidden" style="border-left: 4px solid {{ program_color|default:'#2E7D32' }};">
         <div class="px-5 py-4 flex items-center justify-between gap-4" style="background: rgba(250, 248, 244, 0.5);">
             <div class="text-left">
@@ -50,7 +50,7 @@
             </div>
             <div class="w-px h-12 self-center" style="border-left: 2px dashed rgba(0,0,0,0.1);"></div>
             <button type="button" class="flex-shrink-0 text-warm-400 hover:text-warm-600 transition-colors relative"
-                    onclick="navigator.clipboard.writeText('{{ application.reference_number }}').then(function(){var b=event.currentTarget;b.querySelector('.copy-icon').classList.add('hidden');b.querySelector('.check-icon').classList.remove('hidden');b.querySelector('.copied-label').classList.remove('hidden');setTimeout(function(){b.querySelector('.copy-icon').classList.remove('hidden');b.querySelector('.check-icon').classList.add('hidden');b.querySelector('.copied-label').classList.add('hidden');},2000);});"
+                    onclick="copyReferenceNumber(event, '{{ application.reference_number }}')"
                     title="Copy reference number">
                 <svg class="copy-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -65,7 +65,7 @@
         </div>
     </div>
 
-    <!-- What Happens Next — visual timeline -->
+    <!-- What Happens Next - visual timeline -->
     <div class="section-card p-6 sm:p-7 text-left mb-6">
         <h3 class="font-heading text-xl font-bold text-warm-900 mb-5">What happens next?</h3>
         <div class="relative pl-8">
@@ -105,7 +105,7 @@
                         {% if application.program_type == "vip_spotlight" %}
                         VIP proposals are evaluated on price, feasibility, experience, financing, and neighborhood benefit.
                         {% else %}
-                        If approved, you'll have <strong class="text-warm-900">30 days to close</strong> on the property.
+                        If approved, you'll have <strong class="text-warm-900">21 days to close</strong> on the property.
                         {% endif %}
                     </p>
                 </div>
@@ -160,4 +160,46 @@
         Start a new application
     </a>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyReferenceNumber(event, referenceNumber) {
+    var button = event.currentTarget;
+
+    function showCopiedState() {
+        button.querySelector('.copy-icon').classList.add('hidden');
+        button.querySelector('.check-icon').classList.remove('hidden');
+        button.querySelector('.copied-label').classList.remove('hidden');
+        setTimeout(function() {
+            button.querySelector('.copy-icon').classList.remove('hidden');
+            button.querySelector('.check-icon').classList.add('hidden');
+            button.querySelector('.copied-label').classList.add('hidden');
+        }, 2000);
+    }
+
+    function fallbackCopy() {
+        var textarea = document.createElement('textarea');
+        textarea.value = referenceNumber;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showCopiedState();
+        } catch (err) {
+            button.title = 'Copy failed. Reference: ' + referenceNumber;
+        }
+        document.body.removeChild(textarea);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(referenceNumber).then(showCopiedState).catch(fallbackCopy);
+        return;
+    }
+    fallbackCopy();
+}
+</script>
 {% endblock %}

@@ -18,7 +18,7 @@ from ..models import Application
 
 class R4ROfferForm(forms.Form):
     """
-    Offer details for Ready for Rehab — cash only, no purchase type choice.
+    Offer details for Ready for Rehab - cash only, no purchase type choice.
 
     The purchase_type is set automatically to "cash" in the view.
     Also collects the prior GCLBA purchase flag.
@@ -211,7 +211,7 @@ class R4RRenovationNarrativeForm(forms.Form):
         label="How do you plan to use this property?",
     )
     first_home_or_moving = forms.ChoiceField(
-        choices=[("", "— Select —")] + list(Application.FirstHomeOrMoving.choices),
+        choices=[("", "Select")] + list(Application.FirstHomeOrMoving.choices),
         required=False,
         label="Is this your first home purchase, or are you moving to Michigan?",
     )
@@ -250,7 +250,7 @@ class R4RRenovationNarrativeForm(forms.Form):
 
 class R4RAcknowledgmentsForm(forms.Form):
     """
-    Acknowledgments for Ready for Rehab — same as Featured Homes.
+    Acknowledgments for Ready for Rehab - same as Featured Homes.
 
     Includes ack_highest_not_guaranteed (relevant for offer-based programs).
     """

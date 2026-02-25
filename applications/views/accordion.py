@@ -251,6 +251,29 @@ def _resolve_form_class(section_def, program_type):
 
 # ── Summary builders ────────────────────────────────────────────────
 
+
+def _iter_uploaded_entries(uploaded_value):
+    """Yield normalized upload dict entries from legacy or multi-file shapes."""
+    if isinstance(uploaded_value, list):
+        for entry in uploaded_value:
+            if isinstance(entry, dict):
+                yield entry
+    elif isinstance(uploaded_value, dict):
+        yield uploaded_value
+
+
+def _uploaded_doc_present(uploads, doc_type):
+    """Return True when a document key has at least one saved file."""
+    return any(True for _ in _iter_uploaded_entries(uploads.get(doc_type)))
+
+
+def _uploaded_doc_count(uploads):
+    """Count total files uploaded across all document types."""
+    count = 0
+    for value in uploads.values():
+        count += sum(1 for _ in _iter_uploaded_entries(value))
+    return count
+
 def _build_summary(section_id, form_data):
     """Build a one-line summary string for a collapsed section."""
     if section_id == "property_search":
@@ -338,7 +361,7 @@ def _build_summary(section_id, form_data):
 
     if section_id == "documents":
         uploads = form_data.get("uploads", {})
-        count = len(uploads)
+        count = _uploaded_doc_count(uploads)
         if count == 1:
             return "1 document uploaded"
         return f"{count} documents uploaded"
@@ -628,6 +651,8 @@ def section_validate(request, section_id):
 
         form_data.update(cleaned)
         draft.form_data = form_data
+        if form_data.get("email"):
+            draft.email = form_data["email"]
 
         # Check if this is the last section (acks = submit)
         if section_id == "acks":
@@ -635,7 +660,7 @@ def section_validate(request, section_id):
             from .shared import _get_required_docs
             uploads = form_data.get("uploads", {})
             required_docs = _get_required_docs(program_type, purchase_type, form_data)
-            missing = [d for d in required_docs if d not in uploads]
+            missing = [d for d in required_docs if not _uploaded_doc_present(uploads, d)]
             if missing:
                 # Save form data but do NOT advance current_step
                 draft.save()
@@ -797,6 +822,7 @@ def _validate_documents_section(
         ALLOWED_EXTENSIONS,
         ALLOWED_MIME_TYPES,
         MAX_UPLOAD_SIZE,
+        MULTI_UPLOAD_DOC_TYPES,
         _get_optional_docs,
         _get_required_docs,
     )
@@ -810,9 +836,40 @@ def _validate_documents_section(
     file_errors = {}
     draft_prefix = f"drafts/{draft.token}"
 
+    def _delete_saved_upload(upload_entry):
+        path = upload_entry.get("path", "")
+        if path and default_storage.exists(path):
+            default_storage.delete(path)
+
+    def _delete_saved_uploads(upload_value):
+        for upload_entry in _iter_uploaded_entries(upload_value):
+            _delete_saved_upload(upload_entry)
+
     for doc_type in all_doc_types:
-        file = request.FILES.get(doc_type)
-        if file:
+        remove_requested = str(request.POST.get(f"remove_{doc_type}", "")).lower() in {
+            "1",
+            "true",
+            "on",
+            "yes",
+        }
+
+        if remove_requested and doc_type in uploaded:
+            _delete_saved_uploads(uploaded.get(doc_type))
+            uploaded.pop(doc_type, None)
+
+        if doc_type in MULTI_UPLOAD_DOC_TYPES:
+            files = request.FILES.getlist(doc_type)
+            current_multi = uploaded.get(doc_type, [])
+            if isinstance(current_multi, dict):
+                current_multi = [current_multi]
+        else:
+            file = request.FILES.get(doc_type)
+            files = [file] if file else []
+
+        for file in files:
+            if not file:
+                continue
+
             # Validate
             ext = os.path.splitext(file.name)[1].lower()
             if ext not in ALLOWED_EXTENSIONS:
@@ -850,15 +907,25 @@ def _validate_documents_section(
             safe_name = "".join(c for c in file.name if c.isalnum() or c in ".-_") or "upload"
             dest_path = f"{draft_prefix}/{doc_type}_{safe_name}"
             saved_path = default_storage.save(dest_path, file)
-            uploaded[doc_type] = {
+            entry = {
                 "filename": file.name,
                 "path": saved_path,
             }
 
-    missing_docs = [d for d in required_docs if d not in uploaded]
+            if doc_type in MULTI_UPLOAD_DOC_TYPES:
+                current_multi.append(entry)
+                uploaded[doc_type] = current_multi
+            else:
+                if doc_type in uploaded:
+                    _delete_saved_uploads(uploaded.get(doc_type))
+                uploaded[doc_type] = entry
+
+    missing_docs = [d for d in required_docs if not _uploaded_doc_present(uploaded, d)]
 
     form_data["uploads"] = uploaded
     draft.form_data = form_data
+    if form_data.get("email"):
+        draft.email = form_data["email"]
     draft.save()
 
     errors = list(file_errors.values())

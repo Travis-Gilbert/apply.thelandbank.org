@@ -2,7 +2,7 @@
 Models for the GCLBA Application Portal.
 
 Six models:
-- User: Custom user model (always define at project start — changing later is painful)
+- User: Custom user model (always define at project start - changing later is painful)
 - Property: Inventory of Land Bank properties loaded via CSV
 - ApplicationDraft: Temporary storage for multi-step form (UUID token, JSONField)
 - Application: Final submitted application with all flat fields for admin filtering
@@ -152,7 +152,7 @@ class Property(models.Model):
         return " ".join(words)
 
 
-# Fix forward reference — Property.program_type uses Application.ProgramType choices,
+# Fix forward reference - Property.program_type uses Application.ProgramType choices,
 # but Application is defined below. We'll patch it after Application is defined.
 
 
@@ -181,7 +181,7 @@ class ApplicationDraft(models.Model):
 
     def __str__(self):
         email_display = self.email or "no email"
-        return f"Draft {self.token.hex[:8]} ({email_display}) — step {self.current_step}"
+        return f"Draft {self.token.hex[:8]} ({email_display}) - step {self.current_step}"
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
@@ -199,7 +199,7 @@ class Application(models.Model):
 
     All fields are flat (not JSON) so the Unfold admin can filter,
     sort, and search them. Program type determines which fields are
-    populated — VIP applications have proposal fields, R4R has
+    populated - VIP applications have proposal fields, R4R has
     line-item renovation costs, Featured Homes has narrative renovation.
     """
 
@@ -272,7 +272,7 @@ class Application(models.Model):
     )
     staff_notes = models.TextField(
         blank=True,
-        help_text="Internal notes — never visible to buyer",
+        help_text="Internal notes - never visible to buyer",
     )
 
     # ── Section 1: Applicant Identity ───────────────────────────
@@ -500,7 +500,7 @@ class Application(models.Model):
         max_length=20,
         choices=VIPCompletionPlan.choices,
         blank=True,
-        help_text="Plans upon completion — sell or rent?",
+        help_text="Plans upon completion - sell or rent?",
     )
     vip_q6_completion_detail = models.TextField(
         blank=True,
@@ -571,7 +571,7 @@ class Application(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.reference_number} — {self.full_name}"
+        return f"{self.reference_number} - {self.full_name}"
 
     @property
     def full_name(self):
@@ -744,7 +744,7 @@ class Document(models.Model):
         ordering = ["doc_type"]
 
     def __str__(self):
-        return f"{self.get_doc_type_display()} — {self.application.reference_number}"
+        return f"{self.get_doc_type_display()} - {self.application.reference_number}"
 
 
 class StatusLog(models.Model):

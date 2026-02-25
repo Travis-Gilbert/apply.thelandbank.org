@@ -1,16 +1,16 @@
-{# Collapsed section summary bar — completed section indicator #}
+{# Collapsed section summary bar - completed section indicator #}
 {# Include with: section_id, section_title, summary_text, program_color, edit_url #}
 {# NOTE: This renders ONLY the inner summary-bar div. The caller must add the    #}
 {# outer <div id="section-..."> wrapper (apply_page.html or _render_transition). #}
 <div class="summary-bar">
-    {# Checkmark — green means complete, regardless of program #}
+    {# Checkmark - green means complete, regardless of program #}
     <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-600">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 6L9 17l-5-5"/>
         </svg>
     </div>
 
-    {# Title + summary — two-line layout for readability #}
+    {# Title + summary - two-line layout for readability #}
     <div class="flex-1 min-w-0">
         <div class="text-sm font-semibold text-warm-800 leading-tight">{{ section_title }}</div>
         {% if summary_text %}
@@ -18,7 +18,7 @@
         {% endif %}
     </div>
 
-    {# Edit link — neutral color, not program-colored #}
+    {# Edit link - neutral color, not program-colored #}
     <button type="button"
             hx-get="{{ edit_url }}"
             hx-target="#section-{{ section_id }}"

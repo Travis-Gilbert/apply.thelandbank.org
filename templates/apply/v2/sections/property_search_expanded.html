@@ -1,4 +1,4 @@
-{# Property search — opening section with address autocomplete + program auto-routing #}
+{# Property search - opening section with address autocomplete + program auto-routing #}
 <div class="section-card-v2">
     <div class="section-card-v2-header" style="background: #2E7D32; border-radius: 0.875rem 0.875rem 0 0;">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -8,10 +8,10 @@
 
     <div class="section-body expanded">
         <div class="px-5 pt-4 pb-6 space-y-5">
-            {# ── Property address with autocomplete — primary interaction ── #}
+            {# ── Property address with autocomplete - primary interaction ── #}
             <div class="rounded-xl border border-warm-200 bg-white/60 p-4 space-y-2">
                 <p class="text-sm font-medium text-warm-800">
-                    Start here — type the address of the property you want to purchase.
+                    Start here - type the address of the property you want to purchase.
                 </p>
                 <p class="text-xs text-warm-500">
                     We'll automatically match it to the right program.
@@ -60,7 +60,7 @@
             {# ── Program info card (hidden until property/program selected) ── #}
             {% for key, meta in programs.items %}
             {% if meta.disabled %}
-            {# Disabled program — show "not accepting" message instead of normal info card #}
+            {# Disabled program - show "not accepting" message instead of normal info card #}
             <div id="info-card-{{ key }}" class="program-info-card hidden rounded-xl border-2 p-4 transition-all duration-200"
                  style="border-color: #D1C7B7; background: #FAF7F2;">
                 <div class="flex items-start gap-3">
@@ -157,7 +157,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {% for key, meta in programs.items %}
                     {% if meta.disabled %}
-                    {# Disabled program — visual-only, not selectable #}
+                    {# Disabled program - visual-only, not selectable #}
                     <div id="program-card-{{ key }}"
                          class="relative w-full text-left p-4 rounded-xl border-2 bg-white/40 min-h-[56px] opacity-50 cursor-not-allowed"
                          style="border-color: rgba(0,0,0,0.06);">

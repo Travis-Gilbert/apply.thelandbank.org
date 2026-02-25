@@ -121,6 +121,13 @@ def dashboard_callback(request, context):
                     "link": "/admin/applications/application/?status__exact=under_review",
                 },
                 {
+                    "label": "Needs More Info",
+                    "value": needs_more_info,
+                    "icon": "upload_file",
+                    "color": "warning",
+                    "link": "/admin/applications/application/?status__exact=needs_more_info",
+                },
+                {
                     "label": "Approved",
                     "value": approved,
                     "icon": "check_circle",

@@ -30,6 +30,10 @@ ALLOWED_MIME_TYPES = {
     "image/heif",
 }
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+MULTI_UPLOAD_DOC_TYPES = {
+    "vip_portfolio_photo",
+    "vip_support_letter",
+}
 
 
 def _get_required_docs(program_type, purchase_type, form_data):
@@ -87,6 +91,15 @@ def save_progress(request):
     """Save current progress and send magic link email."""
     draft = _get_draft(request)
 
+    candidate_email = (
+        draft.email
+        or request.POST.get("email", "").strip()
+        or draft.form_data.get("email", "").strip()
+    )
+    if candidate_email and draft.email != candidate_email:
+        draft.email = candidate_email
+        draft.save(update_fields=["email", "updated_at"])
+
     if not draft.email:
         return HttpResponse(
             '<span class="text-amber-600">'
@@ -95,8 +108,10 @@ def save_progress(request):
 
     resume_url = request.build_absolute_uri(f"/apply/resume/{draft.token}/")
     context = {
-        "first_name": draft.form_data.get("first_name", ""),
-        "property_address": draft.form_data.get("property_address", "your property"),
+        "first_name": request.POST.get("first_name", "").strip()
+        or draft.form_data.get("first_name", ""),
+        "property_address": request.POST.get("property_address", "").strip()
+        or draft.form_data.get("property_address", "your property"),
         "resume_url": resume_url,
         "expires_at": draft.expires_at.strftime("%B %d, %Y"),
     }

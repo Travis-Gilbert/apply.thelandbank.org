@@ -1,4 +1,4 @@
-{# Ready for Rehab documents — expanded #}
+{# Ready for Rehab documents - expanded #}
 <div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
     <div class="px-5 pt-5 flex items-center gap-3">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -23,7 +23,7 @@
             {% include "apply/v2/_document_capture.html" with field_name="photo_id" label="Photo ID" required=True hint="State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted." existing_file=uploaded.photo_id %}
 
             {# Proof of funds for offer amount #}
-            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds — Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds %}
+            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds - Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds %}
 
             {# Proof of funds OR financing for renovation costs #}
             {% include "apply/v2/_document_capture.html" with field_name="reno_funding_proof" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.reno_funding_proof %}
@@ -37,7 +37,7 @@
 
             {# Progress nudge #}
             <p class="text-xs text-warm-400 text-center pt-1">
-                Nice work — next up is your itemized renovation estimate.
+                Nice work - next up is your itemized renovation estimate.
             </p>
 
             {# Continue button #}

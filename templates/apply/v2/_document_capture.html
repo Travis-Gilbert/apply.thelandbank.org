@@ -2,6 +2,7 @@
 {# Include with: field_name, label, required (bool), hint (optional), accept (e.g. "image/*,.pdf") #}
 {# existing_file (optional, for resume state) #}
 <div class="space-y-2">
+    <input type="hidden" name="remove_{{ field_name }}" id="remove-{{ field_name }}" value="0">
     <div class="flex items-baseline justify-between gap-2">
         <label class="block text-sm font-medium text-warm-900">
             {{ label }}{% if required %} <span class="text-red-500 text-xs">*</span>{% endif %}
@@ -15,7 +16,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
                 <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span class="text-sm text-civic-green-800 truncate flex-1">{{ existing_file.name }}</span>
+            <span class="text-sm text-civic-green-800 truncate flex-1">{{ existing_file.filename|default:existing_file.name }}</span>
             <button type="button" onclick="removeDoc('{{ field_name }}')" class="text-xs text-red-500 hover:text-red-700 font-medium min-w-[44px] min-h-[44px] flex items-center justify-center">Remove</button>
         </div>
         {% else %}
@@ -29,7 +30,7 @@
         {% endif %}
     </div>
 
-    {# Capture buttons — camera primary on mobile, equal on desktop #}
+    {# Capture buttons - camera primary on mobile, equal on desktop #}
     <div id="buttons-{{ field_name }}" class="flex gap-3 {% if existing_file %}hidden{% endif %}">
         {# Camera button (primary on mobile) #}
         <label class="doc-capture-btn doc-capture-btn-primary">

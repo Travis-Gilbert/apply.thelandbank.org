@@ -84,7 +84,7 @@ class FHRenovationNarrativeForm(forms.Form):
         label="How do you plan to use this property?",
     )
     first_home_or_moving = forms.ChoiceField(
-        choices=[("", "— Select —")] + list(Application.FirstHomeOrMoving.choices),
+        choices=[("", "Select")] + list(Application.FirstHomeOrMoving.choices),
         required=False,
         label="Is this your first home purchase, or are you moving to Michigan?",
     )
@@ -124,7 +124,7 @@ class FHRenovationNarrativeForm(forms.Form):
 
 class FHHomebuyerEdForm(forms.Form):
     """
-    Homebuyer education — Featured Homes land contract only.
+    Homebuyer education - Featured Homes land contract only.
 
     Required before closing. MSHDA or HUD approved counselors.
     """
@@ -134,7 +134,7 @@ class FHHomebuyerEdForm(forms.Form):
         label="I have completed (or will complete before closing) a homebuyer education course",
     )
     homebuyer_ed_agency = forms.ChoiceField(
-        choices=[("", "— Select Agency —")] + list(Application.HomebuyerEdAgency.choices),
+        choices=[("", "Select Agency")] + list(Application.HomebuyerEdAgency.choices),
         required=False,
         label="Homebuyer Education Provider",
     )
@@ -148,7 +148,7 @@ class FHHomebuyerEdForm(forms.Form):
 
 class FHAcknowledgmentsForm(forms.Form):
     """
-    Acknowledgments for Featured Homes — standard set.
+    Acknowledgments for Featured Homes - standard set.
 
     All are required checkboxes. The buyer must affirmatively agree to each.
     """

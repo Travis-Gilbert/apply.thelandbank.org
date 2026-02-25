@@ -25,8 +25,8 @@ BUYER_EMAIL_STATUSES = {
 }
 
 STATUS_SUBJECTS = {
-    Application.Status.NEEDS_MORE_INFO: "GCLBA Application Update — More Information Needed",
-    Application.Status.APPROVED: "GCLBA Application Update — Approved",
+    Application.Status.NEEDS_MORE_INFO: "GCLBA Application Update - More Information Needed",
+    Application.Status.APPROVED: "GCLBA Application Update - Approved",
     Application.Status.DECLINED: "GCLBA Application Update",
 }
 
@@ -58,7 +58,7 @@ def send_buyer_status_email(application, old_status="", note=""):
 
     subject = STATUS_SUBJECTS.get(
         status_key,
-        f"GCLBA Application Update — {application.get_status_display()}",
+        f"GCLBA Application Update - {application.get_status_display()}",
     )
     txt_template = f"emails/status_change_{status_key}.txt"
     html_template = f"emails/status_change_{status_key}.html"

@@ -1,4 +1,4 @@
-{# Autocomplete dropdown — results from property search #}
+{# Autocomplete dropdown - results from property search #}
 {% if results %}
 {# Dropdown floats over content (absolute) so it doesn't push the form down #}
 <div class="absolute left-0 right-0 mt-1 border border-warm-200 rounded-lg shadow-lg bg-white max-h-[240px] overflow-y-auto">
@@ -22,7 +22,7 @@
     {% endfor %}
 </div>
 {% elif query %}
-{# "Not found" message renders inline — pushes content down instead of overlapping #}
+{# "Not found" message renders inline - pushes content down instead of overlapping #}
 <div class="mt-2 px-4 py-3 text-center rounded-lg border border-warm-200 bg-warm-50/50">
     <p class="text-sm text-warm-600 font-medium">Hmmm... looks like we don't own that one.</p>
     <button type="button" onclick="showManualPicker()"

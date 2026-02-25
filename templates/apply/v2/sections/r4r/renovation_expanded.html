@@ -1,4 +1,4 @@
-{# Ready for Rehab renovation narrative — expanded #}
+{# Ready for Rehab renovation narrative - expanded #}
 <div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
     <div class="px-5 pt-5 flex items-center gap-3">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -22,7 +22,7 @@
                         hx-target="#intended-use-fields-reno"
                         hx-swap="innerHTML"
                         hx-include="closest form">
-                    <option value="">— Select —</option>
+                    <option value="">Select</option>
                     {% for value, label in form.intended_use.field.choices %}
                     <option value="{{ value }}" {% if form.intended_use.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -39,7 +39,7 @@
                     </label>
                     <select name="{{ form.first_home_or_moving.html_name }}" id="{{ form.first_home_or_moving.id_for_label }}"
                             class="gclba-input gclba-select">
-                        <option value="">— Select —</option>
+                        <option value="">Select</option>
                         {% for value, label in form.first_home_or_moving.field.choices %}
                         {% if value %}
                         <option value="{{ value }}" {% if form.first_home_or_moving.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>

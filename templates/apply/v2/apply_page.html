@@ -2,12 +2,12 @@
 {% block title %}Apply - GCLBA Property Purchase Portal{% endblock %}
 
 {% block content %}
-{# Progress bar — sticky at top, updates via hx-swap-oob #}
+{# Progress bar - sticky at top, updates via hx-swap-oob #}
 <div id="progress-bar">
     {% include "apply/v2/_progress_bar.html" with completed_count=completed_count total_count=total_sections program_color=program_color program_name=program_name %}
 </div>
 
-{# Welcome message — sets a warm, encouraging tone #}
+{# Welcome message - sets a warm, encouraging tone #}
 <div class="mt-4 mb-5 text-center">
     <h2 class="font-heading text-xl sm:text-2xl font-bold text-warm-900">
         Let's get started on your application
@@ -15,12 +15,23 @@
     <p class="text-sm text-warm-500 mt-1.5 max-w-md mx-auto">
         Fill out each section below. Your progress is saved automatically, and you can return anytime to finish.
     </p>
+    <div class="mt-3">
+        <button type="button"
+                hx-post="{% url 'applications:save_progress' %}"
+                hx-target="#save-progress-message"
+                hx-swap="innerHTML"
+                hx-include="#accordion-form"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium text-civic-blue-700 bg-civic-blue-50 border border-civic-blue-200 hover:bg-civic-blue-100 transition-colors">
+            Email me a link to resume later
+        </button>
+        <div id="save-progress-message" class="mt-2 min-h-[18px] text-xs text-warm-600"></div>
+    </div>
 </div>
 
 {# Two-column layout: accordion (left) + outline sidebar (right, desktop only) #}
 <div class="lg:grid lg:grid-cols-[1fr_220px] lg:gap-6 lg:items-start">
 
-{# Accordion container — all sections rendered here #}
+{# Accordion container - all sections rendered here #}
 <form method="post" enctype="multipart/form-data" id="accordion-form" onsubmit="return false;">
     {% csrf_token %}
     <div id="accordion-container" class="mt-4 space-y-0">
@@ -60,7 +71,7 @@
     </div>
 </form>
 
-{# Application outline sidebar — desktop only, updates via OOB swap #}
+{# Application outline sidebar - desktop only, updates via OOB swap #}
 {% include "apply/v2/_application_outline.html" %}
 
 </div>{# /grid #}
@@ -69,9 +80,9 @@
 <div class="mt-6 text-center py-3 px-4 rounded-lg"
      style="background: rgba(240, 236, 229, 0.4); border: 1px solid rgba(210, 204, 194, 0.2);">
     <p class="text-xs text-warm-500" style="opacity: 0.85;">
-        Need help? Call <span class="font-mono text-[11px]">(810) 257-3088</span>
+        Need help? Call <span class="text-[11px]">(810) 257-3088</span>
         or email <a href="mailto:offers@thelandbank.org"
-                    class="font-mono text-[11px] text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
+                    class="text-[11px] text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>
     </p>
 </div>
 
@@ -168,7 +179,7 @@
         }
     };
 
-    // Called on address input — clears stale validation errors (T0-3)
+    // Called on address input - clears stale validation errors (T0-3)
     window.clearPropertyErrors = function() {
         var section = document.getElementById('section-property_search');
         if (!section) return;
@@ -248,10 +259,12 @@
             var preview = document.getElementById('preview-' + fieldName);
             var buttons = document.getElementById('buttons-' + fieldName);
             var filenameEl = document.getElementById('filename-' + fieldName);
+            var removeFlag = document.getElementById('remove-' + fieldName);
 
             if (filenameEl) filenameEl.textContent = file.name;
             if (preview) preview.classList.remove('hidden');
             if (buttons) buttons.classList.add('hidden');
+            if (removeFlag) removeFlag.value = '0';
 
             // Clear the document error banner (server-side validation errors)
             // Walk up to the section body and remove any error div
@@ -268,14 +281,18 @@
     window.removeDoc = function(fieldName) {
         var preview = document.getElementById('preview-' + fieldName);
         var buttons = document.getElementById('buttons-' + fieldName);
+        var removeFlag = document.getElementById('remove-' + fieldName);
 
         if (preview) preview.classList.add('hidden');
         if (buttons) buttons.classList.remove('hidden');
+        if (removeFlag) removeFlag.value = '1';
 
         // Clear the file inputs
-        var inputs = buttons.querySelectorAll('input[type=file]');
-        for (var i = 0; i < inputs.length; i++) {
-            inputs[i].value = '';
+        if (buttons) {
+            var inputs = buttons.querySelectorAll('input[type=file]');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+            }
         }
     };
 
@@ -302,7 +319,9 @@
 
     window.handleFileList = function(input, fieldName) {
         var listEl = document.getElementById('filelist-' + fieldName);
+        var removeFlag = document.getElementById('remove-' + fieldName);
         if (!listEl || !input.files) return;
+        if (removeFlag && removeFlag.value !== '1') removeFlag.value = '0';
 
         // Clear existing list safely
         while (listEl.firstChild) {
@@ -359,6 +378,20 @@
 
         // Re-render the file list
         handleFileList(input, fieldName);
+    };
+
+    window.clearExistingFiles = function(fieldName) {
+        var removeFlag = document.getElementById('remove-' + fieldName);
+        var existingList = document.getElementById('existing-' + fieldName);
+        var input = document.getElementById('fileinput-' + fieldName);
+        var listEl = document.getElementById('filelist-' + fieldName);
+
+        if (removeFlag) removeFlag.value = '1';
+        if (existingList) existingList.classList.add('hidden');
+        if (input) input.value = '';
+        if (listEl) {
+            while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+        }
     };
 })();
 </script>

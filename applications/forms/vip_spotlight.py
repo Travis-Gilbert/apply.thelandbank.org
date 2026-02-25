@@ -5,7 +5,7 @@ Step path: Proposal → Documents → Acks (4-6)
 
 VIP is a proposal process, not a standard offer. The buyer writes
 narrative answers to 8 structured questions. There's no offer_amount
-field — purchase price is stated within Q1.
+field - purchase price is stated within Q1.
 """
 
 from django import forms
@@ -15,7 +15,7 @@ from ..models import Application
 
 class VIPProposalForm(forms.Form):
     """
-    VIP Spotlight proposal — 8 structured questions.
+    VIP Spotlight proposal - 8 structured questions.
 
     Questions 1-6 are required. Q7 (contractor info) and Q8 (additional
     info) are optional. Q2 and Q5 have boolean + conditional detail fields.
@@ -87,7 +87,7 @@ class VIPProposalForm(forms.Form):
 
     # Q6: Completion plan
     vip_q6_completion_plan = forms.ChoiceField(
-        choices=[("", "— Select —")] + list(Application.VIPCompletionPlan.choices),
+        choices=[("", "Select")] + list(Application.VIPCompletionPlan.choices),
         label="6. What are your plans upon completion?",
     )
     vip_q6_completion_detail = forms.CharField(
@@ -110,7 +110,7 @@ class VIPProposalForm(forms.Form):
         widget=forms.Textarea(attrs={"rows": 3}),
         required=False,
         label=(
-            "8. Any additional information — letters of support, references, "
+            "8. Any additional information - letters of support, references, "
             "community ties. (Optional)"
         ),
     )
@@ -141,7 +141,7 @@ class VIPProposalForm(forms.Form):
 
 class VIPAcknowledgmentsForm(forms.Form):
     """
-    Acknowledgments for VIP Spotlight — includes additional VIP-specific items.
+    Acknowledgments for VIP Spotlight - includes additional VIP-specific items.
 
     Standard acks plus:
     - Reconveyance deed: property reverts if project not completed per agreement

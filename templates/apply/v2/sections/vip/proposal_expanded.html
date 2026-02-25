@@ -1,4 +1,4 @@
-{# VIP Spotlight proposal — 8 structured questions #}
+{# VIP Spotlight proposal - 8 structured questions #}
 <div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
     <div class="px-5 pt-5 flex items-center gap-3">
         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -51,7 +51,7 @@
                 </div>
                 {% if form.vip_q2_prior_purchases.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q2_prior_purchases.errors.0 }}</p>{% endif %}
 
-                {# Conditional detail — shown only when "Yes" is selected #}
+                {# Conditional detail - shown only when "Yes" is selected #}
                 <div id="q2-detail" class="space-y-1.5"
                      style="{% if form.vip_q2_prior_purchases.value|stringformat:'s' != 'True' %}display: none{% endif %}">
                     <label for="{{ form.vip_q2_prior_detail.id_for_label }}" class="block text-sm text-warm-700">
@@ -108,7 +108,7 @@
                 </div>
                 {% if form.vip_q5_has_experience.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q5_has_experience.errors.0 }}</p>{% endif %}
 
-                {# Conditional detail — shown only when "Yes" is selected #}
+                {# Conditional detail - shown only when "Yes" is selected #}
                 <div id="q5-detail" class="space-y-1.5"
                      style="{% if form.vip_q5_has_experience.value|stringformat:'s' != 'True' %}display: none{% endif %}">
                     <label for="{{ form.vip_q5_experience_detail.id_for_label }}" class="block text-sm text-warm-700">
@@ -177,7 +177,7 @@
 
             {# Progress nudge #}
             <p class="text-xs text-warm-400 text-center pt-1">
-                Great proposal — just upload your supporting documents and you're nearly done.
+                Great proposal - just upload your supporting documents and you're nearly done.
             </p>
 
             {# Continue button #}

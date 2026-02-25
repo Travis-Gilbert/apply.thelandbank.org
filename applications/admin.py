@@ -10,7 +10,7 @@ from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import display
 
@@ -104,7 +104,7 @@ class PropertyAdmin(ModelAdmin):
     @display(description="Price")
     def listing_price_display(self, instance):
         if instance.listing_price is None:
-            return "—"
+            return "N/A"
         return f"${instance.listing_price:,.2f}"
 
     @display(description="Apps", ordering="_application_count")
@@ -113,7 +113,7 @@ class PropertyAdmin(ModelAdmin):
 
     @admin.action(description="Import properties from CSV")
     def import_csv_action(self, request, queryset):
-        """Placeholder — CSV import is handled via the changelist toolbar."""
+        """Placeholder - CSV import is handled via the changelist toolbar."""
         self.message_user(
             request,
             "Use the management command: python manage.py import_properties <file.csv>",
@@ -143,12 +143,11 @@ class DocumentInline(TabularInline):
     extra = 0
     fields = ("doc_type", "file", "view_file", "original_filename", "uploaded_at")
     readonly_fields = ("view_file", "uploaded_at")
-    classes = ("collapse",)
 
     @display(description="View")
     def view_file(self, instance):
         if not instance.pk or not instance.file:
-            return "—"
+            return "N/A"
         url = reverse("applications:document_view", args=[instance.pk])
         return format_html(
             '<a href="{}" target="_blank" rel="noopener">Open</a>',
@@ -243,8 +242,8 @@ class ApplicationAdmin(ModelAdmin):
         Application.ProgramType.READY_FOR_REHAB: {
             "Offer Details",
             "Intended Use & Renovation Narrative",
-            "R4R: Renovation Line Items — Interior",
-            "R4R: Renovation Line Items — Exterior",
+            "R4R: Renovation Line Items - Interior",
+            "R4R: Renovation Line Items - Exterior",
             "R4R: Prior GCLBA Purchase",
         },
         Application.ProgramType.VIP_SPOTLIGHT: {"VIP Proposal"},
@@ -256,9 +255,11 @@ class ApplicationAdmin(ModelAdmin):
         "full_name",
         "property_address",
         "display_program",
+        "display_purchase_type",
         "display_offer",
         "display_status",
         "display_docs",
+        "quick_docs",
         "display_assignee",
         "submitted_age",
         "submitted_at",
@@ -289,6 +290,7 @@ class ApplicationAdmin(ModelAdmin):
     readonly_fields = (
         "reference_number",
         "display_docs",
+        "quick_docs",
         "closing_fee_display",
         "submitted_age",
         "created_at",
@@ -312,6 +314,7 @@ class ApplicationAdmin(ModelAdmin):
                 "fields": (
                     ("reference_number", "status"),
                     ("assigned_to", "display_docs"),
+                    "quick_docs",
                     ("submitted_age", "closing_fee_display"),
                     "staff_notes",
                 ),
@@ -377,7 +380,7 @@ class ApplicationAdmin(ModelAdmin):
             },
         ),
         (
-            "R4R: Renovation Line Items — Interior",
+            "R4R: Renovation Line Items - Interior",
             {
                 "fields": (
                     "reno_clean_out",
@@ -402,7 +405,7 @@ class ApplicationAdmin(ModelAdmin):
             },
         ),
         (
-            "R4R: Renovation Line Items — Exterior",
+            "R4R: Renovation Line Items - Exterior",
             {
                 "fields": (
                     "reno_cleanup_landscaping",
@@ -506,29 +509,43 @@ class ApplicationAdmin(ModelAdmin):
             .prefetch_related("documents")
         )
 
-    @display(
-        description="Status",
-        label={
-            Application.Status.RECEIVED: "info",
-            Application.Status.UNDER_REVIEW: "warning",
-            Application.Status.APPROVED: "success",
-            Application.Status.DECLINED: "danger",
-            Application.Status.NEEDS_MORE_INFO: "warning",
-        },
-    )
+    @display(description="Status", ordering="status")
     def display_status(self, instance):
-        return instance.status
+        palette = {
+            Application.Status.RECEIVED: ("#dbeafe", "#1e40af"),
+            Application.Status.UNDER_REVIEW: ("#fef3c7", "#92400e"),
+            Application.Status.NEEDS_MORE_INFO: ("#ffedd5", "#9a3412"),
+            Application.Status.APPROVED: ("#dcfce7", "#166534"),
+            Application.Status.DECLINED: ("#fee2e2", "#991b1b"),
+        }
+        bg, fg = palette.get(instance.status, ("#e5e7eb", "#374151"))
+        return format_html(
+            (
+                "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+                "border-radius:999px;font-size:12px;font-weight:600;"
+                "background:{};color:{}'>{}</span>"
+            ),
+            bg,
+            fg,
+            instance.get_status_display(),
+        )
 
     @display(description="Program")
     def display_program(self, instance):
         return instance.get_program_type_display()
+
+    @display(description="Purchase Type", ordering="purchase_type")
+    def display_purchase_type(self, instance):
+        if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+            return "Proposal"
+        return instance.get_purchase_type_display()
 
     @display(description="Offer")
     def display_offer(self, instance):
         if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
             return "See Proposal"
         if instance.offer_amount is None:
-            return "—"
+            return "N/A"
         return f"${instance.offer_amount:,.2f}"
 
     @display(description="Docs", label={"Complete": "success", "Incomplete": "danger"})
@@ -536,6 +553,28 @@ class ApplicationAdmin(ModelAdmin):
         if instance.docs_complete:
             return "Complete"
         return "Incomplete"
+
+    @display(description="Quick Docs")
+    def quick_docs(self, instance):
+        docs = list(instance.documents.all())
+        if not docs:
+            return "N/A"
+
+        links_html = format_html_join(
+            " · ",
+            '<a href="{}" target="_blank" rel="noopener">{}</a>',
+            (
+                (reverse("applications:document_view", args=[doc.pk]), doc.get_doc_type_display())
+                for doc in docs[:3]
+            ),
+        )
+        if len(docs) > 3:
+            return format_html(
+                "{} <span style='color:#6b7280'>+{} more</span>",
+                links_html,
+                len(docs) - 3,
+            )
+        return links_html
 
     @display(description="Assigned", ordering="assigned_to__username")
     def display_assignee(self, instance):
