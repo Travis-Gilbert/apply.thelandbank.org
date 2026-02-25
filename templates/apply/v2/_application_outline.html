@@ -1,0 +1,30 @@
+{# Application outline — shows section checklist on desktop, hidden on mobile #}
+{# Updated via hx-swap-oob on each section transition #}
+<div id="application-outline" class="hidden lg:block">
+    <div class="sticky top-4">
+        <div class="rounded-xl border border-warm-200/60 bg-white/80 backdrop-blur-sm p-4 shadow-sm">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-warm-500 mb-3">Application Outline</h4>
+            <nav class="space-y-1">
+                {% for step in outline_steps %}
+                <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm
+                    {% if step.state == 'completed' %}text-warm-600
+                    {% elif step.state == 'active' %}font-semibold text-warm-900 bg-warm-100/60
+                    {% else %}text-warm-400
+                    {% endif %}">
+                    {% if step.state == "completed" %}
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-600">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    {% elif step.state == "active" %}
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-white"
+                         style="background: {{ program_color|default:'#2d6a8a' }}">{{ step.number }}</div>
+                    {% else %}
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 border border-warm-300 text-[10px] font-medium text-warm-400">{{ step.number }}</div>
+                    {% endif %}
+                    <span class="truncate">{{ step.title }}</span>
+                </div>
+                {% endfor %}
+            </nav>
+        </div>
+    </div>
+</div>

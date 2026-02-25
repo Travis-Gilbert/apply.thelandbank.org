@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django_ratelimit.decorators import ratelimit
 
 from ..models import ApplicationDraft
 
@@ -66,7 +67,10 @@ def _get_draft(request):
     if draft_token:
         try:
             draft = ApplicationDraft.objects.get(token=draft_token)
-            if not draft.is_expired:
+            # If the draft was already submitted, clear it and start fresh
+            if draft.submitted:
+                request.session.pop("draft_token", None)
+            elif not draft.is_expired:
                 return draft
         except ApplicationDraft.DoesNotExist:
             pass
@@ -78,6 +82,7 @@ def _get_draft(request):
 # ── Save & Resume ────────────────────────────────────────────────
 
 
+@ratelimit(key="ip", rate="5/m", method="POST", block=True)
 def save_progress(request):
     """Save current progress and send magic link email."""
     draft = _get_draft(request)

@@ -21,6 +21,7 @@ from django.core.files.storage import default_storage
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django_ratelimit.decorators import ratelimit
 
 from .. import forms as app_forms
 from ..models import ApplicationDraft
@@ -451,6 +452,7 @@ def apply_page(request):
         "total_sections": len(section_order),
         "form_data": form_data,
         "draft": draft,
+        "outline_steps": _build_outline_steps(section_order, active_index, program_type),
     }
     return render(request, "apply/v2/apply_page.html", ctx)
 
@@ -546,6 +548,7 @@ def section_program_select(request):
 
 # ── Section validation ───────────────────────────────────────────────
 
+@ratelimit(key="ip", rate="20/m", method="POST", block=True)
 def section_validate(request, section_id):
     """
     POST — validate a section's form data.
@@ -818,6 +821,27 @@ def _validate_documents_section(
             if file.content_type not in ALLOWED_MIME_TYPES:
                 file_errors[doc_type] = f'"{file.name}" has an unrecognized format.'
                 continue
+
+            # Magic byte validation — don't trust browser-supplied content_type
+            file.seek(0)
+            if ext == ".pdf":
+                header = file.read(5)
+                file.seek(0)
+                if header != b"%PDF-":
+                    file_errors[doc_type] = f'"{file.name}" does not appear to be a valid PDF.'
+                    continue
+            elif ext in (".jpg", ".jpeg", ".png", ".heic"):
+                from PIL import Image
+
+                try:
+                    img = Image.open(file)
+                    img.verify()
+                except Exception:
+                    file_errors[doc_type] = f'"{file.name}" does not appear to be a valid image.'
+                    continue
+                finally:
+                    file.seek(0)
+
             if file.size > MAX_UPLOAD_SIZE:
                 size_mb = file.size / (1024 * 1024)
                 file_errors[doc_type] = f'"{file.name}" is {size_mb:.1f} MB. Max is 10 MB.'
@@ -1058,14 +1082,32 @@ def _render_transition(
         },
     ).content.decode()
 
+    # Application outline sidebar (OOB — updates the desktop checklist)
+    outline_steps = _build_outline_steps(section_order, next_index, program_type)
+    outline_html = render(
+        request,
+        "apply/v2/_application_outline.html",
+        {
+            "outline_steps": outline_steps,
+            "program_color": meta["color"],
+        },
+    ).content.decode()
+    # Inject OOB attribute into the template's existing outer div
+    outline_oob = outline_html.replace(
+        'id="application-outline"',
+        'id="application-outline" hx-swap-oob="outerHTML:#application-outline"',
+        1,
+    )
+
     # Assemble response:
     # - Collapsed + next section are PRIMARY content (replace hx-target via outerHTML)
-    # - Progress bar is OOB (updates existing #progress-bar element)
+    # - Progress bar + outline are OOB (update existing DOM elements)
     html = collapsed_html + next_section_html
     html += (
         f'<div id="progress-bar" hx-swap-oob="innerHTML:#progress-bar">'
         f'{progress_html}</div>'
     )
+    html += outline_oob
 
     response = HttpResponse(html)
     # Trigger scroll to next section
@@ -1128,6 +1170,28 @@ def _draft_step_to_section_index(draft, section_order):
 
     # Clamp to valid range
     return min(section_index, len(section_order) - 1)
+
+
+def _build_outline_steps(section_order, active_index, program_type):
+    """Build the list of outline steps for the sidebar checklist.
+
+    Each step has: number, title, state ('completed', 'active', 'upcoming').
+    """
+    steps = []
+    for i, section_id in enumerate(section_order):
+        section_def = SECTION_DEFS.get(section_id, {})
+        if i < active_index:
+            state = "completed"
+        elif i == active_index:
+            state = "active"
+        else:
+            state = "upcoming"
+        steps.append({
+            "number": i + 1,
+            "title": section_def.get("title", section_id),
+            "state": state,
+        })
+    return steps
 
 
 def _serialize_cleaned_data(cleaned_data):

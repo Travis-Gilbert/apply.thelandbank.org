@@ -135,11 +135,14 @@
                 <div id="open-house-date-row" class="space-y-1.5 ml-7"
                      style="{% if not form.attended_open_house.value %}display: none{% endif %}">
                     <label for="id_open_house_date" class="block text-sm font-medium text-warm-700">
-                        Date of visit
+                        Approximate date of visit
                     </label>
-                    <input type="date" name="open_house_date" id="id_open_house_date"
-                           value="{{ form.open_house_date.value|default:'' }}"
-                           class="gclba-input max-w-[200px]{% if form.open_house_date.errors %} has-error{% endif %}">
+                    <div class="flex items-center gap-2">
+                        <input type="month" name="open_house_date" id="id_open_house_date"
+                               value="{{ form.open_house_date.value|default:'' }}"
+                               class="gclba-input max-w-[200px]{% if form.open_house_date.errors %} has-error{% endif %}">
+                        <span class="text-xs text-warm-400">Month and year is fine</span>
+                    </div>
                 </div>
             </div>
 

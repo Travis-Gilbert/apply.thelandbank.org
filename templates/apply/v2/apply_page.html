@@ -17,6 +17,9 @@
     </p>
 </div>
 
+{# Two-column layout: accordion (left) + outline sidebar (right, desktop only) #}
+<div class="lg:grid lg:grid-cols-[1fr_220px] lg:gap-6 lg:items-start">
+
 {# Accordion container — all sections rendered here #}
 <form method="post" enctype="multipart/form-data" id="accordion-form" onsubmit="return false;">
     {% csrf_token %}
@@ -56,6 +59,11 @@
         {% endfor %}
     </div>
 </form>
+
+{# Application outline sidebar — desktop only, updates via OOB swap #}
+{% include "apply/v2/_application_outline.html" %}
+
+</div>{# /grid #}
 
 {# Help text #}
 <div class="mt-6 text-center py-3 px-4 rounded-lg"

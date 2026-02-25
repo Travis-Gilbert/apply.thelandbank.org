@@ -10,6 +10,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from django_ratelimit.decorators import ratelimit
 
 
 def htmx_purchase_type_fields(request):
@@ -129,6 +130,7 @@ def htmx_progress_bar(request):
     )
 
 
+@ratelimit(key="ip", rate="30/m", method="GET", block=True)
 def htmx_property_search(request):
     """
     HTMX autocomplete: search available properties by address or parcel ID.

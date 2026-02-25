@@ -50,7 +50,7 @@
             </div>
             <div class="w-px h-12 self-center" style="border-left: 2px dashed rgba(0,0,0,0.1);"></div>
             <button type="button" class="flex-shrink-0 text-warm-400 hover:text-warm-600 transition-colors relative"
-                    onclick="navigator.clipboard.writeText('{{ application.reference_number }}').then(function(){var b=event.currentTarget;b.querySelector('.copy-icon').classList.add('hidden');b.querySelector('.check-icon').classList.remove('hidden');setTimeout(function(){b.querySelector('.copy-icon').classList.remove('hidden');b.querySelector('.check-icon').classList.add('hidden');},1500);});"
+                    onclick="navigator.clipboard.writeText('{{ application.reference_number }}').then(function(){var b=event.currentTarget;b.querySelector('.copy-icon').classList.add('hidden');b.querySelector('.check-icon').classList.remove('hidden');b.querySelector('.copied-label').classList.remove('hidden');setTimeout(function(){b.querySelector('.copy-icon').classList.remove('hidden');b.querySelector('.check-icon').classList.add('hidden');b.querySelector('.copied-label').classList.add('hidden');},2000);});"
                     title="Copy reference number">
                 <svg class="copy-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -59,6 +59,8 @@
                 <svg class="check-icon hidden" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: {{ program_color|default:'#2E7D32' }}">
                     <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
+                <span class="copied-label hidden absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold whitespace-nowrap px-1.5 py-0.5 rounded"
+                      style="color: {{ program_color|default:'#2E7D32' }}; background: {{ program_color_light|default:'#E8F5E9' }}">Copied!</span>
             </button>
         </div>
     </div>
@@ -115,10 +117,12 @@
     <div class="section-card p-6 sm:p-7 text-left mb-8" style="border-left: 4px solid {{ program_color|default:'#2e7d32' }};">
         <h3 class="font-heading text-xl font-bold text-warm-900 mb-4">Your Application Summary</h3>
         <div class="text-sm text-warm-600 space-y-2.5">
+            {% if application.property_address %}
             <div class="flex justify-between items-baseline">
                 <span>Property</span>
                 <span class="text-warm-900 font-medium text-right">{{ application.property_address }}</span>
             </div>
+            {% endif %}
             <div class="flex justify-between items-baseline">
                 <span>Program</span>
                 <span class="text-warm-900 font-medium">{{ application.get_program_type_display }}</span>
