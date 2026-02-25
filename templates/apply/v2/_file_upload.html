@@ -1,4 +1,4 @@
-{# Drag-drop file upload area with file list #}
+{# Drag-drop file upload area with file list + per-file remove #}
 {# Include with: field_name, label, required (bool), hint (optional), accept, multiple (bool) #}
 <div class="space-y-2">
     <div class="flex items-baseline justify-between gap-2">
@@ -23,13 +23,14 @@
         <p class="text-xs text-warm-400">PDF, JPG, PNG up to 10MB each</p>
         <input type="file"
                name="{{ field_name }}"
+               id="fileinput-{{ field_name }}"
                accept="{{ accept|default:'image/*,.pdf' }}"
                {% if multiple %}multiple{% endif %}
                class="hidden"
                onchange="handleFileList(this, '{{ field_name }}')">
     </label>
 
-    {# File list #}
+    {# File list with per-file remove buttons #}
     <div id="filelist-{{ field_name }}" class="space-y-1.5"></div>
 
     {% if hint %}

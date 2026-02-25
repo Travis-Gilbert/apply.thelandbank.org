@@ -129,7 +129,8 @@
                         {{ form.vip_q6_completion_plan.label }} <span class="text-red-500 text-xs">*</span>
                     </label>
                     <select name="{{ form.vip_q6_completion_plan.html_name }}" id="{{ form.vip_q6_completion_plan.id_for_label }}"
-                            class="gclba-input gclba-select" style="min-height: 44px;" required>
+                            class="gclba-input gclba-select" style="min-height: 44px;" required
+                            onchange="document.getElementById('q6-detail-wrapper').style.display = this.value ? '' : 'none'">
                         {% for value, label in form.vip_q6_completion_plan.field.choices %}
                         <option value="{{ value }}" {% if form.vip_q6_completion_plan.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
@@ -137,7 +138,8 @@
                     {% if form.vip_q6_completion_plan.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q6_completion_plan.errors.0 }}</p>{% endif %}
                 </div>
 
-                <div class="space-y-1.5">
+                <div id="q6-detail-wrapper" class="space-y-1.5"
+                     style="{% if not form.vip_q6_completion_plan.value %}display: none{% endif %}">
                     <label for="{{ form.vip_q6_completion_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q6_completion_detail.label }} <span class="text-red-500 text-xs">*</span>
                     </label>

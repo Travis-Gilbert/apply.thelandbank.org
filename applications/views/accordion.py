@@ -72,6 +72,7 @@ PROGRAM_META = {
         "time": "5-10 minutes",
         "color": "#7B8794",
         "color_light": "#F0F4F8",
+        "disabled": True,
     },
 }
 
@@ -389,7 +390,12 @@ def apply_page(request):
     On first visit: shows only the property search section (expanded).
     On resume: rebuilds collapsed summaries for completed sections,
     expands the current section.
+    ?new=1: clears the current draft and starts fresh.
     """
+    # ?new=1 — start a fresh application (used by disqualification "Start new" link)
+    if request.GET.get("new") == "1":
+        request.session.pop("draft_token", None)
+
     draft = _get_draft(request)
     form_data = draft.form_data or {}
     program_type = form_data.get("program_type")
@@ -558,6 +564,12 @@ def section_validate(request, section_id):
     if section_id == "property_search":
         return _validate_property_search_section(request, draft)
 
+    # Guard: Step 1 (property search) must be completed before any other section.
+    # Without this, a user can manually advance to later sections by submitting
+    # directly to the section_validate URL.
+    if not form_data.get("program_type"):
+        return redirect("applications:apply_page")
+
     program_type = form_data.get("program_type", "featured_homes")
     purchase_type = form_data.get("purchase_type", "cash")
     section_order = _get_section_order(program_type, purchase_type)
@@ -719,6 +731,22 @@ def _validate_property_search_section(request, draft):
     if form.is_valid():
         cleaned = _serialize_cleaned_data(form.cleaned_data)
         program_type = cleaned["program_type"]
+
+        # Block disabled programs (e.g. Vacant Lot — not yet accepting)
+        meta_check = PROGRAM_META.get(program_type, {})
+        if meta_check.get("disabled"):
+            form.add_error(None, "This program is not yet accepting applications.")
+            ctx = _section_context(
+                draft, "property_search", 1,
+                form_data.get("program_type", ""),
+                form_data.get("purchase_type", "cash"),
+            )
+            ctx["form"] = form
+            ctx["programs"] = PROGRAM_META
+            return _render_expanded_response(
+                request, "apply/v2/sections/property_search_expanded.html",
+                ctx, "property_search"
+            )
 
         # Set default purchase type (may change later in the offer section)
         if program_type == "ready_for_rehab":

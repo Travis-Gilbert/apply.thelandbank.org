@@ -17,8 +17,8 @@
                  style="width: {% widthratio completed_count total_count 100 %}%; background: {{ program_color|default:'#2d6a8a' }}">
             </div>
         </div>
-        <span class="text-[11px] text-warm-500 flex-shrink-0 tabular-nums font-mono">
-            {{ completed_count }}/{{ total_count }}
+        <span class="text-[11px] text-warm-500 flex-shrink-0 tabular-nums">
+            Step {{ completed_count|add:1 }} of {{ total_count }}
         </span>
     </div>
 </div>

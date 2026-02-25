@@ -149,12 +149,40 @@
         for (var i = 0; i < cards.length; i++) {
             cards[i].classList.add('hidden');
         }
+
+        // Hide the manual picker + reset card selection states
+        var picker = document.getElementById('manual-picker');
+        if (picker) picker.classList.add('hidden');
+        var allCards = document.querySelectorAll('[id^="program-card-"]');
+        for (var j = 0; j < allCards.length; j++) {
+            allCards[j].classList.remove('ring-2');
+            allCards[j].style.borderColor = 'rgba(0,0,0,0.08)';
+        }
+    };
+
+    // Called on address input — clears stale validation errors (T0-3)
+    window.clearPropertyErrors = function() {
+        var section = document.getElementById('section-property_search');
+        if (!section) return;
+        // Remove field-level error paragraphs (red text below address input)
+        var fieldErrors = section.querySelectorAll('.text-red-600');
+        for (var i = 0; i < fieldErrors.length; i++) fieldErrors[i].remove();
+        // Remove non-field error banners (red bordered boxes)
+        var banners = section.querySelectorAll('.border-red-200');
+        for (var i = 0; i < banners.length; i++) banners[i].remove();
+        // Remove the has-error class from the input itself
+        var addrInput = document.getElementById('id_property_address');
+        if (addrInput) addrInput.classList.remove('has-error');
     };
 
     // Called from "Choose a program manually" link in no-results message
     window.showManualPicker = function() {
         // Close the autocomplete dropdown
         clearChildren(document.getElementById('property-results'));
+
+        // Hide any auto-detected info cards (mutual exclusion with manual picker)
+        var infoCards = document.querySelectorAll('.program-info-card');
+        for (var i = 0; i < infoCards.length; i++) infoCards[i].classList.add('hidden');
 
         // Show the manual program card grid
         var picker = document.getElementById('manual-picker');
@@ -243,7 +271,26 @@
         }
     };
 
-    // ── File list handler ──────────────────────────────────────
+    // ── File list handler (with per-file remove) ───────────────
+
+    // Helper: create an SVG element with paths
+    function _createSvgIcon(w, h, strokeColor, strokeW, paths) {
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', strokeColor);
+        svg.setAttribute('stroke-width', strokeW);
+        for (var p = 0; p < paths.length; p++) {
+            var pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathEl.setAttribute('d', paths[p]);
+            pathEl.setAttribute('stroke-linecap', 'round');
+            pathEl.setAttribute('stroke-linejoin', 'round');
+            svg.appendChild(pathEl);
+        }
+        return svg;
+    }
 
     window.handleFileList = function(input, fieldName) {
         var listEl = document.getElementById('filelist-' + fieldName);
@@ -259,20 +306,8 @@
             var div = document.createElement('div');
             div.className = 'flex items-center gap-2 p-2 rounded-lg bg-civic-green-50 border border-civic-green-200';
 
-            // Checkmark SVG
-            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttribute('width', '14');
-            svg.setAttribute('height', '14');
-            svg.setAttribute('viewBox', '0 0 24 24');
-            svg.setAttribute('fill', 'none');
-            svg.setAttribute('stroke', '#2E7D32');
-            svg.setAttribute('stroke-width', '2');
-            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', 'M20 6L9 17l-5-5');
-            path.setAttribute('stroke-linecap', 'round');
-            path.setAttribute('stroke-linejoin', 'round');
-            svg.appendChild(path);
-            div.appendChild(svg);
+            // Checkmark icon
+            div.appendChild(_createSvgIcon('14', '14', '#2E7D32', '2', ['M20 6L9 17l-5-5']));
 
             // File name
             var nameSpan = document.createElement('span');
@@ -282,12 +317,40 @@
 
             // File size
             var sizeSpan = document.createElement('span');
-            sizeSpan.className = 'text-xs text-warm-400';
+            sizeSpan.className = 'text-xs text-warm-400 flex-shrink-0';
             sizeSpan.textContent = (file.size / 1024 / 1024).toFixed(1) + ' MB';
             div.appendChild(sizeSpan);
 
+            // Remove button (X icon built via DOM, no innerHTML)
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-warm-400 hover:text-red-600 hover:bg-red-50 transition-colors';
+            removeBtn.setAttribute('data-index', i);
+            removeBtn.setAttribute('data-field', fieldName);
+            removeBtn.appendChild(_createSvgIcon('12', '12', 'currentColor', '2.5', ['M18 6L6 18', 'M6 6l12 12']));
+            removeBtn.onclick = function() {
+                removeFileFromList(this.getAttribute('data-field'), parseInt(this.getAttribute('data-index')));
+            };
+            div.appendChild(removeBtn);
+
             listEl.appendChild(div);
         }
+    };
+
+    // Remove a single file from a multi-file input and re-render the list
+    window.removeFileFromList = function(fieldName, index) {
+        var input = document.getElementById('fileinput-' + fieldName);
+        if (!input || !input.files) return;
+
+        // Build a new FileList without the removed file
+        var dt = new DataTransfer();
+        for (var i = 0; i < input.files.length; i++) {
+            if (i !== index) dt.items.add(input.files[i]);
+        }
+        input.files = dt.files;
+
+        // Re-render the file list
+        handleFileList(input, fieldName);
     };
 })();
 </script>

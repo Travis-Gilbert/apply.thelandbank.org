@@ -8,11 +8,16 @@
 
     <div class="section-body expanded">
         <div class="px-5 pt-4 pb-6 space-y-5">
-            <p class="text-sm text-warm-600">
-                Enter the property address you're interested in. We'll show you which program it's listed under.
-            </p>
+            {# ── Property address with autocomplete — primary interaction ── #}
+            <div class="rounded-xl border border-warm-200 bg-white/60 p-4 space-y-2">
+                <p class="text-sm font-medium text-warm-800">
+                    Start here — type the address of the property you want to purchase.
+                </p>
+                <p class="text-xs text-warm-500">
+                    We'll automatically match it to the right program.
+                </p>
+            </div>
 
-            {# ── Property address with autocomplete ── #}
             <div class="space-y-1.5 relative">
                 <label for="id_property_address" class="block text-sm font-medium text-warm-900">
                     Property Address <span class="text-red-500 text-xs">*</span>
@@ -32,7 +37,7 @@
                            hx-swap="innerHTML"
                            hx-indicator="#search-spinner"
                            onfocus="document.getElementById('property-results').style.display=''"
-                           oninput="clearPropertySelection()">
+                           oninput="clearPropertySelection(); clearPropertyErrors()">
                     {# Search icon / spinner #}
                     <div class="absolute right-3 top-1/2 -translate-y-1/2 text-warm-400">
                         <svg id="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -43,7 +48,8 @@
                         </svg>
                     </div>
                 </div>
-                {% if form.property_address.errors %}
+                {# Show field error only if there's no form-level error (avoids stacking messages) #}
+                {% if form.property_address.errors and not form.non_field_errors %}
                 <p class="text-xs text-red-600 font-medium">{{ form.property_address.errors.0 }}</p>
                 {% endif %}
 
@@ -53,6 +59,25 @@
 
             {# ── Program info card (hidden until property/program selected) ── #}
             {% for key, meta in programs.items %}
+            {% if meta.disabled %}
+            {# Disabled program — show "not accepting" message instead of normal info card #}
+            <div id="info-card-{{ key }}" class="program-info-card hidden rounded-xl border-2 p-4 transition-all duration-200"
+                 style="border-color: #D1C7B7; background: #FAF7F2;">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-warm-100">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7B8794" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold font-heading text-warm-700">{{ meta.name }}</h4>
+                        <p class="text-sm text-warm-600 mt-1">This program is not yet accepting applications. Please choose a different program or check back later.</p>
+                        <button type="button" onclick="clearPropertySelection(); showManualPicker();"
+                                class="mt-2 text-xs font-medium text-civic-blue-600 hover:text-civic-blue-800 underline underline-offset-2">
+                            Choose a different program
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% else %}
             <div id="info-card-{{ key }}" class="program-info-card hidden rounded-xl border-2 p-4 transition-all duration-200"
                  style="border-color: {{ meta.color }}30; background: {{ meta.color }}06;">
                 <div class="flex items-start gap-3">
@@ -71,6 +96,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
             {% endfor %}
 
             {# ── Form-level errors ── #}
@@ -127,6 +153,26 @@
                 <p class="text-sm text-warm-600 mb-3">Select the program this property is listed under:</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {% for key, meta in programs.items %}
+                    {% if meta.disabled %}
+                    {# Disabled program — visual-only, not selectable #}
+                    <div id="program-card-{{ key }}"
+                         class="relative w-full text-left p-4 rounded-xl border-2 bg-white/40 min-h-[56px] opacity-50 cursor-not-allowed"
+                         style="border-color: rgba(0,0,0,0.06);">
+                        <div class="flex flex-col gap-2 program-card-inner">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background: {{ meta.color }}10">
+                                {{ meta.icon_svg|safe }}
+                            </div>
+                            <div class="program-card-text min-w-0">
+                                <h4 class="text-sm font-bold font-heading text-warm-500">{{ meta.name }}</h4>
+                                <p class="text-xs text-warm-400 leading-relaxed">{{ meta.description }}</p>
+                            </div>
+                        </div>
+                        <span class="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-warm-100 text-warm-500">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Coming soon
+                        </span>
+                    </div>
+                    {% else %}
                     <button type="button"
                             onclick="selectProgram('{{ key }}')"
                             id="program-card-{{ key }}"
@@ -145,6 +191,7 @@
                             </div>
                         </div>
                     </button>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>

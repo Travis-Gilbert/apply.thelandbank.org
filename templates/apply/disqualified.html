@@ -56,8 +56,14 @@
     <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
         <a href="{% url 'applications:apply_page' %}"
            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-colors"
-           style="background: #2e7d32;">
+           style="background: #2d6a8a;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Go back and review my answers
+        </a>
+        <a href="{% url 'applications:apply_page' %}?new=1"
+           class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium text-warm-600 transition-colors"
+           style="border: 1.5px solid rgba(210, 204, 194, 0.5); background: rgba(255,255,255,0.5);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             Start a new application
         </a>
         <a href="https://www.thelandbank.org"
