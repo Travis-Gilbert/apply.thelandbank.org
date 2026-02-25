@@ -449,6 +449,9 @@ python manage.py check            # Validate models, urls, templates
 python manage.py makemigrations --check  # Verify no missing migrations
 ```
 
+**⚠ Broken venv:** The virtualenv symlinks point to an old project path. `./venv/bin/pip` fails.
+Workaround: `python3 -m pip install --target=./venv/lib/python3.13/site-packages <package>`
+
 **Deploy:** merge develop → main, push main (Railway auto-deploys)
 **Railway URL:** https://apply-thelandbankorg.up.railway.app/apply/
 
@@ -540,6 +543,16 @@ AWS_S3_REGION_NAME
 17. **Git branch flow** — Admin → develop → main. Railway auto-deploys from `main`.
     Push all three at once: `git push origin main develop Admin`.
 
+18. **OOB sidebar + progress bar** — `_render_transition()` returns main swap HTML + OOB fragments
+    for `#progress-bar` and `#application-outline`. Inject `hx-swap-oob` via `.replace()` on rendered
+    HTML rather than wrapping in a new div (avoids duplicate IDs).
+
+19. **Rate limiting** — `@ratelimit(key="ip", rate="30/m")` on `section_validate` and `htmx_property_search`.
+    Requires `django-ratelimit` in requirements.txt + `CACHES` configured in settings.
+
+20. **Document magic-byte validation** — `_validate_documents_section()` checks file headers (PIL for images,
+    `%PDF` for PDFs) not just extensions. Prevents renamed-file bypass.
+
 ---
 
 ## Phase 1 MVP Scope
@@ -574,22 +587,23 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
+| Ship-readiness polish | Done | 20 tasks: security (rate-limit, magic-byte, submitted guard), UX (progress bar, outline sidebar, error clearing, open house month picker), footer trust language |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing refinement |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
 | Scaffold improvements (local) | Open | Custom User model, DB indexes, requirements split, DRF/CORS removal — all LOCAL ONLY, not deployed. See warning below |
-| Better icons/emojis | Open | User feedback: current emoji icons are basic, better icons would help a lot |
+| Better icons/emojis | Open | SVG icon set would improve polish. Moved from "icons/emojis" to actual SVG exploration. |
 
 **⚠ Scaffold deploy warning:** The scaffold changes include a migration reset (deleted 0002+0003, new 0001_initial with User model, new 0002_add_indexes). Railway's PostgreSQL has the OLD migration history. Pushing these changes without a migration plan will break the production database. Options: (a) `--fake` migrations on Railway, (b) squash into compatible migration, or (c) reset Railway DB if no real data yet.
 
 ## Next Step
 
-1. **Better icons/emojis** — audit program cards, section headers, upload boxes; consider SVG icon set or better emoji choices
-2. **Plan scaffold deployment** — resolve migration conflict between local reset and Railway DB history before pushing structural changes
-3. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-4. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
-5. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
-6. **Staff dashboard polish** — document viewer links in admin, status badges
+1. **Plan scaffold deployment** — resolve migration conflict between local reset and Railway DB history before pushing structural changes
+2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+4. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
+5. **Staff dashboard polish** — document viewer links in admin, status badges
+6. **Better icons** — audit program cards, section headers, upload boxes; explore SVG icon set
 
 ### Future
 
@@ -615,6 +629,9 @@ AWS_S3_REGION_NAME
 | Color role separation: blue=navigation, green=completion | Green was overused (buttons, progress, focus, checkmarks). Blue (#2d6a8a) now handles all interactive/nav elements; green reserved for completion signals only. | 2026-02-24 |
 | CSS `!important` for continue-btn color override | Single CSS rule overrides inline `style="background: {{ program_color }}"` across 13+ templates — avoids template-by-template edits. | 2026-02-24 |
 | Property data via CSV upload, not direct DB sync | Office policy restricts direct database access. Weekly CSV upload achieves same buyer UX (address → auto-program routing). | 2026-02-24 |
+| Application outline sidebar (desktop) | `_application_outline.html` with OOB swap on transitions. `hidden lg:block` for desktop-only. Sticky positioning inside CSS grid. | 2026-02-25 |
+| Rate limiting on validation + search endpoints | `django-ratelimit` 30/m on section_validate, 30/m on property search. Prevents abuse before launch. | 2026-02-25 |
+| Magic-byte file validation over extension-only | PIL header check for images, `%PDF` prefix for PDFs. Extension-only validation lets renamed files through. | 2026-02-25 |
 
 ---
 
