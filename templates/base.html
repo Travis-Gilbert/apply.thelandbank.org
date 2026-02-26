@@ -10,8 +10,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Bitter', 'Georgia', 'serif'],
+                        sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        civic: {
+                            green: { 50:'#f0f7f1', 100:'#dceede', 200:'#b8ddb9', 600:'#2e7d32', 700:'#256929', 800:'#1b5e20', 900:'#0d3311' },
+                            blue:  { 50:'#eff4f8', 100:'#dae6f0', 200:'#b4cde0', 500:'#3d7ea6', 600:'#2d6a8a', 700:'#1e5673', 800:'#184862' },
+                        },
+                        program: {
+                            featured: { DEFAULT:'#2E7D32', light:'#E8F5E9', border:'#b8ddb9' },
+                            rehab:    { DEFAULT:'#F57C00', light:'#FFF3E0', border:'#FFE0B2' },
+                            vip:      { DEFAULT:'#1565C0', light:'#E3F2FD', border:'#BBDEFB' },
+                        },
+                        warm: { 50:'#FAF6F1', 100:'#F2EDE6', 200:'#EAE4DC', 300:'#DDD6CC', 400:'#CCC7BF', 500:'#A09890', 600:'#7A746C', 700:'#5A5550', 800:'#3A3632', 900:'#2A2622' },
+                    },
+                },
+            },
+        }
+    </script>
     <style>
         /* ── Warm Linen Background ──────────────────────── */
         .civic-bg {
