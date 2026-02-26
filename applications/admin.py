@@ -189,6 +189,60 @@ class DocsStateFilter(admin.SimpleListFilter):
         return queryset.filter(pk__in=matching_ids)
 
 
+class AssignmentFilter(admin.SimpleListFilter):
+    """Quick filter: my apps, unassigned, or assigned to others."""
+
+    title = "assignment"
+    parameter_name = "assignment"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("mine", "Assigned to me"),
+            ("unassigned", "Unassigned"),
+            ("others", "Assigned to others"),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "mine":
+            return queryset.filter(assigned_to=request.user)
+        if self.value() == "unassigned":
+            return queryset.filter(assigned_to__isnull=True)
+        if self.value() == "others":
+            return queryset.filter(assigned_to__isnull=False).exclude(
+                assigned_to=request.user
+            )
+        return queryset
+
+
+class FreshnessFilter(admin.SimpleListFilter):
+    """Quick filter: submitted today, this week, or stale (14+ days in review)."""
+
+    title = "freshness"
+    parameter_name = "freshness"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("today", "Submitted today"),
+            ("week", "This week"),
+            ("stale", "Stale (14+ days in review)"),
+        ]
+
+    def queryset(self, request, queryset):
+        now = timezone.now()
+        if self.value() == "today":
+            return queryset.filter(submitted_at__date=now.date())
+        if self.value() == "week":
+            week_ago = now - timezone.timedelta(days=7)
+            return queryset.filter(submitted_at__gte=week_ago)
+        if self.value() == "stale":
+            cutoff = now - timezone.timedelta(days=14)
+            return queryset.filter(
+                status=Application.Status.UNDER_REVIEW,
+                updated_at__lte=cutoff,
+            )
+        return queryset
+
+
 class ApplicationAdminForm(forms.ModelForm):
     """Admin form with transition-note requirements for buyer-facing updates."""
 
@@ -276,10 +330,11 @@ class ApplicationAdmin(ModelAdmin):
         "submitted_age",
     )
     list_filter = (
+        AssignmentFilter,
+        FreshnessFilter,
         "status",
         "program_type",
         "purchase_type",
-        "assigned_to",
         DocsStateFilter,
         "submitted_at",
     )

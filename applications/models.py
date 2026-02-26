@@ -773,6 +773,17 @@ class StatusLog(models.Model):
     class Meta:
         ordering = ["-changed_at"]
 
+    # Map raw status values to human-readable labels for the timeline.
+    _STATUS_LABELS = dict(Application.Status.choices)
+
+    @property
+    def from_status_label(self):
+        return self._STATUS_LABELS.get(self.from_status, self.from_status or "New")
+
+    @property
+    def to_status_label(self):
+        return self._STATUS_LABELS.get(self.to_status, self.to_status)
+
     def __str__(self):
         return (
             f"{self.application.reference_number}: "

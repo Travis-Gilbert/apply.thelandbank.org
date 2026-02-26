@@ -1,0 +1,186 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{# ── Task 9: Application Summary Card ────────────────────────── #}
+{# Unfold uses form_top (not before_fieldsets) for content above fieldsets #}
+{% block form_top %}
+{{ block.super }}
+
+{% if original %}
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+
+  {# Applicant card #}
+  <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+    <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin: 0 0 6px;">
+      Applicant
+    </p>
+    <p style="font-size: 16px; font-weight: 700; color: #111; margin: 0;">
+      {{ original.full_name }}
+    </p>
+    <p style="font-size: 13px; color: #6b7280; margin: 4px 0 0;">
+      {{ original.email }}
+    </p>
+    <p style="font-size: 13px; color: #6b7280; margin: 2px 0 0;">
+      {{ original.phone }}
+    </p>
+    {% if original.preferred_contact %}
+    <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0;">
+      Prefers: {{ original.get_preferred_contact_display }}
+    </p>
+    {% endif %}
+  </div>
+
+  {# Property card #}
+  <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+    <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin: 0 0 6px;">
+      Property
+    </p>
+    <p style="font-size: 16px; font-weight: 700; color: #111; margin: 0;">
+      {{ original.property_address }}
+    </p>
+    <p style="font-size: 13px; color: #6b7280; margin: 4px 0 0;">
+      {{ original.get_program_type_display }}
+    </p>
+    {% if original.parcel_id %}
+    <p style="font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #9ca3af; margin: 4px 0 0;">
+      Parcel: {{ original.parcel_id }}
+    </p>
+    {% endif %}
+  </div>
+
+  {# Offer card #}
+  <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+    <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin: 0 0 6px;">
+      Offer
+    </p>
+    {% if original.program_type == 'vip_spotlight' %}
+      <p style="font-size: 18px; font-weight: 700; color: #374151; margin: 0;">See Proposal</p>
+    {% elif original.offer_amount %}
+      <p style="font-size: 24px; font-weight: 800; color: #16a34a; margin: 0; font-family: 'JetBrains Mono', monospace;">
+        ${{ original.offer_amount|floatformat:0|default:"N/A" }}
+      </p>
+    {% else %}
+      <p style="font-size: 18px; font-weight: 700; color: #9ca3af; margin: 0;">N/A</p>
+    {% endif %}
+    <p style="font-size: 13px; color: #6b7280; margin: 4px 0 0;">
+      {{ original.get_purchase_type_display }}
+    </p>
+    {% if original.intended_use %}
+    <p style="font-size: 13px; color: #6b7280; margin: 2px 0 0;">
+      {{ original.get_intended_use_display }}
+    </p>
+    {% endif %}
+  </div>
+
+</div>
+{% endif %}
+{% endblock %}
+
+{# ── Task 4: Status Timeline ─────────────────────────────────── #}
+{% block after_field_sets %}
+{{ block.super }}
+
+{% if original %}
+<div style="margin: 24px 0; padding: 24px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+  <h3 style="font-size: 14px; font-weight: 700; color: #111; margin: 0 0 20px;">
+    Application Timeline
+  </h3>
+
+  <div style="position: relative; padding-left: 28px;">
+    {# Vertical connector line #}
+    <div style="position: absolute; left: 7px; top: 4px; bottom: 4px; width: 2px; background: #e5e7eb;"></div>
+
+    {# ── Submission event (always first, chronologically) ── #}
+    <div style="position: relative; margin-bottom: 24px;">
+      <div style="
+        position: absolute; left: -28px; top: 2px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #16a34a; border: 3px solid white;
+        box-shadow: 0 0 0 2px #16a34a;
+      "></div>
+      <div>
+        <p style="font-size: 13px; font-weight: 600; color: #111; margin: 0;">
+          Application Submitted
+        </p>
+        <p style="font-size: 12px; color: #6b7280; margin: 2px 0 0;">
+          {{ original.submitted_at|date:"M j, Y \a\t g:i A" }}
+          &middot; {{ original.full_name }}
+          &middot; {{ original.get_program_type_display }}
+        </p>
+      </div>
+    </div>
+
+    {# ── Status change events from audit log ── #}
+    {% for log in original.status_logs.all reversed %}
+    <div style="position: relative; margin-bottom: 24px;">
+      <div style="
+        position: absolute; left: -28px; top: 2px;
+        width: 16px; height: 16px; border-radius: 50%;
+        border: 3px solid white;
+        {% if log.to_status == 'approved' %}
+          background: #16a34a; box-shadow: 0 0 0 2px #16a34a;
+        {% elif log.to_status == 'declined' %}
+          background: #dc2626; box-shadow: 0 0 0 2px #dc2626;
+        {% elif log.to_status == 'needs_more_info' %}
+          background: #ea580c; box-shadow: 0 0 0 2px #ea580c;
+        {% elif log.to_status == 'under_review' %}
+          background: #d97706; box-shadow: 0 0 0 2px #d97706;
+        {% else %}
+          background: #6b7280; box-shadow: 0 0 0 2px #6b7280;
+        {% endif %}
+      "></div>
+      <div>
+        <p style="font-size: 13px; font-weight: 600; color: #111; margin: 0;">
+          {{ log.from_status_label }}
+          &rarr;
+          {{ log.to_status_label }}
+        </p>
+        <p style="font-size: 12px; color: #6b7280; margin: 2px 0 0;">
+          {{ log.changed_at|date:"M j, Y \a\t g:i A" }}
+          {% if log.changed_by %}&middot; {{ log.changed_by.get_short_name|default:log.changed_by.username }}{% endif %}
+        </p>
+        {% if log.notes %}
+        <p style="
+          font-size: 12px; color: #374151; margin: 6px 0 0;
+          padding: 8px 12px; background: #f9fafb; border-radius: 6px;
+          border-left: 3px solid #d1d5db;
+        ">
+          {{ log.notes }}
+        </p>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div style="position: relative; margin-bottom: 24px;">
+      <div style="
+        position: absolute; left: -28px; top: 2px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #9ca3af; border: 3px solid white;
+        box-shadow: 0 0 0 2px #9ca3af;
+      "></div>
+      <p style="font-size: 13px; color: #6b7280; margin: 0;">
+        No status changes yet.
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── Keyboard shortcut hint ── #}
+<div style="margin: 0 0 16px; padding: 12px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+  <p style="font-size: 12px; color: #166534; margin: 0;">
+    <strong>Keyboard shortcuts:</strong>
+    <kbd style="padding: 1px 4px; background: white; border: 1px solid #d1d5db; border-radius: 3px; font-size: 11px;">Ctrl+Shift+R</kbd> Under Review &nbsp;
+    <kbd style="padding: 1px 4px; background: white; border: 1px solid #d1d5db; border-radius: 3px; font-size: 11px;">Ctrl+Shift+D</kbd> Needs More Info &nbsp;
+    <kbd style="padding: 1px 4px; background: white; border: 1px solid #d1d5db; border-radius: 3px; font-size: 11px;">Ctrl+Shift+A</kbd> Approve &nbsp;
+    <kbd style="padding: 1px 4px; background: white; border: 1px solid #d1d5db; border-radius: 3px; font-size: 11px;">Ctrl+Shift+N</kbd> Decline
+  </p>
+</div>
+{% endif %}
+{% endblock %}
+
+{# ── Task 10: Keyboard Shortcuts JS ──────────────────────────── #}
+{% block extrajs %}
+{{ block.super }}
+<script src="{% static 'js/admin_shortcuts.js' %}"></script>
+{% endblock %}

@@ -3,6 +3,8 @@ Admin utility functions for the Unfold dashboard.
 
 Provides:
 - Dashboard stat cards (applications by status, recent submissions, property inventory)
+- Personalized workload cards (my reviews, my waiting-on-docs)
+- Queue health metrics (unassigned, stale applications)
 - Environment badge (DEVELOPMENT / PRODUCTION)
 - Sidebar badges showing pending review count and available property count
 """
@@ -54,11 +56,18 @@ def dashboard_callback(request, context):
     """
     Populate the admin dashboard with stat cards and recent activity.
     Called by Unfold's DASHBOARD_CALLBACK setting.
+
+    Provides three layers of data:
+    1. Global status counts and stat cards
+    2. Personalized "my workload" for the logged-in staff member
+    3. Queue health (unassigned, stale) and recent submissions table
     """
     from django.db.models import Count
     from django.utils import timezone
 
-    # Status counts
+    now = timezone.now()
+
+    # ── Global status counts ──────────────────────────────────
     status_counts = dict(
         Application.objects.values_list("status")
         .annotate(count=Count("id"))
@@ -72,27 +81,47 @@ def dashboard_callback(request, context):
     declined = status_counts.get("declined", 0)
     needs_more_info = status_counts.get("needs_more_info", 0)
 
-    # Queue health
+    # ── Queue health ──────────────────────────────────────────
     unassigned_received = Application.objects.filter(
         status="received",
         assigned_to__isnull=True,
     ).count()
+
+    # Stale: received 5+ days ago (quick attention metric)
     stale_received = Application.objects.filter(
         status="received",
-        submitted_at__lt=timezone.now() - timezone.timedelta(days=5),
+        submitted_at__lt=now - timezone.timedelta(days=5),
     ).count()
 
-    # Recent submissions (last 7 days)
-    week_ago = timezone.now() - timezone.timedelta(days=7)
+    # Stale: under review 14+ days (design doc metric for follow-up)
+    stale_under_review = Application.objects.filter(
+        status="under_review",
+        updated_at__lte=now - timezone.timedelta(days=14),
+    ).count()
+
+    # ── Personalized workload ─────────────────────────────────
+    my_apps = Application.objects.filter(assigned_to=request.user)
+    my_review = my_apps.filter(status="under_review").count()
+    my_needs_more_info = my_apps.filter(status="needs_more_info").count()
+
+    # ── Recent submissions (last 7 days) ──────────────────────
+    week_ago = now - timezone.timedelta(days=7)
     recent_count = Application.objects.filter(submitted_at__gte=week_ago).count()
 
-    # Top 5 recent applications for quick access
+    # Top 10 recent applications for the dashboard table
     recent_apps = (
-        Application.objects.order_by("-submitted_at")[:5]
-        .values("id", "reference_number", "first_name", "last_name", "property_address", "status", "submitted_at")
+        Application.objects.select_related("assigned_to")
+        .order_by("-submitted_at")[:10]
     )
 
-    # Property inventory
+    # ── Program breakdown ─────────────────────────────────────
+    program_counts = dict(
+        Application.objects.values_list("program_type")
+        .annotate(count=Count("id"))
+        .values_list("program_type", "count")
+    )
+
+    # ── Property inventory ────────────────────────────────────
     property_counts = dict(
         Property.objects.filter(status=Property.Status.AVAILABLE)
         .values_list("program_type")
@@ -104,7 +133,7 @@ def dashboard_callback(request, context):
 
     context.update(
         {
-            # Stat card data
+            # Stat card data (existing format for backwards compat)
             "stats": [
                 {
                     "label": "Awaiting Review",
@@ -156,10 +185,19 @@ def dashboard_callback(request, context):
                     "link": "/admin/applications/application/?status__exact=received",
                 },
             ],
+            # Global totals
             "total_applications": total,
             "needs_more_info": needs_more_info,
             "recent_week_count": recent_count,
+            # Personalized workload (design doc Task 1)
+            "unassigned": unassigned_received,
+            "my_review": my_review,
+            "my_needs_more_info": my_needs_more_info,
+            "stale_under_review": stale_under_review,
+            # Recent submissions table (expanded to 10, with full objects)
             "recent_applications": recent_apps,
+            # Program breakdown
+            "program_counts": program_counts,
             # Property inventory
             "property_stats": {
                 "total_available": total_available,
