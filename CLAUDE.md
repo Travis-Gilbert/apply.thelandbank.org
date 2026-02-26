@@ -463,6 +463,23 @@ Workaround: `python3 -m pip install --target=./venv/lib/python3.13/site-packages
 
 **Platform: Railway** — PostgreSQL plugin, auto-deploy on push to main
 
+**⚠ Railway uses `Procfile` over `nixpacks.toml`** — Railpack prefers Procfile for
+the start command when both files exist. Keep both in sync. The Procfile is the
+source of truth for what runs on deploy.
+
+**Prototype admin login:** `ensure_superuser` management command runs on every deploy
+(in Procfile). Creates/resets Admin/Admin123. Remove before production launch.
+
+**LOGGING:** `config/settings.py` has a LOGGING config that sends `django.request`
+errors to stdout (visible in Railway logs). Without this, `DEBUG=False` swallows
+all tracebacks silently.
+
+**Static files gotcha:** `CompressedManifestStaticFilesStorage` raises `ValueError`
+(not 404) when `{% static 'file.css' %}` references a file not in the manifest.
+This crashes every page load, not just the missing asset. The Tailwind CSS is
+loaded via Play CDN (`<script>` in base.html), NOT a compiled build pipeline.
+Do not switch to compiled CSS without adding a build step to Railway.
+
 **Domain:** apply.thelandbank.org (separate from compliance.thelandbank.org)
 
 **Environment Variables:**
@@ -555,6 +572,11 @@ AWS_S3_REGION_NAME
 20. **Document magic-byte validation** — `_validate_documents_section()` checks file headers (PIL for images,
     `%PDF` for PDFs) not just extensions. Prevents renamed-file bypass.
 
+21. **Prototype superuser** — `applications/management/commands/ensure_superuser.py` runs
+    on every deploy via Procfile. Uses `get_or_create` + `set_password` to be idempotent.
+    Prints DB diagnostics (table, columns, migration state) for Railway debugging.
+    **Remove before production launch.**
+
 ---
 
 ## Phase 1 MVP Scope
@@ -589,23 +611,24 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Ship-readiness polish | Done | 20 tasks: security (rate-limit, magic-byte, submitted guard), UX (progress bar, outline sidebar, error clearing, open house month picker), footer trust language |
 | Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing refinement |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
-| Scaffold improvements (local) | Open | Custom User model, DB indexes, requirements split, DRF/CORS removal — all LOCAL ONLY, not deployed. See warning below |
-| Better icons/emojis | Open | SVG icon set would improve polish. Moved from "icons/emojis" to actual SVG exploration. |
+| Better icons | Open | SVG icon set would improve polish over current emoji icons |
+| Production LOGGING | Done | `django.request` errors now visible in Railway logs |
+| Prototype superuser | Done | Admin/Admin123 auto-created on every deploy via Procfile |
 
-**⚠ Scaffold deploy warning:** The scaffold changes include a migration reset (deleted 0002+0003, new 0001_initial with User model, new 0002_add_indexes). Railway's PostgreSQL has the OLD migration history. Pushing these changes without a migration plan will break the production database. Options: (a) `--fake` migrations on Railway, (b) squash into compatible migration, or (c) reset Railway DB if no real data yet.
+**⚠ Prototype credentials on Railway:** Admin/Admin123 superuser is auto-created on
+every deploy. Remove `ensure_superuser` from Procfile and delete the management
+command before production launch with real user data.
 
 ## Next Step
 
-1. **Plan scaffold deployment** — resolve migration conflict between local reset and Railway DB history before pushing structural changes
-2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
-4. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
-5. **Staff dashboard polish** — document viewer links in admin, status badges
-6. **Better icons** — audit program cards, section headers, upload boxes; explore SVG icon set
+1. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+2. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+3. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
+4. **Staff dashboard polish** — document viewer links in admin, status badges
+5. **Better icons** — audit program cards, section headers, upload boxes; explore SVG icon set
 
 ### Future
 
@@ -627,13 +650,15 @@ AWS_S3_REGION_NAME
 | Port 8199 for dev server | Avoids conflict with other local services | 2026-02-20 |
 | font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
 | Single-page accordion over multi-step wizard | Better UX: one page, HTMX validates per section, collapsed summaries show progress | 2026-02-20 |
-| Scaffold changes uncommitted — need migration plan | Local has new 0001_initial (with User model) + 0002_add_indexes; Railway has old 0001+0002+0003. Must resolve before pushing. | 2026-02-21 |
 | Color role separation: blue=navigation, green=completion | Green was overused (buttons, progress, focus, checkmarks). Blue (#2d6a8a) now handles all interactive/nav elements; green reserved for completion signals only. | 2026-02-24 |
 | CSS `!important` for continue-btn color override | Single CSS rule overrides inline `style="background: {{ program_color }}"` across 13+ templates — avoids template-by-template edits. | 2026-02-24 |
 | Property data via CSV upload, not direct DB sync | Office policy restricts direct database access. Weekly CSV upload achieves same buyer UX (address → auto-program routing). | 2026-02-24 |
 | Application outline sidebar (desktop) | `_application_outline.html` with OOB swap on transitions. `hidden lg:block` for desktop-only. Sticky positioning inside CSS grid. | 2026-02-25 |
 | Rate limiting on validation + search endpoints | `django-ratelimit` 30/m on section_validate, 30/m on property search. Prevents abuse before launch. | 2026-02-25 |
 | Magic-byte file validation over extension-only | PIL header check for images, `%PDF` prefix for PDFs. Extension-only validation lets renamed files through. | 2026-02-25 |
+| Procfile is Railway's source of truth, not nixpacks.toml | Railpack ignores nixpacks.toml [start].cmd when Procfile exists. Keep both in sync. | 2026-02-26 |
+| LOGGING config added to settings.py | DEBUG=False silently swallows all errors without explicit LOGGING. django.request at ERROR level captures tracebacks to stdout. | 2026-02-26 |
+| Tailwind via CDN only — no compiled build | CompressedManifestStaticFilesStorage + missing compiled CSS = hard 500 on every page. CDN avoids needing a Tailwind build step on Railway. | 2026-02-26 |
 
 ---
 
@@ -666,11 +691,12 @@ Data flow: `ApplicationDraft` (in-progress) → `Application` (submitted) → `S
 
 ```
 applications/
-  admin.py                    # Admin UX + workflow actions (+ UserAdmin, local only)
+  admin.py                    # Admin UX + workflow actions (+ UserAdmin)
   admin_utils.py              # Unfold dashboard callbacks/badges
-  models.py                   # Application, Draft, Document, StatusLog (+ User model, local only)
+  models.py                   # Application, Draft, Document, StatusLog, User
   status_notifications.py     # Status-email and note-requirement helpers
   forms/                      # Program-specific form classes
+  management/commands/         # ensure_superuser (prototype login), import_properties
   views/                      # Accordion flow, shared steps, submission
 config/
   settings.py                 # App config, Unfold, email, DB
