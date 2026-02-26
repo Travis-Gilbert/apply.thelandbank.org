@@ -2,4 +2,4 @@
 nixPkgs = ["python313", "gcc"]
 
 [start]
-cmd = "python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"
+cmd = "python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"
