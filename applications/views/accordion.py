@@ -1,5 +1,5 @@
 """
-Accordion view — single-page collapsible application flow.
+Accordion view - single-page collapsible application flow.
 
 Replaces the multi-page wizard with an HTMX-powered accordion where
 only one section is expanded at a time. Completed sections collapse
@@ -82,7 +82,7 @@ PROGRAM_META = {
 # Each section maps to a form class (or None for document uploads) and
 # template paths for expanded + collapsed states.
 #
-# Section order is dynamic — determined by program_type + purchase_type.
+# Section order is dynamic - determined by program_type + purchase_type.
 
 SECTION_DEFS = {
     "property_search": {
@@ -91,7 +91,7 @@ SECTION_DEFS = {
         "expanded_template": "apply/v2/sections/property_search_expanded.html",
         "collapsed_template": "apply/v2/sections/property_search_collapsed.html",
     },
-    # Legacy — kept for backwards compat with old drafts
+    # Legacy - kept for backwards compat with old drafts
     "program": {
         "title": "Select a Program",
         "form": None,
@@ -191,7 +191,7 @@ SECTION_DEFS = {
             "ready_for_rehab": "apply/v2/sections/r4r/acks_expanded.html",
             "vip_spotlight": "apply/v2/sections/vip/acks_expanded.html",
         },
-        # acks never collapses — it's always the last section
+        # acks never collapses - it's always the last section
     },
 }
 
@@ -232,7 +232,7 @@ def _get_section_order(program_type, purchase_type="cash"):
 # ── Template resolution ─────────────────────────────────────────────
 
 def _resolve_template(section_def, template_key, program_type):
-    """Resolve a template path — handles dict (per-program) or string (shared)."""
+    """Resolve a template path - handles dict (per-program) or string (shared)."""
     tmpl = section_def.get(template_key)
     if isinstance(tmpl, dict):
         return tmpl.get(program_type, tmpl.get("featured_homes"))
@@ -240,7 +240,7 @@ def _resolve_template(section_def, template_key, program_type):
 
 
 def _resolve_form_class(section_def, program_type):
-    """Resolve a form class — handles dict (per-program) or string (shared)."""
+    """Resolve a form class - handles dict (per-program) or string (shared)."""
     form_name = section_def.get("form")
     if isinstance(form_name, dict):
         form_name = form_name.get(program_type)
@@ -409,14 +409,14 @@ def _section_context(draft, section_id, section_number, program_type, purchase_t
 
 def apply_page(request):
     """
-    GET /apply/ — render the accordion page.
+    GET /apply/ - render the accordion page.
 
     On first visit: shows only the property search section (expanded).
     On resume: rebuilds collapsed summaries for completed sections,
     expands the current section.
     ?new=1: clears the current draft and starts fresh.
     """
-    # ?new=1 — start a fresh application (used by disqualification "Start new" link)
+    # ?new=1 - start a fresh application (used by disqualification "Start new" link)
     if request.GET.get("new") == "1":
         request.session.pop("draft_token", None)
 
@@ -437,7 +437,7 @@ def apply_page(request):
     for i, section_id in enumerate(section_order):
         section_def = SECTION_DEFS[section_id]
         if i < active_index:
-            # Completed — render as collapsed summary bar
+            # Completed - render as collapsed summary bar
             sections.append({
                 "id": section_id,
                 "state": "collapsed",
@@ -447,7 +447,7 @@ def apply_page(request):
                 "edit_url": reverse("applications:section_edit", args=[section_id]),
             })
         elif i == active_index:
-            # Active — render as expanded section with form
+            # Active - render as expanded section with form
             form_instance = _build_form_for_section(section_id, program_type, form_data)
             expanded = {
                 "id": section_id,
@@ -473,6 +473,8 @@ def apply_page(request):
         "programs": PROGRAM_META,
         "completed_count": active_index,
         "total_sections": len(section_order),
+        "active_step_number": active_index + 1,
+        "is_in_progress": active_index > 0,
         "form_data": form_data,
         "draft": draft,
         "outline_steps": _build_outline_steps(section_order, active_index, program_type),
@@ -484,7 +486,7 @@ def apply_page(request):
 
 def section_program_select(request):
     """
-    POST — handles program card click.
+    POST - handles program card click.
 
     Saves the selected program, returns the collapsed program summary bar
     + the expanded contact section via hx-swap-oob.
@@ -574,7 +576,7 @@ def section_program_select(request):
 @ratelimit(key="ip", rate="20/m", method="POST", block=True)
 def section_validate(request, section_id):
     """
-    POST — validate a section's form data.
+    POST - validate a section's form data.
 
     On success: saves to draft, returns collapsed summary + expanded next section.
     On failure: returns the section re-rendered with validation errors.
@@ -585,7 +587,7 @@ def section_validate(request, section_id):
     draft = _get_draft(request)
     form_data = draft.form_data or {}
 
-    # Property search is special — it determines the program, which affects
+    # Property search is special - it determines the program, which affects
     # everything downstream.  Handle it before we resolve section_order.
     if section_id == "property_search":
         return _validate_property_search_section(request, draft)
@@ -679,7 +681,7 @@ def section_validate(request, section_id):
                 template = _resolve_template(section_def, "expanded_template", program_type)
                 return _render_expanded_response(request, template, ctx, section_id)
 
-            # Docs present — advance step and submit
+            # Docs present - advance step and submit
             overall_step = section_index + 1  # 1-indexed
             draft.current_step = max(draft.current_step, overall_step + 1)
             draft.save()
@@ -696,7 +698,7 @@ def section_validate(request, section_id):
             program_type, purchase_type, meta
         )
 
-    # Validation failed — re-render expanded section with errors
+    # Validation failed - re-render expanded section with errors
     ctx = _section_context(draft, section_id, section_number, program_type, purchase_type)
     ctx["form"] = form
     template = _resolve_template(section_def, "expanded_template", program_type)
@@ -707,7 +709,7 @@ def _validate_eligibility_section(
     request, draft, section_index, section_order,
     program_type, purchase_type, meta
 ):
-    """Handle eligibility gate — disqualify if needed."""
+    """Handle eligibility gate - disqualify if needed."""
     form_data = draft.form_data or {}
     form = app_forms.EligibilityForm(request.POST)
 
@@ -722,7 +724,7 @@ def _validate_eligibility_section(
         draft.save()
 
         if has_taxes or has_foreclosure:
-            # Disqualified — full-page redirect via HX-Redirect
+            # Disqualified - full-page redirect via HX-Redirect
             response = HttpResponse()
             response["HX-Redirect"] = reverse("applications:disqualified_v2")
             return response
@@ -745,7 +747,7 @@ def _validate_eligibility_section(
 
 def _validate_property_search_section(request, draft):
     """
-    Handle property search validation — the opening section.
+    Handle property search validation - the opening section.
 
     This is special because it determines the program, which affects the
     entire section order for the rest of the application.  After validation:
@@ -760,7 +762,7 @@ def _validate_property_search_section(request, draft):
         cleaned = _serialize_cleaned_data(form.cleaned_data)
         program_type = cleaned["program_type"]
 
-        # Block disabled programs (e.g. Vacant Lot — not yet accepting)
+        # Block disabled programs (e.g. Vacant Lot - not yet accepting)
         meta_check = PROGRAM_META.get(program_type, {})
         if meta_check.get("disabled"):
             form.add_error(None, "This program is not yet accepting applications.")
@@ -799,7 +801,7 @@ def _validate_property_search_section(request, draft):
             program_type, purchase_type, meta
         )
 
-    # Validation failed — re-render with errors
+    # Validation failed - re-render with errors
     ctx = _section_context(
         draft, "property_search", 1,
         form_data.get("program_type", ""),
@@ -879,7 +881,7 @@ def _validate_documents_section(
                 file_errors[doc_type] = f'"{file.name}" has an unrecognized format.'
                 continue
 
-            # Magic byte validation — don't trust browser-supplied content_type
+            # Magic byte validation - don't trust browser-supplied content_type
             file.seek(0)
             if ext == ".pdf":
                 header = file.read(5)
@@ -967,7 +969,7 @@ def _validate_documents_section(
 
 def section_edit(request, section_id):
     """
-    GET — re-expand a completed section for editing.
+    GET - re-expand a completed section for editing.
 
     Returns the expanded section HTML. The accordion JS handles
     collapsing whatever was previously active.
@@ -1075,14 +1077,14 @@ def _render_transition(
     hx-swap="outerHTML".  We return:
       1. Collapsed summary of current section  (primary swap content)
       2. Expanded next section                 (primary swap content)
-      3. Progress bar                          (hx-swap-oob — element exists)
+      3. Progress bar                          (hx-swap-oob - element exists)
 
     Items 1+2 are the PRIMARY response (no hx-swap-oob) so HTMX replaces
     the old expanded section with both elements via outerHTML.  The next
     section doesn't need to pre-exist in the DOM.
 
     Neither collapsed nor expanded templates include the outer
-    <div id="section-..."> wrapper — that's always added here.
+    <div id="section-..."> wrapper - that's always added here.
     """
     form_data = draft.form_data or {}
     section_def = SECTION_DEFS[current_section_id]
@@ -1097,7 +1099,7 @@ def _render_transition(
     }
     collapsed_template = _resolve_template(section_def, "collapsed_template", program_type)
     collapsed_inner = render(request, collapsed_template, collapsed_ctx).content.decode()
-    # Collapsed templates render only the inner summary-bar — add the id wrapper
+    # Collapsed templates render only the inner summary-bar - add the id wrapper
     collapsed_html = (
         f'<div id="section-{current_section_id}" '
         f'class="accordion-section accordion-gap">'
@@ -1130,14 +1132,14 @@ def _render_transition(
 
         next_template = _resolve_template(next_section_def, "expanded_template", program_type)
         next_inner = render(request, next_template, next_ctx).content.decode()
-        # Expanded templates don't include the outer id wrapper — add it here
+        # Expanded templates don't include the outer id wrapper - add it here
         next_section_html = (
             f'<div id="section-{next_section_id}" '
             f'class="accordion-section accordion-gap-active">'
             f'{next_inner}</div>'
         )
 
-    # Progress bar update (OOB — this element already exists in the DOM)
+    # Progress bar update (OOB - this element already exists in the DOM)
     progress_html = render(
         request,
         "apply/v2/_progress_bar.html",
@@ -1149,7 +1151,7 @@ def _render_transition(
         },
     ).content.decode()
 
-    # Application outline sidebar (OOB — updates the desktop checklist)
+    # Application outline sidebar (OOB - updates the desktop checklist)
     outline_steps = _build_outline_steps(section_order, next_index, program_type)
     outline_html = render(
         request,
@@ -1221,7 +1223,7 @@ def _draft_step_to_section_index(draft, section_order):
 
     The draft stores current_step as "the next step to work on" (1-indexed).
     After completing section at index ``i``, the validators set
-    ``current_step = max(current_step, i + 2)`` — that is, index+1 (to
+    ``current_step = max(current_step, i + 2)`` - that is, index+1 (to
     make it 1-indexed) plus 1 (to advance to the *next* step).
 
     So the reverse mapping is simply ``section_index = step - 1``.
@@ -1229,7 +1231,7 @@ def _draft_step_to_section_index(draft, section_order):
     step = draft.current_step or 1
 
     if not draft.form_data or not draft.form_data.get("program_type"):
-        return 0  # No program selected yet — show program selector
+        return 0  # No program selected yet - show program selector
 
     # Program (index 0) is always completed if we have a program_type,
     # so the earliest valid section is index 1 (contact).

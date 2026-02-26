@@ -146,7 +146,7 @@ def htmx_property_search(request):
         return HttpResponse("")
 
     # Try address match first (normalized for fuzzy matching)
-    # Exclude vacant_lot — program not yet implemented, buyers would hit dead end
+    # Exclude vacant_lot - program not yet implemented, buyers would hit dead end
     normalized = Property.normalize_address(q)
     results = list(
         Property.objects.filter(

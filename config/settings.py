@@ -171,7 +171,7 @@ if AWS_STORAGE_BUCKET_NAME:
     _s3_endpoint = os.getenv("AWS_S3_ENDPOINT_URL", "")
     if _s3_endpoint:
         AWS_S3_ENDPOINT_URL = _s3_endpoint
-    AWS_DEFAULT_ACL = None  # Private by default — access via pre-signed URLs only
+    AWS_DEFAULT_ACL = None  # Private by default - access via pre-signed URLs only
     AWS_S3_FILE_OVERWRITE = False  # Never overwrite existing files
     AWS_QUERYSTRING_EXPIRE = 900  # Pre-signed URLs expire in 15 minutes
     AWS_S3_OBJECT_PARAMETERS = {
@@ -183,11 +183,11 @@ if AWS_STORAGE_BUCKET_NAME:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Custom user model — always define at project start
+# Custom user model - always define at project start
 AUTH_USER_MODEL = "applications.User"
 
 
-# Email — Resend via Anymail in production, console backend for development
+# Email - Resend via Anymail in production, console backend for development
 
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
@@ -201,7 +201,7 @@ STAFF_NOTIFICATION_EMAIL = os.getenv("STAFF_NOTIFICATION_EMAIL", "offers@theland
 
 
 # ---------------------------------------------------------------------------
-# Security headers — always-on and production-only settings
+# Security headers - always-on and production-only settings
 # ---------------------------------------------------------------------------
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -213,7 +213,7 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # Railway is a reverse proxy — trust X-Forwarded-Proto
+    # Railway is a reverse proxy - trust X-Forwarded-Proto
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 

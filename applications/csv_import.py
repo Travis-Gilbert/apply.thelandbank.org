@@ -18,7 +18,7 @@ from django.utils import timezone
 
 from .models import Application, Property
 
-# Flexible column name mapping — accepts common variations
+# Flexible column name mapping - accepts common variations
 COLUMN_MAP = {
     # address
     "address": "address",
@@ -221,7 +221,7 @@ def _infer_program_type(program_raw, structure_flag):
         resolved = _resolve_program(program_raw)
         if resolved:
             return resolved
-        # Explicit value was set but unrecognized — return None so caller logs error
+        # Explicit value was set but unrecognized - return None so caller logs error
         return None
 
     if structure_flag == "Yes":
@@ -258,14 +258,14 @@ def import_properties_from_excel(excel_file, replace_existing=False, batch_label
 
     result = {"created": 0, "updated": 0, "skipped": 0, "errors": []}
 
-    # Load workbook — handle file path or file-like object
+    # Load workbook - handle file path or file-like object
     try:
         wb = openpyxl.load_workbook(excel_file, read_only=True)
     except Exception as e:
         result["errors"].append(f"Could not open Excel file: {e}")
         return result
 
-    # Find the right sheet — try "Properties" first, fall back to first sheet
+    # Find the right sheet - try "Properties" first, fall back to first sheet
     if "Properties" in wb.sheetnames:
         ws = wb["Properties"]
     else:
@@ -352,7 +352,7 @@ def import_properties_from_excel(excel_file, replace_existing=False, batch_label
         listing_price = None
         if idx_bid is not None and row[idx_bid]:
             listing_price = _parse_price(str(row[idx_bid]))
-            # Skip zero bids — they're not real prices
+            # Skip zero bids - they're not real prices
             if listing_price is not None and listing_price == 0:
                 listing_price = None
 

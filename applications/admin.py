@@ -250,6 +250,18 @@ class ApplicationAdmin(ModelAdmin):
         Application.ProgramType.VACANT_LOT: set(),
     }
 
+    DOC_SHORT_LABELS = {
+        Document.DocType.PHOTO_ID: "ID",
+        Document.DocType.PROOF_OF_FUNDS: "Funds",
+        Document.DocType.PROOF_OF_INCOME: "Income",
+        Document.DocType.PROOF_OF_DOWN_PAYMENT: "Down",
+        Document.DocType.RENO_FUNDING_PROOF: "Reno",
+        Document.DocType.PRIOR_INVESTMENT_PROOF: "Prior",
+        Document.DocType.VIP_PREAPPROVAL: "PreApp",
+        Document.DocType.VIP_PORTFOLIO_PHOTO: "Portfolio",
+        Document.DocType.VIP_SUPPORT_LETTER: "Support",
+    }
+
     list_display = (
         "reference_number",
         "full_name",
@@ -262,7 +274,6 @@ class ApplicationAdmin(ModelAdmin):
         "quick_docs",
         "display_assignee",
         "submitted_age",
-        "submitted_at",
     )
     list_filter = (
         "status",
@@ -561,18 +572,27 @@ class ApplicationAdmin(ModelAdmin):
             return "N/A"
 
         links_html = format_html_join(
-            " · ",
-            '<a href="{}" target="_blank" rel="noopener">{}</a>',
+            " ",
             (
-                (reverse("applications:document_view", args=[doc.pk]), doc.get_doc_type_display())
-                for doc in docs[:3]
+                "<a href='{}' target='_blank' rel='noopener' title='{}' style="
+                "'display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;"
+                "background:#eef2ff;color:#1e3a8a;font-size:11px;font-weight:600;text-decoration:none'>"
+                "{}</a>"
+            ),
+            (
+                (
+                    reverse("applications:document_view", args=[doc.pk]),
+                    doc.get_doc_type_display(),
+                    self.DOC_SHORT_LABELS.get(doc.doc_type, "Doc"),
+                )
+                for doc in docs[:2]
             ),
         )
-        if len(docs) > 3:
+        if len(docs) > 2:
             return format_html(
-                "{} <span style='color:#6b7280'>+{} more</span>",
+                "{} <span style='color:#6b7280;font-size:11px'>+{} more</span>",
                 links_html,
-                len(docs) - 3,
+                len(docs) - 2,
             )
         return links_html
 

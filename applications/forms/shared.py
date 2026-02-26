@@ -1,9 +1,9 @@
 """
 Shared forms used across all four program paths.
 
-  Step 1: PropertySearchForm — address autocomplete + auto-program routing
-  Step 2: IdentityForm — applicant contact info
-  Step 3: EligibilityForm — hard disqualifier gate
+  Step 1: PropertySearchForm - address autocomplete + auto-program routing
+  Step 2: IdentityForm - applicant contact info
+  Step 3: EligibilityForm - hard disqualifier gate
 
 Legacy PropertyForm kept for reference but no longer used in the accordion.
 """
@@ -21,7 +21,7 @@ _phone_validator = RegexValidator(
 
 
 class IdentityForm(forms.Form):
-    """Step 1: Applicant Identity — name, contact, mailing address."""
+    """Step 1: Applicant Identity - name, contact, mailing address."""
 
     first_name = forms.CharField(max_length=100, label="First Name")
     last_name = forms.CharField(max_length=100, label="Last Name")
@@ -71,7 +71,7 @@ class IdentityForm(forms.Form):
 
 
 class PropertyForm(forms.Form):
-    """Step 2: Property Information — address, parcel, program selection."""
+    """Step 2: Property Information - address, parcel, program selection."""
 
     property_address = forms.CharField(max_length=255, label="Property Address")
     parcel_id = forms.CharField(
@@ -97,7 +97,7 @@ class PropertyForm(forms.Form):
 
 class PropertySearchForm(forms.Form):
     """
-    Step 1: Find Your Property — address autocomplete + program auto-routing.
+    Step 1: Find Your Property - address autocomplete + program auto-routing.
 
     Buyer types an address → HTMX autocomplete → selects a property → program
     auto-fills from the Property model.  If the property isn't in the database,
@@ -151,11 +151,11 @@ class PropertySearchForm(forms.Form):
 
 class EligibilityForm(forms.Form):
     """
-    Step 3: Eligibility gate — hard disqualifiers.
+    Step 3: Eligibility gate - hard disqualifiers.
 
     If either answer is "Yes", the buyer is blocked from continuing.
     Uses Yes/No radio buttons (not checkboxes) because the question
-    framing asks "Do you owe..." — a checkbox default of unchecked
+    framing asks "Do you owe..." - a checkbox default of unchecked
     would be ambiguous.
     """
 
