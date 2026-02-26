@@ -116,10 +116,11 @@ class PropertySearchForm(forms.Form):
         required=False,
         label="I have attended an open house or visited this property",
     )
-    open_house_date = forms.DateField(
+    open_house_date = forms.CharField(
         required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
+        max_length=7,
         label="Date of visit (if applicable)",
+        help_text="Month and year is fine",
     )
 
     def clean(self):

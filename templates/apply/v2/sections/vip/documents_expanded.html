@@ -28,7 +28,7 @@
             {% include "apply/v2/_document_capture.html" with field_name="photo_id" label="Photo ID" required=True hint="State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted." existing_file=uploaded.photo_id %}
 
             {# Proof of funds (equity portion) #}
-            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds" required=True hint="Bank statement, investment account, or documentation showing available funds for the equity portion of your proposal." existing_file=uploaded.proof_of_funds %}
+            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds" required=True hint="Bank statement, investment account, or documentation showing available funds for the equity portion of your proposal." existing_file=uploaded.proof_of_funds hide_camera=True %}
 
             {# Optional documents #}
             <div class="space-y-1 pt-2">

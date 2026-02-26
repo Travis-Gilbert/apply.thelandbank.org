@@ -1,6 +1,6 @@
 {# Document capture: square camera + file buttons with preview #}
 {# Include with: field_name, label, required (bool), hint (optional), accept (e.g. "image/*,.pdf") #}
-{# existing_file (optional, for resume state) #}
+{# existing_file (optional, for resume state), hide_camera (bool, optional - hides Take Photo button) #}
 <div class="space-y-2">
     <input type="hidden" name="remove_{{ field_name }}" id="remove-{{ field_name }}" value="0">
     <div class="flex items-baseline justify-between gap-2">
@@ -32,6 +32,7 @@
 
     {# Capture buttons - camera primary on mobile, equal on desktop #}
     <div id="buttons-{{ field_name }}" class="flex gap-3 {% if existing_file %}hidden{% endif %}">
+        {% if not hide_camera %}
         {# Camera button (primary on mobile) #}
         <label class="doc-capture-btn doc-capture-btn-primary">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-civic-blue-600">
@@ -41,14 +42,15 @@
             <span class="text-xs sm:text-xs font-medium text-civic-blue-600">Take Photo</span>
             <input type="file"
                    name="{{ field_name }}"
-                   accept="{{ accept|default:'image/*,.pdf' }}"
+                   accept="{{ accept|default:'.png,.jpg,.jpeg,.pdf,.heic,.HEIC' }}"
                    capture="environment"
                    class="hidden"
                    onchange="handleDocCapture(this, '{{ field_name }}')">
         </label>
+        {% endif %}
 
-        {# File picker button #}
-        <label class="doc-capture-btn">
+        {# File picker button — stretches full width when camera is hidden #}
+        <label class="doc-capture-btn{% if hide_camera %} flex-1 !aspect-auto !max-w-none min-h-[72px]{% endif %}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-civic-blue-500">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
                 <polyline points="14 2 14 8 20 8"/>
@@ -58,7 +60,7 @@
             <span class="text-xs font-medium text-civic-blue-500">Choose File</span>
             <input type="file"
                    name="{{ field_name }}"
-                   accept="{{ accept|default:'image/*,.pdf' }}"
+                   accept="{{ accept|default:'.png,.jpg,.jpeg,.pdf,.heic,.HEIC' }}"
                    class="hidden"
                    onchange="handleDocCapture(this, '{{ field_name }}')">
         </label>

@@ -23,10 +23,10 @@
             {% include "apply/v2/_document_capture.html" with field_name="photo_id" label="Photo ID" required=True hint="State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted." existing_file=uploaded.photo_id %}
 
             {# Proof of funds for offer amount #}
-            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds - Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds %}
+            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds - Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds hide_camera=True %}
 
             {# Proof of funds OR financing for renovation costs #}
-            {% include "apply/v2/_document_capture.html" with field_name="reno_funding_proof" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.reno_funding_proof %}
+            {% include "apply/v2/_document_capture.html" with field_name="reno_funding_proof" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.reno_funding_proof hide_camera=True %}
 
             {# Prior GCLBA investment proof (conditional) #}
             {% if form_data.has_prior_gclba_purchase %}

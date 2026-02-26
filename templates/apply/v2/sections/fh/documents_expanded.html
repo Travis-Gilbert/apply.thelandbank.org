@@ -24,7 +24,7 @@
 
             {# Proof of funds (cash) or income + down payment (land contract) #}
             {% if "proof_of_funds" in required_docs %}
-            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for the full offer amount." existing_file=uploaded.proof_of_funds %}
+            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for the full offer amount." existing_file=uploaded.proof_of_funds hide_camera=True %}
             {% endif %}
 
             {% if "proof_of_income" in required_docs %}

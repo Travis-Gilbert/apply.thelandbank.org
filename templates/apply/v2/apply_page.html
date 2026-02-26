@@ -26,7 +26,11 @@
                 hx-swap="innerHTML"
                 hx-include="#accordion-form"
                 class="inline-flex items-center gap-1.5 {% if is_in_progress %}px-3 py-1.5 text-[11px]{% else %}px-3.5 py-2 text-xs{% endif %} rounded-lg font-medium text-civic-blue-700 bg-civic-blue-50 border border-civic-blue-200 hover:bg-civic-blue-100 transition-colors">
-            {% if is_in_progress %}Email me a resume link{% else %}Email me a link to resume later{% endif %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            Send Me a Link to Resume Later
         </button>
         <div id="save-progress-message" class="{% if is_in_progress %}mt-1.5{% else %}mt-2{% endif %} min-h-[18px] text-xs text-warm-600"></div>
     </div>

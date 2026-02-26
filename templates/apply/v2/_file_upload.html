@@ -47,7 +47,7 @@
         <input type="file"
                name="{{ field_name }}"
                id="fileinput-{{ field_name }}"
-               accept="{{ accept|default:'image/*,.pdf' }}"
+               accept="{{ accept|default:'.png,.jpg,.jpeg,.pdf,.heic,.HEIC' }}"
                {% if multiple %}multiple{% endif %}
                class="hidden"
                onchange="handleFileList(this, '{{ field_name }}')">

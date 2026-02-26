@@ -8,6 +8,7 @@ organized fieldsets, inline documents, and automatic status audit logging.
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html, format_html_join
@@ -19,6 +20,19 @@ from .models import Application, ApplicationDraft, Document, Property, StatusLog
 from .status_notifications import requires_transition_note, send_buyer_status_email
 
 
+# ── User forms (must point to custom User model, not auth.User) ──
+
+
+class CustomUserCreationForm(AdminUserCreationForm):
+    class Meta(AdminUserCreationForm.Meta):
+        model = User
+
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = User
+
+
 # ── User Admin (required for autocomplete_fields on assigned_to) ──
 
 
@@ -26,7 +40,8 @@ from .status_notifications import requires_transition_note, send_buyer_status_em
 class UserAdmin(BaseUserAdmin, ModelAdmin):
     """Custom User admin inheriting from both Django's UserAdmin and Unfold's ModelAdmin."""
 
-    pass
+    form = CustomUserChangeForm
+    add_form = CustomUserCreationForm
 
 
 # ── Property Admin ───────────────────────────────────────────────
@@ -774,11 +789,18 @@ class ApplicationAdmin(ModelAdmin):
 
     @admin.action(description="Set me as reviewer")
     def assign_to_me(self, request, queryset):
-        updated = queryset.exclude(assigned_to=request.user).update(
-            assigned_to=request.user,
-            updated_at=timezone.now(),
-        )
-        self.message_user(request, f"You are now reviewer for {updated} application(s).")
+        try:
+            updated = queryset.exclude(assigned_to=request.user).update(
+                assigned_to=request.user,
+                updated_at=timezone.now(),
+            )
+            self.message_user(request, f"You are now reviewer for {updated} application(s).")
+        except Exception as e:
+            self.message_user(
+                request,
+                f"Could not assign reviewer: {e}",
+                level=messages.ERROR,
+            )
 
     @admin.action(description="Remove reviewer")
     def clear_assignee(self, request, queryset):
