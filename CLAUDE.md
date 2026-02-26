@@ -444,7 +444,9 @@ Generated on final submission only. Example: GCLBA-2026-0001
 
 ```bash
 source venv/bin/activate          # Required — python not on PATH without it
-python manage.py runserver 8199   # Dev server (port 8199 avoids conflicts)
+python manage.py tailwind start   # Terminal 1: CSS watcher (required for dev)
+python manage.py runserver 8199   # Terminal 2: Dev server (port 8199 avoids conflicts)
+python manage.py tailwind build   # One-time CSS build (for CI/deploy)
 python manage.py check            # Validate models, urls, templates
 python manage.py makemigrations --check  # Verify no missing migrations
 ```

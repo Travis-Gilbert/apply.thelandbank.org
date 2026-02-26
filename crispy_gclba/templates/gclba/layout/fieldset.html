@@ -1,0 +1,12 @@
+<fieldset class="mb-6 p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
+  {% if fieldset.legend %}
+  <legend class="sr-only">{{ fieldset.legend }}</legend>
+  <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+    <div class="w-1 h-5 rounded-full bg-civic-green-600"></div>
+    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide">
+      {{ fieldset.legend }}
+    </h3>
+  </div>
+  {% endif %}
+  {{ fields }}
+</fieldset>

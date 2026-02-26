@@ -6,7 +6,10 @@
       "runtimeExecutable": "venv/bin/python",
       "runtimeArgs": ["manage.py", "runserver", "8199"],
       "port": 8199,
-      "autoPort": false
+      "autoPort": false,
+      "env": {
+        "DJANGO_DEBUG": "true"
+      }
     }
   ]
 }

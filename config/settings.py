@@ -59,8 +59,16 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     # Third-party
     "django_htmx",
+    "django_cotton",
+    "template_partials",
+    "crispy_forms",
     "anymail",
     "storages",
+    # Tailwind theme app
+    "tailwind",
+    "theme",
+    # Custom crispy template pack
+    "crispy_gclba",
     # Local apps
     "applications",
 ]
@@ -83,12 +91,16 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+            ],
+            "loaders": [
+                "django_cotton.cotton_loader.Loader",
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
             ],
         },
     },
@@ -355,3 +367,18 @@ UNFOLD = {
         },
     },
 }
+
+
+# ---------------------------------------------------------------------------
+# Crispy Forms — custom GCLBA template pack
+# ---------------------------------------------------------------------------
+
+CRISPY_TEMPLATE_PACK = "gclba"
+
+
+# ---------------------------------------------------------------------------
+# django-tailwind — compiled CSS build
+# ---------------------------------------------------------------------------
+
+TAILWIND_APP_NAME = "theme"
+INTERNAL_IPS = ["127.0.0.1"]
