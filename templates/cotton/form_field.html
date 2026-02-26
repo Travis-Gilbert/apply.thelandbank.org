@@ -1,0 +1,45 @@
+{% comment %}
+  Consistent form field wrapper with label, help text, and errors.
+
+  Usage:
+    <c-form_field label="Property Address" required for_id="id_property_address"
+                  help="Start typing to search GCLBA inventory"
+                  error="{{ form.property_address.errors.0 }}">
+      {{ form.property_address }}
+    </c-form_field>
+
+  Props:
+    label    (str)  : Label text
+    for_id   (str)  : ID of the input element (for label accessibility)
+    help     (str)  : Help text below the field
+    error    (str)  : Error message string
+    required (bool) : Show required asterisk
+    class    (str)  : Additional wrapper classes
+{% endcomment %}
+
+<div class="space-y-1.5 {{ class }}">
+  {% if label %}
+  <label{% if for_id %} for="{{ for_id }}"{% endif %}
+         class="block text-sm font-medium text-warm-900">
+    {{ label }}
+    {% if required %}
+    <span class="text-red-500 text-xs" aria-hidden="true">*</span>
+    {% endif %}
+  </label>
+  {% endif %}
+
+  {{ slot }}
+
+  {% if help %}
+  <p class="text-xs text-warm-500 leading-relaxed">{{ help }}</p>
+  {% endif %}
+
+  {% if error %}
+  <p class="text-xs text-red-600 font-medium flex items-center gap-1" role="alert">
+    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+    </svg>
+    {{ error }}
+  </p>
+  {% endif %}
+</div>

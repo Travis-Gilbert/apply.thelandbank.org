@@ -101,11 +101,11 @@
 
             {# ── Form-level errors ── #}
             {% if form.non_field_errors %}
-            <div class="rounded-lg border border-red-200 bg-red-50/60 px-4 py-3">
+            <c-alert type="error">
                 {% for error in form.non_field_errors %}
-                <p class="text-sm text-red-800">{{ error }}</p>
+                <p>{{ error }}</p>
                 {% endfor %}
-            </div>
+            </c-alert>
             {% endif %}
 
             {# ── Parcel ID (auto-filled from selection or manual entry) ── #}

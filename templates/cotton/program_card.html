@@ -1,0 +1,96 @@
+{% comment %}
+  Program selection card for Step 2 (property selection).
+
+  Usage:
+    <c-program_card
+      name="Featured Homes"
+      value="own_it_now"
+      description="Homes available for immediate sale"
+      detail="Cash or land contract. All homes sold as-is."
+      time="10-15 minutes"
+      color="green"
+      selected="{{ selected_program }}"
+    />
+
+  Props:
+    name         (str)  : Display name
+    value        (str)  : form value (own_it_now, ready_for_rehab, vip_spotlight)
+    description  (str)  : One-line description
+    detail       (str)  : Requirements note
+    time         (str)  : Estimated completion time
+    color        (str)  : green | amber | purple | gray
+    selected     (str)  : Currently selected program value (for active state)
+    disabled     (bool) : Gray out and prevent selection
+    field_name   (str)  : Form field name (default: "program_type")
+{% endcomment %}
+
+<label
+  class="
+    block cursor-pointer group
+    {% if disabled %}opacity-60 cursor-not-allowed{% endif %}
+  "
+>
+  <input
+    type="radio"
+    name="{{ field_name|default:'program_type' }}"
+    value="{{ value }}"
+    class="peer sr-only"
+    {% if selected == value %}checked{% endif %}
+    {% if disabled %}disabled{% endif %}
+  />
+
+  <div class="
+    relative p-5 rounded-card border-2 transition-all duration-200
+    bg-white shadow-card
+    peer-checked:shadow-card-hover
+    {% if not disabled %}
+      hover:shadow-card-hover hover:border-gray-300
+      peer-checked:border-gclba-500 peer-checked:bg-gclba-50/30
+    {% endif %}
+    {% if disabled %}
+      border-gray-200 bg-gray-50
+    {% else %}
+      border-gray-200
+    {% endif %}
+  ">
+    {# Selected indicator #}
+    <div class="
+      absolute top-4 right-4 w-5 h-5 rounded-full border-2
+      flex items-center justify-center transition-all
+      peer-checked:border-gclba-600 peer-checked:bg-gclba-600
+      {% if disabled %}border-gray-300{% else %}border-gray-300{% endif %}
+    ">
+      <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+
+    {# Program badge #}
+    <span class="
+      inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3
+      {% if color == 'green' %}bg-green-100 text-green-800
+      {% elif color == 'amber' %}bg-amber-100 text-amber-800
+      {% elif color == 'purple' %}bg-purple-100 text-purple-800
+      {% else %}bg-gray-100 text-gray-600{% endif %}
+    ">
+      {{ name }}
+    </span>
+
+    <p class="text-sm font-semibold text-gray-900 mb-1">{{ description }}</p>
+    <p class="text-xs text-gray-500 mb-3">{{ detail }}</p>
+
+    {# Time estimate #}
+    <div class="flex items-center gap-1.5 text-xs text-gray-400">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
+      </svg>
+      {{ time }}
+    </div>
+
+    {% if disabled %}
+    <div class="mt-3 text-xs font-medium text-gray-500 bg-gray-100 rounded px-2.5 py-1.5 text-center">
+      Coming Soon
+    </div>
+    {% endif %}
+  </div>
+</label>

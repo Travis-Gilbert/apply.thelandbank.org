@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     # Third-party
     "django_htmx",
-    "django_cotton",
+    "django_cotton.apps.SimpleAppConfig",
     "template_partials",
     "crispy_forms",
     "anymail",
@@ -98,9 +98,17 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ],
             "loaders": [
-                "django_cotton.cotton_loader.Loader",
-                "django.template.loaders.filesystem.Loader",
-                "django.template.loaders.app_directories.Loader",
+                (
+                    "template_partials.loader.Loader",
+                    [
+                        "django_cotton.cotton_loader.Loader",
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                    ],
+                ),
+            ],
+            "builtins": [
+                "django_cotton.templatetags.cotton",
             ],
         },
     },

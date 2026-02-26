@@ -12,11 +12,11 @@
     <div class="section-body expanded">
         <div class="px-5 pt-3 pb-6 space-y-6">
             {% if errors %}
-            <div class="p-4 rounded-xl border border-red-200 bg-red-50/60">
+            <c-alert type="error">
                 {% for error in errors %}
-                <p class="text-sm text-red-800">{{ error }}</p>
+                <p>{{ error }}</p>
                 {% endfor %}
-            </div>
+            </c-alert>
             {% endif %}
 
             {# Photo ID #}

@@ -12,23 +12,13 @@
     <div class="section-body expanded">
         <div class="px-5 pt-3 pb-6 space-y-5">
             {# Warning callout #}
-            <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/60">
-                <div class="flex items-start gap-3">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" class="flex-shrink-0 mt-0.5">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke-linecap="round" stroke-linejoin="round"/>
-                        <line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    <div>
-                        <p class="text-sm font-semibold text-amber-900">Important</p>
-                        <p class="text-xs text-amber-800 mt-1 leading-relaxed">
-                            The Land Bank cannot sell to you if you have delinquent property taxes or
-                            if you have been through tax foreclosure with the Genesee County Treasurer
-                            in the last five years.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <c-alert type="warning" title="Important">
+                <p class="text-xs">
+                    The Land Bank cannot sell to you if you have delinquent property taxes or
+                    if you have been through tax foreclosure with the Genesee County Treasurer
+                    in the last five years.
+                </p>
+            </c-alert>
 
             {# Delinquent taxes question #}
             <div class="space-y-2">

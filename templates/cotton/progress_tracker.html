@@ -1,0 +1,75 @@
+{% comment %}
+  Smart progress tracker that adapts to conditional steps.
+
+  Usage:
+    <c-progress_tracker
+      current="{{ current_step }}"
+      total="{{ total_steps }}"
+      steps="{{ active_steps }}"
+      step_names="{{ step_names }}"
+    />
+
+  Props:
+    current    (int)  : Current step position (1-indexed)
+    total      (int)  : Total active steps
+    steps      (list) : Active step numbers (e.g. [1,2,3,4,5,8])
+    step_names (dict) : Step number to label mapping
+{% endcomment %}
+
+<div class="mb-8">
+  {# Mobile: text indicator #}
+  <div class="sm:hidden mb-3">
+    <p class="text-sm font-semibold text-gclba-700">
+      Step {{ current }} of {{ total }}
+    </p>
+    <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div
+        class="h-full bg-gclba-600 rounded-full transition-all duration-500"
+        style="width: {% widthratio current total 100 %}%"
+      ></div>
+    </div>
+  </div>
+
+  {# Desktop: step indicators #}
+  <nav class="hidden sm:block" aria-label="Application progress">
+    <ol class="flex items-center gap-0">
+      {% for i in step_range %}
+      <li class="flex items-center {% if not forloop.last %}flex-1{% endif %}">
+        <div class="flex flex-col items-center">
+          {# Step circle #}
+          <div class="
+            w-9 h-9 rounded-full flex items-center justify-center
+            text-sm font-bold
+            border-2 transition-all duration-300
+            {% if i < current %}
+              bg-gclba-600 border-gclba-600 text-white
+            {% elif i == current %}
+              bg-white border-gclba-600 text-gclba-700
+              ring-4 ring-gclba-100
+            {% else %}
+              bg-gray-100 border-gray-300 text-gray-400
+            {% endif %}
+          ">
+            {% if i < current %}
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            {% else %}
+              {{ i }}
+            {% endif %}
+          </div>
+        </div>
+
+        {# Connector line #}
+        {% if not forloop.last %}
+        <div class="
+          flex-1 h-0.5 mx-2
+          transition-all duration-500
+          {% if i < current %}bg-gclba-500{% else %}bg-gray-200{% endif %}
+        "></div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </nav>
+</div>

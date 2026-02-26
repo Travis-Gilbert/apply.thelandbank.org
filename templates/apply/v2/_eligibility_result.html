@@ -1,0 +1,15 @@
+{# Eligibility result partial — inline pre-check hint (main flow uses HX-Redirect) #}
+{% if disqualified %}
+<c-alert type="error" title="Unable to continue">
+    <p class="text-sm">
+        The Land Bank cannot sell to you if you have delinquent property taxes
+        or if you have been through tax foreclosure with the Genesee County
+        Treasurer in the last five years.
+    </p>
+    <p class="text-xs text-warm-600 mt-2">
+        If your situation changes, you are welcome to apply again.
+        Questions? Call <strong>(810) 257-3088</strong> or email
+        <a href="mailto:offers@thelandbank.org" class="text-civic-blue-600 underline underline-offset-2">offers@thelandbank.org</a>.
+    </p>
+</c-alert>
+{% endif %}

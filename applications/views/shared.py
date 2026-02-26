@@ -9,7 +9,6 @@ import logging
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django_ratelimit.decorators import ratelimit
@@ -101,10 +100,7 @@ def save_progress(request):
         draft.save(update_fields=["email", "updated_at"])
 
     if not draft.email:
-        return HttpResponse(
-            '<span class="text-amber-600">'
-            "Please complete your contact information first to save your progress.</span>"
-        )
+        return render(request, "apply/v2/_save_feedback.html", {"status": "no_email"})
 
     resume_url = request.build_absolute_uri(f"/apply/resume/{draft.token}/")
     context = {
@@ -126,16 +122,12 @@ def save_progress(request):
         )
     except Exception:
         logger.exception("Failed to send magic link email to %s", draft.email)
-        return HttpResponse(
-            '<span class="text-amber-600">'
-            "Progress saved, but we couldn't send the email. "
-            "Please try again or note your application link.</span>"
-        )
+        return render(request, "apply/v2/_save_feedback.html", {"status": "email_error"})
 
-    return HttpResponse(
-        '<span class="text-civic-green-700 font-medium">'
-        "&#10003; Progress saved! Check your email for a resume link.</span>"
-    )
+    return render(request, "apply/v2/_save_feedback.html", {
+        "status": "success",
+        "email": draft.email,
+    })
 
 
 def resume_draft(request, token):
