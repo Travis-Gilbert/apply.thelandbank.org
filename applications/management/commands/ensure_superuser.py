@@ -1,8 +1,8 @@
 """
-Create a default superuser for prototype/demo environments.
+Create or reset a default superuser for prototype/demo environments.
 
-Idempotent: skips if the user already exists.
 Runs automatically on Railway deploy via nixpacks.toml start command.
+If the user exists, resets password and ensures superuser + staff flags.
 """
 
 from django.contrib.auth import get_user_model
@@ -10,16 +10,26 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = "Create default superuser (Admin/Admin123) if it does not exist"
+    help = "Create or reset prototype superuser (Admin/Admin123)"
 
     def handle(self, *args, **options):
         User = get_user_model()
         username = "Admin"
         password = "Admin123"
 
-        if User.objects.filter(username=username).exists():
-            self.stdout.write(self.style.WARNING(f"Superuser '{username}' already exists — skipping"))
-            return
+        user, created = User.objects.get_or_create(
+            username=username,
+            defaults={"email": "admin@thelandbank.org", "is_staff": True, "is_superuser": True},
+        )
 
-        User.objects.create_superuser(username=username, email="admin@thelandbank.org", password=password)
-        self.stdout.write(self.style.SUCCESS(f"Superuser '{username}' created"))
+        # Always reset password and ensure privileges on every deploy
+        user.set_password(password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_active = True
+        user.save()
+
+        if created:
+            self.stdout.write(self.style.SUCCESS(f"Superuser '{username}' created"))
+        else:
+            self.stdout.write(self.style.SUCCESS(f"Superuser '{username}' password reset and privileges confirmed"))
