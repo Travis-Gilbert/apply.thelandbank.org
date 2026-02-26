@@ -297,7 +297,7 @@ UNFOLD = {
                         "link": "/admin/applications/application/?status__exact=received",
                     },
                     {
-                        "title": "Unassigned Queue",
+                        "title": "Needs Reviewer",
                         "icon": "person_off",
                         "link": "/admin/applications/application/?status__exact=received&assigned_to__isnull=True",
                     },

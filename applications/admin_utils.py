@@ -171,7 +171,7 @@ def dashboard_callback(request, context):
                     "link": "/admin/applications/application/?status__exact=declined",
                 },
                 {
-                    "label": "Unassigned",
+                    "label": "Needs Reviewer",
                     "value": unassigned_received,
                     "icon": "person_off",
                     "color": "warning",

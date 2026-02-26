@@ -8,19 +8,43 @@
 {% endblock %}
 
 {% block content %}
+<style>
+  /* ── Dark mode overrides for dashboard ── */
+  .dark .dash-greeting    { color: #f9fafb !important; }
+  .dark .dash-subtitle    { color: #9ca3af !important; }
+  .dark .dash-card-needs  { background: #451a1a !important; border-color: #7f1d1d !important; }
+  .dark .dash-card-review { background: #422006 !important; border-color: #78350f !important; }
+  .dark .dash-card-docs   { background: #2e1065 !important; border-color: #4c1d95 !important; }
+  .dark .dash-card-stale  { background: #431407 !important; border-color: #7c2d12 !important; }
+  .dark .dash-table-wrap  { background: #111827 !important; border-color: #374151 !important; }
+  .dark .dash-table-head  { border-color: #1f2937 !important; }
+  .dark .dash-table-title { color: #f9fafb !important; }
+  .dark .dash-table-link  { color: #4ade80 !important; }
+  .dark .dash-th          { background: #1f2937 !important; color: #9ca3af !important; }
+  .dark .dash-tr          { border-color: #1f2937 !important; }
+  .dark .dash-td-name     { color: #e5e7eb !important; }
+  .dark .dash-td-subtle   { color: #9ca3af !important; }
+  .dark .dash-ref-link    { color: #4ade80 !important; }
+  .dark .dash-stat-card   { background: #111827 !important; border-color: #374151 !important; }
+  .dark .dash-stat-value  { color: #f9fafb !important; }
+  .dark .dash-stat-icon   { color: #9ca3af !important; }
+  .dark .dash-stat-label  { color: #9ca3af !important; }
+  .dark .dash-muted       { color: #6b7280 !important; }
+</style>
+
 <div style="max-width: 1200px; margin: 0 auto;">
 
   {# ── Greeting + summary ──────────────────────────────── #}
   <div style="margin-bottom: 32px;">
-    <h1 style="font-size: 24px; font-weight: 700; color: #111; margin: 0 0 8px;">
+    <h1 class="dash-greeting" style="font-size: 24px; font-weight: 700; color: #111; margin: 0 0 8px;">
       Good {% now "A" %}, {{ request.user.first_name|default:request.user.username }}
     </h1>
-    <p style="font-size: 14px; color: #6b7280; margin: 0;">
+    <p class="dash-subtitle" style="font-size: 14px; color: #6b7280; margin: 0;">
       {{ total_applications }} total application{{ total_applications|pluralize }} in the system.
       {% if unassigned %}
-        <strong style="color: #dc2626;">{{ unassigned }} unassigned</strong> need{{ unassigned|pluralize:"s," }} attention.
+        <strong style="color: #dc2626;">{{ unassigned }} without a reviewer</strong> need{{ unassigned|pluralize:"s," }} attention.
       {% else %}
-        All applications are assigned.
+        All applications have a reviewer.
       {% endif %}
     </p>
   </div>
@@ -31,7 +55,7 @@
     {# Needs Action (unassigned received) #}
     <a href="/admin/applications/application/?status__exact=received&assigned_to__isnull=True"
        style="text-decoration: none;">
-      <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 20px;">
+      <div class="dash-card-needs" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 20px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #991b1b;">priority_high</span>
           <p style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #991b1b; margin: 0;">
@@ -41,14 +65,14 @@
         <p style="font-size: 32px; font-weight: 800; color: #dc2626; margin: 0;">
           {{ unassigned }}
         </p>
-        <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">Unassigned submissions</p>
+        <p class="dash-muted" style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">No reviewer assigned</p>
       </div>
     </a>
 
     {# My Review Queue #}
     <a href="/admin/applications/application/?status__exact=under_review&assigned_to__id__exact={{ request.user.pk }}"
        style="text-decoration: none;">
-      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 20px;">
+      <div class="dash-card-review" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 20px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #92400e;">rate_review</span>
           <p style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #92400e; margin: 0;">
@@ -58,14 +82,14 @@
         <p style="font-size: 32px; font-weight: 800; color: #d97706; margin: 0;">
           {{ my_review }}
         </p>
-        <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">Under review by you</p>
+        <p class="dash-muted" style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">Under review by you</p>
       </div>
     </a>
 
     {# Waiting on Docs #}
     <a href="/admin/applications/application/?status__exact=needs_more_info&assigned_to__id__exact={{ request.user.pk }}"
        style="text-decoration: none;">
-      <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 20px;">
+      <div class="dash-card-docs" style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 20px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #5b21b6;">upload_file</span>
           <p style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #5b21b6; margin: 0;">
@@ -75,7 +99,7 @@
         <p style="font-size: 32px; font-weight: 800; color: #7c3aed; margin: 0;">
           {{ my_needs_more_info }}
         </p>
-        <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">Buyer needs to respond</p>
+        <p class="dash-muted" style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">Buyer needs to respond</p>
       </div>
     </a>
 
@@ -83,7 +107,7 @@
     {% if stale_under_review %}
     <a href="/admin/applications/application/?status__exact=under_review"
        style="text-decoration: none;">
-      <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 20px;">
+      <div class="dash-card-stale" style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 20px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #9a3412;">schedule</span>
           <p style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #9a3412; margin: 0;">
@@ -93,50 +117,50 @@
         <p style="font-size: 32px; font-weight: 800; color: #ea580c; margin: 0;">
           {{ stale_under_review }}
         </p>
-        <p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">Need follow-up</p>
+        <p class="dash-muted" style="font-size: 11px; color: #9ca3af; margin: 4px 0 0;">Need follow-up</p>
       </div>
     </a>
     {% endif %}
   </div>
 
   {# ── Recent submissions table ────────────────────────── #}
-  <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 32px;">
-    <div style="padding: 16px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;">
-      <h2 style="font-size: 14px; font-weight: 700; color: #111; margin: 0;">
+  <div class="dash-table-wrap" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 32px;">
+    <div class="dash-table-head" style="padding: 16px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;">
+      <h2 class="dash-table-title" style="font-size: 14px; font-weight: 700; color: #111; margin: 0;">
         Recent Submissions
       </h2>
-      <a href="/admin/applications/application/"
+      <a class="dash-table-link" href="/admin/applications/application/"
          style="font-size: 12px; color: #16a34a; text-decoration: none; font-weight: 600;">
         View all &rarr;
       </a>
     </div>
     <table style="width: 100%; border-collapse: collapse;">
       <thead>
-        <tr style="background: #f9fafb;">
+        <tr class="dash-th">
           <th style="padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Ref #</th>
           <th style="padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Applicant</th>
           <th style="padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Property</th>
           <th style="padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Program</th>
           <th style="padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Status</th>
-          <th style="padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Assigned</th>
+          <th style="padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Reviewer</th>
         </tr>
       </thead>
       <tbody>
         {% for app in recent_applications %}
-        <tr style="border-top: 1px solid #f3f4f6;">
+        <tr class="dash-tr" style="border-top: 1px solid #f3f4f6;">
           <td style="padding: 12px 16px;">
-            <a href="/admin/applications/application/{{ app.pk }}/change/"
+            <a class="dash-ref-link" href="/admin/applications/application/{{ app.pk }}/change/"
                style="font-size: 13px; font-weight: 600; color: #16a34a; text-decoration: none; font-family: ui-monospace, SFMono-Regular, monospace;">
               {{ app.reference_number|default:"--" }}
             </a>
           </td>
-          <td style="padding: 12px 16px; font-size: 13px; color: #374151;">
+          <td class="dash-td-name" style="padding: 12px 16px; font-size: 13px; color: #374151;">
             {{ app.full_name }}
           </td>
-          <td style="padding: 12px 16px; font-size: 13px; color: #6b7280;">
+          <td class="dash-td-subtle" style="padding: 12px 16px; font-size: 13px; color: #6b7280;">
             {{ app.property_address|truncatechars:35 }}
           </td>
-          <td style="padding: 12px 16px; font-size: 12px; color: #6b7280;">
+          <td class="dash-td-subtle" style="padding: 12px 16px; font-size: 12px; color: #6b7280;">
             {{ app.get_program_type_display }}
           </td>
           <td style="padding: 12px 16px;">
@@ -153,17 +177,17 @@
               {{ app.get_status_display }}
             </span>
           </td>
-          <td style="padding: 12px 16px; font-size: 13px; color: #6b7280;">
+          <td class="dash-td-subtle" style="padding: 12px 16px; font-size: 13px; color: #6b7280;">
             {% if app.assigned_to %}
               {{ app.assigned_to.get_short_name|default:app.assigned_to.username }}
             {% else %}
-              <span style="color: #dc2626; font-weight: 500;">Unassigned</span>
+              <span style="color: #dc2626; font-weight: 500;">Needs reviewer</span>
             {% endif %}
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" style="padding: 24px 16px; text-align: center; color: #9ca3af; font-size: 13px;">
+          <td colspan="6" class="dash-muted" style="padding: 24px 16px; text-align: center; color: #9ca3af; font-size: 13px;">
             No applications yet.
           </td>
         </tr>
@@ -176,10 +200,10 @@
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
     {% for stat in stats %}
     <a href="{{ stat.link }}" style="text-decoration: none;">
-      <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; text-align: center;">
-        <span class="material-symbols-outlined" style="font-size: 20px; color: #6b7280; margin-bottom: 4px; display: block;">{{ stat.icon }}</span>
-        <p style="font-size: 20px; font-weight: 700; color: #111; margin: 0;">{{ stat.value }}</p>
-        <p style="font-size: 11px; color: #6b7280; margin: 4px 0 0;">{{ stat.label }}</p>
+      <div class="dash-stat-card" style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; text-align: center;">
+        <span class="material-symbols-outlined dash-stat-icon" style="font-size: 20px; color: #6b7280; margin-bottom: 4px; display: block;">{{ stat.icon }}</span>
+        <p class="dash-stat-value" style="font-size: 20px; font-weight: 700; color: #111; margin: 0;">{{ stat.value }}</p>
+        <p class="dash-stat-label" style="font-size: 11px; color: #6b7280; margin: 4px 0 0;">{{ stat.label }}</p>
       </div>
     </a>
     {% endfor %}

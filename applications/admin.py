@@ -197,9 +197,9 @@ class AssignmentFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ("mine", "Assigned to me"),
-            ("unassigned", "Unassigned"),
-            ("others", "Assigned to others"),
+            ("mine", "My reviews"),
+            ("unassigned", "Needs reviewer"),
+            ("others", "Other reviewer"),
         ]
 
     def queryset(self, request, queryset):
@@ -651,10 +651,10 @@ class ApplicationAdmin(ModelAdmin):
             )
         return links_html
 
-    @display(description="Assigned", ordering="assigned_to__username")
+    @display(description="Reviewer", ordering="assigned_to__username")
     def display_assignee(self, instance):
         if not instance.assigned_to:
-            return "Unassigned"
+            return "Needs reviewer"
         return instance.assigned_to.get_full_name() or instance.assigned_to.get_username()
 
     @display(description="Age", ordering="submitted_at")
@@ -772,21 +772,21 @@ class ApplicationAdmin(ModelAdmin):
     def mark_declined(self, request, queryset):
         self._bulk_set_status(request, queryset, Application.Status.DECLINED)
 
-    @admin.action(description="Assign selected to me")
+    @admin.action(description="Set me as reviewer")
     def assign_to_me(self, request, queryset):
         updated = queryset.exclude(assigned_to=request.user).update(
             assigned_to=request.user,
             updated_at=timezone.now(),
         )
-        self.message_user(request, f"Assigned {updated} application(s) to you.")
+        self.message_user(request, f"You are now reviewer for {updated} application(s).")
 
-    @admin.action(description="Clear assignee")
+    @admin.action(description="Remove reviewer")
     def clear_assignee(self, request, queryset):
         updated = queryset.exclude(assigned_to=None).update(
             assigned_to=None,
             updated_at=timezone.now(),
         )
-        self.message_user(request, f"Cleared assignee for {updated} application(s).")
+        self.message_user(request, f"Removed reviewer from {updated} application(s).")
 
     def save_model(self, request, obj, form, change):
         """Auto-create StatusLog when status changes."""
