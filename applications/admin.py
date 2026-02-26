@@ -567,6 +567,14 @@ class ApplicationAdmin(ModelAdmin):
         ),
     )
 
+    def has_add_permission(self, request):
+        """Applications are created only through the buyer form, not by staff."""
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        """Only superusers can delete applications — prevents accidental loss."""
+        return request.user.is_superuser
+
     def get_fieldsets(self, request, obj=None):
         """Hide irrelevant field groups for the selected program."""
         if obj is None:
@@ -644,7 +652,8 @@ class ApplicationAdmin(ModelAdmin):
         links_html = format_html_join(
             " ",
             (
-                "<a href='{}' target='_blank' rel='noopener' title='{}' style="
+                "<a href='{}' target='_blank' rel='noopener' title='{}'"
+                " onclick='event.stopPropagation()' style="
                 "'display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;"
                 "background:#eef2ff;color:#1e3a8a;font-size:11px;font-weight:600;text-decoration:none'>"
                 "{}</a>"
@@ -658,13 +667,17 @@ class ApplicationAdmin(ModelAdmin):
                 for doc in docs[:2]
             ),
         )
+        wrap = "<div style='display:flex;flex-wrap:wrap;gap:4px;max-width:180px'>{}</div>"
         if len(docs) > 2:
             return format_html(
-                "{} <span style='color:#6b7280;font-size:11px'>+{} more</span>",
-                links_html,
-                len(docs) - 2,
+                wrap,
+                format_html(
+                    "{} <span style='color:#6b7280;font-size:11px'>+{} more</span>",
+                    links_html,
+                    len(docs) - 2,
+                ),
             )
-        return links_html
+        return format_html(wrap, links_html)
 
     @display(description="Reviewer", ordering="assigned_to__username")
     def display_assignee(self, instance):
@@ -876,4 +889,3 @@ class ApplicationDraftAdmin(ModelAdmin):
 
     is_expired_display.short_description = "Expired?"
     is_expired_display.boolean = True
-    form = ApplicationAdminForm

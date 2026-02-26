@@ -23,21 +23,37 @@ _phone_validator = RegexValidator(
 class IdentityForm(forms.Form):
     """Step 1: Applicant Identity - name, contact, mailing address."""
 
-    first_name = forms.CharField(max_length=100, label="First Name")
-    last_name = forms.CharField(max_length=100, label="Last Name")
-    email = forms.EmailField(label="Email Address")
+    first_name = forms.CharField(
+        max_length=100, label="First Name",
+        widget=forms.TextInput(attrs={"placeholder": "First name"}),
+    )
+    last_name = forms.CharField(
+        max_length=100, label="Last Name",
+        widget=forms.TextInput(attrs={"placeholder": "Last name"}),
+    )
+    email = forms.EmailField(
+        label="Email Address",
+        widget=forms.EmailInput(attrs={"placeholder": "you@example.com"}),
+    )
     phone = forms.CharField(
         max_length=20,
         label="Phone Number",
         validators=[_phone_validator],
+        widget=forms.TextInput(attrs={"placeholder": "(810) 555-0123", "inputmode": "tel"}),
     )
     preferred_contact = forms.ChoiceField(
         choices=Application.PreferredContact.choices,
         initial=Application.PreferredContact.EMAIL,
         label="Preferred Contact Method",
     )
-    mailing_address = forms.CharField(max_length=255, label="Mailing Address")
-    city = forms.CharField(max_length=100, label="City")
+    mailing_address = forms.CharField(
+        max_length=255, label="Mailing Address",
+        widget=forms.TextInput(attrs={"placeholder": "123 Main St"}),
+    )
+    city = forms.CharField(
+        max_length=100, label="City",
+        widget=forms.TextInput(attrs={"placeholder": "City"}),
+    )
     state = forms.ChoiceField(
         choices=[
             ("AL", "AL"), ("AK", "AK"), ("AZ", "AZ"), ("AR", "AR"), ("CA", "CA"),
@@ -55,18 +71,23 @@ class IdentityForm(forms.Form):
         initial="MI",
         label="State",
     )
-    zip_code = forms.CharField(max_length=10, label="ZIP Code")
+    zip_code = forms.CharField(
+        max_length=10, label="ZIP Code",
+        widget=forms.TextInput(attrs={"placeholder": "ZIP code", "inputmode": "numeric"}),
+    )
     purchasing_entity_name = forms.CharField(
         max_length=200,
         required=False,
         label="Purchasing Entity Name",
         help_text="If purchasing through an LLC, trust, or other entity",
+        widget=forms.TextInput(attrs={"placeholder": "LLC or entity name (if applicable)"}),
     )
     contact_name_different = forms.CharField(
         max_length=200,
         required=False,
         label="Alternate Contact Name",
         help_text="If the primary contact is different from the buyer",
+        widget=forms.TextInput(attrs={"placeholder": "Contact name (if different from buyer)"}),
     )
 
 

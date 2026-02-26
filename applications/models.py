@@ -577,6 +577,13 @@ class Application(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+    @property
+    def formatted_phone(self):
+        digits = "".join(c for c in (self.phone or "") if c.isdigit())
+        if len(digits) == 10:
+            return f"({digits[:3]}) {digits[3:6]}-{digits[6:]}"
+        return self.phone or ""
+
     # ── Interior line-item field names (for calculation) ────────
 
     INTERIOR_RENO_FIELDS = [

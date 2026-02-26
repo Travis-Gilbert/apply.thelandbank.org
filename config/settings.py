@@ -280,7 +280,7 @@ UNFOLD = {
                         "badge": "applications.admin_utils.pending_count_badge",
                     },
                     {
-                        "title": "Drafts (In Progress)",
+                        "title": "Applications in Progress",
                         "icon": "edit_note",
                         "link": reverse_lazy("admin:applications_applicationdraft_changelist"),
                     },

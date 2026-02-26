@@ -14,7 +14,7 @@
     </h2>
     <p class="{% if is_in_progress %}text-xs text-warm-500 mt-1 max-w-sm{% else %}text-sm text-warm-500 mt-1.5 max-w-md{% endif %} mx-auto">
         {% if is_in_progress %}
-            You're on step {{ active_step_number }} of {{ total_sections }}. Your progress is saved automatically.
+            Your progress is saved automatically. Pick up right where you left off.
         {% else %}
             Fill out each section below. Your progress is saved automatically, and you can return anytime to finish.
         {% endif %}
@@ -133,6 +133,22 @@
                 }, 150);
             }
         }
+    });
+
+    // ── Clear validation errors on re-input (event delegation) ────────
+    // Uses event delegation so it works after HTMX DOM swaps
+    document.getElementById('accordion-form').addEventListener('input', function(evt) {
+        var section = evt.target.closest('.section-card-v2');
+        if (!section) return;
+        // Remove field-level error text
+        var errs = section.querySelectorAll('.text-red-600');
+        for (var i = 0; i < errs.length; i++) errs[i].remove();
+        // Remove error banners
+        var banners = section.querySelectorAll('.border-red-200');
+        for (var i = 0; i < banners.length; i++) banners[i].remove();
+        // Remove has-error class from inputs in this section
+        var errInputs = section.querySelectorAll('.has-error');
+        for (var i = 0; i < errInputs.length; i++) errInputs[i].classList.remove('has-error');
     });
 
     // ── Property search: autocomplete + program routing ────────

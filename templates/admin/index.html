@@ -37,7 +37,7 @@
   {# ── Greeting + summary ──────────────────────────────── #}
   <div style="margin-bottom: 32px;">
     <h1 class="dash-greeting" style="font-size: 24px; font-weight: 700; color: #111; margin: 0 0 8px;">
-      Good {% now "A" %}, {{ request.user.first_name|default:request.user.username }}
+      Good {{ greeting_time }}, {{ request.user.first_name|default:request.user.username }}
     </h1>
     <p class="dash-subtitle" style="font-size: 14px; color: #6b7280; margin: 0;">
       {{ total_applications }} total application{{ total_applications|pluralize }} in the system.

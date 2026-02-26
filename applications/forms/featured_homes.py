@@ -27,6 +27,7 @@ class FHOfferForm(forms.Form):
         decimal_places=2,
         min_value=Decimal("1.00"),
         label="Offer Amount ($)",
+        widget=forms.NumberInput(attrs={"placeholder": "Enter amount", "inputmode": "decimal"}),
     )
     purchase_type = forms.ChoiceField(
         choices=Application.PurchaseType.choices,
@@ -39,6 +40,7 @@ class FHOfferForm(forms.Form):
         required=False,
         label="Down Payment Amount ($)",
         help_text="Minimum: 10% of offer or $1,000, whichever is higher",
+        widget=forms.NumberInput(attrs={"placeholder": "Enter amount", "inputmode": "decimal"}),
     )
     is_self_employed = forms.BooleanField(
         required=False,
@@ -89,19 +91,20 @@ class FHRenovationNarrativeForm(forms.Form):
         label="Is this your first home purchase, or are you moving to Michigan?",
     )
     renovation_description = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 4}),
+        widget=forms.Textarea(attrs={"rows": 4, "placeholder": "Describe the renovations you plan to make"}),
         label="What renovations will you be making?",
     )
     renovation_who = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 3}),
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Yourself, licensed contractor, etc."}),
         label="Who will complete the renovations?",
     )
     renovation_when = forms.CharField(
         max_length=200,
         label="When will renovations be completed?",
+        widget=forms.TextInput(attrs={"placeholder": "e.g. Within 12 months of closing"}),
     )
     renovation_funding = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 3}),
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Cash savings, construction loan, etc."}),
         label="How will you pay for the purchase and renovations?",
     )
 

@@ -67,6 +67,15 @@ def dashboard_callback(request, context):
 
     now = timezone.now()
 
+    # ── Time-of-day greeting ─────────────────────────────────
+    hour = now.hour
+    if hour < 12:
+        greeting_time = "morning"
+    elif hour < 17:
+        greeting_time = "afternoon"
+    else:
+        greeting_time = "evening"
+
     # ── Global status counts ──────────────────────────────────
     status_counts = dict(
         Application.objects.values_list("status")
@@ -133,6 +142,7 @@ def dashboard_callback(request, context):
 
     context.update(
         {
+            "greeting_time": greeting_time,
             # Stat card data (existing format for backwards compat)
             "stats": [
                 {

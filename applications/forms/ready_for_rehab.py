@@ -29,6 +29,7 @@ class R4ROfferForm(forms.Form):
         decimal_places=2,
         min_value=Decimal("1.00"),
         label="Offer Amount ($)",
+        widget=forms.NumberInput(attrs={"placeholder": "Enter amount", "inputmode": "decimal"}),
     )
     has_prior_gclba_purchase = forms.BooleanField(
         required=False,

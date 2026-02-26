@@ -90,7 +90,7 @@
                     </label>
                     <input type="text" name="{{ form.city.html_name }}" id="{{ form.city.id_for_label }}"
                            value="{{ form.city.value|default:'' }}" required
-                           placeholder="Flint" class="gclba-input{% if form.city.errors %} has-error{% endif %}">
+                           placeholder="City" class="gclba-input{% if form.city.errors %} has-error{% endif %}">
                     {% if form.city.errors %}<p class="text-xs text-red-600 font-medium">{{ form.city.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="space-y-1.5">
@@ -111,7 +111,7 @@
                     </label>
                     <input type="text" name="{{ form.zip_code.html_name }}" id="{{ form.zip_code.id_for_label }}"
                            value="{{ form.zip_code.value|default:'' }}" required maxlength="10" inputmode="numeric"
-                           placeholder="48502" class="gclba-input{% if form.zip_code.errors %} has-error{% endif %}">
+                           placeholder="ZIP code" class="gclba-input{% if form.zip_code.errors %} has-error{% endif %}">
                     {% if form.zip_code.errors %}<p class="text-xs text-red-600 font-medium">{{ form.zip_code.errors.0 }}</p>{% endif %}
                 </div>
             </div>
