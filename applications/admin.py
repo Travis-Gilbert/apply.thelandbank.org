@@ -711,18 +711,11 @@ class ApplicationAdmin(ModelAdmin):
         return "TBD"
 
     def _bulk_set_status(self, request, queryset, new_status):
-        apps = list(queryset.only(
-            "id",
-            "status",
-            "staff_notes",
-            "reference_number",
-            "first_name",
-            "email",
-            "property_address",
-            "program_type",
-            "purchase_type",
-            "offer_amount",
-        ))
+        # Don't use .only() here — the base queryset from get_queryset() has
+        # .select_related("assigned_to"), and .only() without that field causes
+        # FieldError in Django 6.0. Bulk actions operate on a small selection
+        # so the overhead is negligible.
+        apps = list(queryset)
         changed = [app for app in apps if app.status != new_status]
         if not changed:
             self.message_user(request, "No status changes were needed.")
