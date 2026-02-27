@@ -6,11 +6,14 @@ swap into the DOM. They're called via hx-get or hx-post from the
 buyer-facing form templates.
 """
 
+import logging
 from decimal import Decimal, InvalidOperation
 
 from django.http import HttpResponse
 from django.shortcuts import render
 from django_ratelimit.decorators import ratelimit
+
+logger = logging.getLogger(__name__)
 
 
 def htmx_purchase_type_fields(request):
@@ -147,23 +150,31 @@ def htmx_property_search(request):
 
     # Try address match first (normalized for fuzzy matching)
     # Exclude vacant_lot - program not yet implemented, buyers would hit dead end
-    normalized = Property.normalize_address(q)
-    results = list(
-        Property.objects.filter(
-            status="available",
-            address_normalized__icontains=normalized,
-        )
-        .exclude(program_type="vacant_lot")[:8]
-    )
-
-    # Fall back to parcel ID match if no address hits
-    if not results:
+    try:
+        normalized = Property.normalize_address(q)
         results = list(
             Property.objects.filter(
                 status="available",
-                parcel_id__icontains=q,
+                address_normalized__icontains=normalized,
             )
             .exclude(program_type="vacant_lot")[:8]
+        )
+
+        # Fall back to parcel ID match if no address hits
+        if not results:
+            results = list(
+                Property.objects.filter(
+                    status="available",
+                    parcel_id__icontains=q,
+                )
+                .exclude(program_type="vacant_lot")[:8]
+            )
+    except Exception:
+        logger.exception("Property search failed for query: %s", q)
+        return render(
+            request,
+            "apply/partials/property_results.html",
+            {"error": True, "query": q},
         )
 
     # Import here to avoid circular import at module level

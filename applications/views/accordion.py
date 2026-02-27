@@ -296,11 +296,15 @@ def _build_summary(section_id, form_data):
         last = form_data.get("last_name", "")
         entity = form_data.get("purchasing_entity_name", "")
         email = form_data.get("email", "")
+        pref = form_data.get("preferred_contact", "")
+        pref_labels = {"email": "email preferred", "text": "text preferred", "phone_call": "call preferred"}
         parts = [f"{first} {last}".strip()]
         if entity:
             parts[0] += f" ({entity})"
         if email:
             parts.append(email)
+        if pref and pref in pref_labels:
+            parts.append(pref_labels[pref])
         return " \u00b7 ".join(parts)
 
     if section_id == "property":
@@ -322,7 +326,16 @@ def _build_summary(section_id, form_data):
                 amount_fmt = f"${Decimal(amount):,.0f}"
             except Exception:
                 amount_fmt = f"${amount}"
-            return f"{amount_fmt} \u00b7 {label}"
+            parts = [amount_fmt, label]
+            # Show down payment for land contract
+            if ptype == "land_contract":
+                down = form_data.get("down_payment_amount", "")
+                if down:
+                    try:
+                        parts.append(f"${Decimal(down):,.0f} down")
+                    except Exception:
+                        parts.append(f"${down} down")
+            return " \u00b7 ".join(parts)
         return label
 
     if section_id == "line_items":
@@ -357,11 +370,33 @@ def _build_summary(section_id, form_data):
         return f"Homebuyer education: {agency_labels.get(agency, agency)}"
 
     if section_id == "proposal":
+        # Count non-empty VIP proposal responses
+        proposal_fields = [
+            "vip_q1_who_and_why", "vip_q2_prior_purchases",
+            "vip_q3_renovation_costs_timeline", "vip_q4_financing",
+            "vip_q5_has_experience", "vip_q6_completion_plan",
+            "vip_q7_contractor_info", "vip_q8_additional_info",
+        ]
+        filled = sum(1 for f in proposal_fields if form_data.get(f))
+        if filled:
+            return f"Proposal \u00b7 {filled} of {len(proposal_fields)} responses provided"
         return "Proposal submitted"
 
     if section_id == "documents":
         uploads = form_data.get("uploads", {})
         count = _uploaded_doc_count(uploads)
+        # Try to show "X of Y required docs" when we have program context
+        program_type = form_data.get("program_type", "")
+        purchase_type = form_data.get("purchase_type", "cash")
+        if program_type:
+            from .shared import _get_required_docs
+            required = _get_required_docs(program_type, purchase_type, form_data)
+            total_required = len(required)
+            # Count how many required doc types have at least one upload
+            uploaded_required = sum(
+                1 for doc_type in required if uploads.get(doc_type)
+            )
+            return f"{uploaded_required} of {total_required} required docs uploaded"
         if count == 1:
             return "1 document uploaded"
         return f"{count} documents uploaded"
@@ -464,6 +499,10 @@ def apply_page(request):
             sections.append(expanded)
         # Future sections: not rendered at all
 
+    # Current section title for progress bar display
+    active_section_id = section_order[active_index] if active_index < len(section_order) else None
+    current_section_title = SECTION_DEFS[active_section_id]["title"] if active_section_id else None
+
     ctx = {
         "sections": sections,
         "program_type": program_type,
@@ -475,6 +514,7 @@ def apply_page(request):
         "total_sections": len(section_order),
         "active_step_number": active_index + 1,
         "is_in_progress": active_index > 0,
+        "current_section_title": current_section_title,
         "form_data": form_data,
         "draft": draft,
         "outline_steps": _build_outline_steps(section_order, active_index, program_type),
@@ -724,10 +764,17 @@ def _validate_eligibility_section(
         draft.save()
 
         if has_taxes or has_foreclosure:
-            # Disqualified - full-page redirect via HX-Redirect
-            response = HttpResponse()
-            response["HX-Redirect"] = reverse("applications:disqualified_v2")
-            return response
+            # Disqualified - render inline instead of redirecting
+            ctx = _section_context(
+                draft, "eligibility", section_index + 1,
+                program_type, purchase_type,
+            )
+            return _render_expanded_response(
+                request,
+                "apply/v2/sections/_eligibility_disqualified_inline.html",
+                ctx,
+                "eligibility",
+            )
 
         draft.current_step = max(draft.current_step, section_index + 2)
         draft.save()
@@ -954,10 +1001,15 @@ def _validate_documents_section(
     # Re-render with errors
     section_def = SECTION_DEFS[section_id]
     ctx = _section_context(draft, section_id, section_index + 1, program_type, purchase_type)
+    uploaded_required = sum(
+        1 for d in required_docs if _uploaded_doc_present(uploaded, d)
+    )
     ctx.update({
         "required_docs": required_docs,
         "optional_docs": optional_docs,
         "uploaded": uploaded,
+        "required_count": len(required_docs),
+        "uploaded_required_count": uploaded_required,
         "errors": errors,
         "has_file_upload": True,
     })
@@ -1021,10 +1073,16 @@ def section_edit(request, section_id):
     # For document sections, add doc-specific context
     if section_def.get("is_documents"):
         from .shared import _get_optional_docs, _get_required_docs
+        req_docs = _get_required_docs(program_type, purchase_type, form_data)
+        uploads = form_data.get("uploads", {})
         ctx.update({
-            "required_docs": _get_required_docs(program_type, purchase_type, form_data),
+            "required_docs": req_docs,
             "optional_docs": _get_optional_docs(program_type),
-            "uploaded": form_data.get("uploads", {}),
+            "uploaded": uploads,
+            "required_count": len(req_docs),
+            "uploaded_required_count": sum(
+                1 for d in req_docs if _uploaded_doc_present(uploads, d)
+            ),
             "has_file_upload": True,
         })
 
@@ -1123,10 +1181,16 @@ def _render_transition(
         # Document sections need extra context
         if next_section_def.get("is_documents"):
             from .shared import _get_optional_docs, _get_required_docs
+            req_docs = _get_required_docs(program_type, purchase_type, form_data)
+            uploads = form_data.get("uploads", {})
             next_ctx.update({
-                "required_docs": _get_required_docs(program_type, purchase_type, form_data),
+                "required_docs": req_docs,
                 "optional_docs": _get_optional_docs(program_type),
-                "uploaded": form_data.get("uploads", {}),
+                "uploaded": uploads,
+                "required_count": len(req_docs),
+                "uploaded_required_count": sum(
+                    1 for d in req_docs if _uploaded_doc_present(uploads, d)
+                ),
                 "has_file_upload": True,
             })
 
@@ -1140,6 +1204,11 @@ def _render_transition(
         )
 
     # Progress bar update (OOB - this element already exists in the DOM)
+    next_section_title = (
+        SECTION_DEFS[section_order[next_index]]["title"]
+        if next_index < len(section_order)
+        else None
+    )
     progress_html = render(
         request,
         "apply/v2/_progress_bar.html",
@@ -1148,6 +1217,7 @@ def _render_transition(
             "total_count": len(section_order),
             "program_color": meta["color"],
             "program_name": meta["name"],
+            "current_section_title": next_section_title,
         },
     ).content.decode()
 

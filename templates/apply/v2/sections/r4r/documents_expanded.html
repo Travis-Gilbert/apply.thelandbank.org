@@ -11,6 +11,14 @@
 
     <div class="section-body expanded">
         <div class="px-5 pt-3 pb-6 space-y-6">
+            {# Completion counter #}
+            {% if required_count %}
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-warm-50 border border-warm-200">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="{% if uploaded_required_count >= required_count %}text-civic-green-600{% else %}text-warm-400{% endif %}"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span class="text-xs {% if uploaded_required_count >= required_count %}text-civic-green-700 font-semibold{% else %}text-warm-600{% endif %}">{{ uploaded_required_count }} of {{ required_count }} required documents uploaded</span>
+            </div>
+            {% endif %}
+
             {% if errors %}
             <c-alert type="error">
                 {% for error in errors %}

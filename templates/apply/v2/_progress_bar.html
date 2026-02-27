@@ -18,7 +18,7 @@
             </div>
         </div>
         <span class="text-[11px] text-warm-500 flex-shrink-0 tabular-nums">
-            Step {{ completed_count|add:1 }} of {{ total_count }}
+            {% if current_section_title %}{{ current_section_title }} · {% endif %}Step {{ completed_count|add:1 }} of {{ total_count }}
         </span>
     </div>
 </div>

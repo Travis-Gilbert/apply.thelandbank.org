@@ -1,5 +1,20 @@
 {# Autocomplete dropdown - results from property search #}
-{% if results %}
+{% if error %}
+{# Search error - system issue, not user's fault #}
+<div class="mt-2 px-4 py-4 rounded-lg border border-red-200 bg-red-50/50">
+    <p class="text-sm text-red-700 font-medium">Something went wrong with our search. Please try again.</p>
+    <div class="mt-2 flex flex-wrap gap-3">
+        <button type="button" onclick="document.getElementById('id_property_address').dispatchEvent(new Event('input'))"
+                class="text-xs text-civic-blue-600 underline underline-offset-2 hover:text-civic-blue-700">
+            Try again
+        </button>
+        <span class="text-warm-300">&middot;</span>
+        <a href="mailto:offers@thelandbank.org" class="text-xs text-civic-blue-600 underline underline-offset-2 hover:text-civic-blue-700">
+            Contact the Land Bank
+        </a>
+    </div>
+</div>
+{% elif results %}
 {# Dropdown floats over content (absolute) so it doesn't push the form down #}
 <div class="absolute left-0 right-0 mt-1 border border-warm-200 rounded-lg shadow-lg bg-white max-h-[240px] overflow-y-auto">
     {% for result in results %}
@@ -22,12 +37,23 @@
     {% endfor %}
 </div>
 {% elif query %}
-{# "Not found" message renders inline - pushes content down instead of overlapping #}
-<div class="mt-2 px-4 py-3 text-center rounded-lg border border-warm-200 bg-warm-50/50">
-    <p class="text-sm text-warm-600 font-medium">Hmmm... looks like we don't own that one.</p>
-    <button type="button" onclick="showManualPicker()"
-            class="text-xs text-civic-blue-600 underline underline-offset-2 mt-1.5 hover:text-civic-blue-700">
-        Choose a program manually
-    </button>
+{# "Not found" - improved with tips and recovery paths #}
+<div class="mt-2 px-4 py-4 rounded-lg border border-warm-200 bg-warm-50/50">
+    <p class="text-sm text-warm-600 font-medium">We couldn't find that address in our available properties.</p>
+    <ul class="mt-2 space-y-1 text-xs text-warm-500">
+        <li>Try a shorter search (e.g. just the street number and name)</li>
+        <li>Double-check the spelling</li>
+        <li>Search by parcel ID if you have it</li>
+    </ul>
+    <div class="mt-3 flex flex-wrap gap-3">
+        <button type="button" onclick="showManualPicker()"
+                class="text-xs text-civic-blue-600 underline underline-offset-2 hover:text-civic-blue-700">
+            Choose a program manually
+        </button>
+        <span class="text-warm-300">&middot;</span>
+        <a href="mailto:offers@thelandbank.org" class="text-xs text-civic-blue-600 underline underline-offset-2 hover:text-civic-blue-700">
+            Contact the Land Bank
+        </a>
+    </div>
 </div>
 {% endif %}

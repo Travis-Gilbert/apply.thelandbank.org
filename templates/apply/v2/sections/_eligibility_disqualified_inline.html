@@ -1,0 +1,82 @@
+{# Inline eligibility disqualification - replaces the eligibility section card #}
+<div class="section-card-v2" style="border-top: 3px solid #F9A825">
+    <div class="px-5 pt-5 flex items-center gap-3">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style="background: #FFF8E1; color: #F9A825;">{{ section_number }}</span>
+        <div>
+            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
+            <p class="text-[13px] text-warm-500 mt-0.5">We need to pause here</p>
+        </div>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-3 pb-6 space-y-5">
+            {# Amber alert icon #}
+            <div class="flex justify-center">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center"
+                     style="background: #FFF8E1; border: 1px solid #FFE082;">
+                    <svg class="w-8 h-8" fill="none" stroke="#F9A825" viewBox="0 0 24 24" stroke-width="1.75">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <h4 class="font-heading text-lg font-bold text-warm-900 mb-1">Unable to Continue</h4>
+                <p class="text-sm text-warm-500">We ask these questions early to save you time.</p>
+            </div>
+
+            {# Explanation card #}
+            <div class="rounded-xl border p-4 space-y-4 text-left" style="border-color: #FFE082; background: #FFFDF5;">
+                <div>
+                    <h5 class="text-sm font-semibold text-warm-900 mb-1.5">Why can't I continue?</h5>
+                    <p class="text-sm text-warm-600 leading-relaxed">
+                        The Land Bank cannot sell to you if you have delinquent property taxes or if you
+                        have been through tax foreclosure with the Genesee County Treasurer in the last
+                        five years.
+                    </p>
+                </div>
+                <div class="border-t pt-3" style="border-color: #FFE082;">
+                    <h5 class="text-sm font-semibold text-warm-900 mb-1.5">What can I do?</h5>
+                    <p class="text-sm text-warm-600 leading-relaxed">
+                        If you believe this was made in error, or if you have resolved your tax
+                        obligations, please contact our office. We're happy to help.
+                    </p>
+                </div>
+            </div>
+
+            {# Contact info #}
+            <div class="text-center space-y-2 text-sm text-warm-500">
+                <p class="font-medium text-warm-700">Genesee County Land Bank Authority</p>
+                <p>
+                    <a href="tel:8102573088" class="inline-flex items-center gap-1.5 text-civic-blue-600 hover:underline font-medium">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                        (810) 257-3088
+                    </a>
+                    <span class="mx-1 text-warm-300">|</span>
+                    <a href="mailto:offers@thelandbank.org" class="text-civic-blue-600 hover:underline">offers@thelandbank.org</a>
+                </p>
+                <p class="text-[11px] text-warm-400">452 S. Saginaw St., Flint, MI 48502</p>
+            </div>
+
+            {# Actions #}
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <button type="button"
+                        hx-get="{{ edit_url }}"
+                        hx-target="#section-{{ section_id }}"
+                        hx-swap="outerHTML"
+                        class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-colors min-h-[44px]"
+                        style="background: #2d6a8a;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    Go back and change my answers
+                </button>
+                <a href="mailto:offers@thelandbank.org?subject=Application%20Eligibility%20Question"
+                   class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium text-warm-600 transition-colors min-h-[44px]"
+                   style="border: 1.5px solid rgba(210, 204, 194, 0.5); background: rgba(255,255,255,0.5);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    Contact the Land Bank
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
