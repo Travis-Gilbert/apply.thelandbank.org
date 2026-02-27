@@ -577,6 +577,16 @@ AWS_S3_REGION_NAME
     Prints DB diagnostics (table, columns, migration state) for Railway debugging.
     **Remove before production launch.**
 
+22. **Admin permission restrictions** — `ApplicationAdmin` disables Add button (`has_add_permission=False`)
+    and restricts Delete to superusers (`has_delete_permission` checks `request.user.is_superuser`).
+    Applications are created through the buyer form only.
+
+23. **Event-delegated JS for HTMX compatibility** — error-clearing listener attached to
+    `#accordion-form` (stable parent) not individual inputs. Survives HTMX DOM swaps.
+
+24. **Dashboard greeting** — `admin_utils.py` computes `greeting_time` (morning/afternoon/evening)
+    from `timezone.now().hour`. Django's `{% now "A" %}` outputs AM/PM format codes, not time-of-day words.
+
 ---
 
 ## Phase 1 MVP Scope
@@ -611,12 +621,9 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Staff dashboard polish | Open | Basic admin works, needs status badges + doc viewing refinement |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
 | Better icons | Open | SVG icon set would improve polish over current emoji icons |
-| Production LOGGING | Done | `django.request` errors now visible in Railway logs |
-| Prototype superuser | Done | Admin/Admin123 auto-created on every deploy via Procfile |
 
 **⚠ Prototype credentials on Railway:** Admin/Admin123 superuser is auto-created on
 every deploy. Remove `ensure_superuser` from Procfile and delete the management
@@ -627,8 +634,7 @@ command before production launch with real user data.
 1. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
 2. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
 3. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
-4. **Staff dashboard polish** — document viewer links in admin, status badges
-5. **Better icons** — audit program cards, section headers, upload boxes; explore SVG icon set
+4. **Better icons** — audit program cards, section headers, upload boxes; explore SVG icon set
 
 ### Future
 
@@ -651,7 +657,6 @@ command before production launch with real user data.
 | font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
 | Single-page accordion over multi-step wizard | Better UX: one page, HTMX validates per section, collapsed summaries show progress | 2026-02-20 |
 | Color role separation: blue=navigation, green=completion | Green was overused (buttons, progress, focus, checkmarks). Blue (#2d6a8a) now handles all interactive/nav elements; green reserved for completion signals only. | 2026-02-24 |
-| CSS `!important` for continue-btn color override | Single CSS rule overrides inline `style="background: {{ program_color }}"` across 13+ templates — avoids template-by-template edits. | 2026-02-24 |
 | Property data via CSV upload, not direct DB sync | Office policy restricts direct database access. Weekly CSV upload achieves same buyer UX (address → auto-program routing). | 2026-02-24 |
 | Application outline sidebar (desktop) | `_application_outline.html` with OOB swap on transitions. `hidden lg:block` for desktop-only. Sticky positioning inside CSS grid. | 2026-02-25 |
 | Rate limiting on validation + search endpoints | `django-ratelimit` 30/m on section_validate, 30/m on property search. Prevents abuse before launch. | 2026-02-25 |
