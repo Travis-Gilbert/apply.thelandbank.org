@@ -55,28 +55,36 @@
             <div class="field-divider"></div>
 
             {# Renovation description #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.renovation_description.id_for_label }}" class="block text-sm font-medium text-warm-900">
                     What renovations will you be making? <span class="text-red-500 text-xs">*</span>
                 </label>
                 <textarea name="{{ form.renovation_description.html_name }}" id="{{ form.renovation_description.id_for_label }}"
                           rows="4" required
                           placeholder="Describe the renovations you plan to make..."
-                          class="gclba-input{% if form.renovation_description.errors %} has-error{% endif %}">{{ form.renovation_description.value|default:"" }}</textarea>
-                <p class="text-xs text-warm-400 leading-relaxed">Common items: roof, windows, plumbing, electrical, HVAC, flooring, paint</p>
+                          class="gclba-input{% if form.renovation_description.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.renovation_description.value|default:"" }}</textarea>
+                <div class="flex items-baseline justify-between gap-2">
+                    <p class="text-xs text-warm-400 leading-relaxed">Common items: roof, windows, plumbing, electrical, HVAC, flooring, paint</p>
+                    <span class="text-[11px] text-warm-400 tabular-nums flex-shrink-0" x-text="count + ' / 2,000'">0 / 2,000</span>
+                </div>
                 {% if form.renovation_description.errors %}<p class="text-xs text-red-600 font-medium">{{ form.renovation_description.errors.0 }}</p>{% endif %}
             </div>
 
             {# Who will complete #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.renovation_who.id_for_label }}" class="block text-sm font-medium text-warm-900">
                     Who will complete the renovations? <span class="text-red-500 text-xs">*</span>
                 </label>
                 <textarea name="{{ form.renovation_who.html_name }}" id="{{ form.renovation_who.id_for_label }}"
                           rows="3" required
                           placeholder="Self, licensed contractor, etc."
-                          class="gclba-input{% if form.renovation_who.errors %} has-error{% endif %}">{{ form.renovation_who.value|default:"" }}</textarea>
-                <p class="text-xs text-warm-400 leading-relaxed">Example: Licensed contractor for electrical and plumbing; I'll do painting myself</p>
+                          class="gclba-input{% if form.renovation_who.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.renovation_who.value|default:"" }}</textarea>
+                <div class="flex items-baseline justify-between gap-2">
+                    <p class="text-xs text-warm-400 leading-relaxed">Example: Licensed contractor for electrical and plumbing; I'll do painting myself</p>
+                    <span class="text-[11px] text-warm-400 tabular-nums flex-shrink-0" x-text="count + ' / 2,000'">0 / 2,000</span>
+                </div>
                 {% if form.renovation_who.errors %}<p class="text-xs text-red-600 font-medium">{{ form.renovation_who.errors.0 }}</p>{% endif %}
             </div>
 
@@ -94,15 +102,19 @@
             </div>
 
             {# How will you pay #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.renovation_funding.id_for_label }}" class="block text-sm font-medium text-warm-900">
                     How will you pay for the purchase and renovations? <span class="text-red-500 text-xs">*</span>
                 </label>
                 <textarea name="{{ form.renovation_funding.html_name }}" id="{{ form.renovation_funding.id_for_label }}"
                           rows="3" required
                           placeholder="Savings, construction loan, etc."
-                          class="gclba-input{% if form.renovation_funding.errors %} has-error{% endif %}">{{ form.renovation_funding.value|default:"" }}</textarea>
-                <p class="text-xs text-warm-400 leading-relaxed">Example: Cash savings for purchase, home improvement loan for renovations</p>
+                          class="gclba-input{% if form.renovation_funding.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.renovation_funding.value|default:"" }}</textarea>
+                <div class="flex items-baseline justify-between gap-2">
+                    <p class="text-xs text-warm-400 leading-relaxed">Example: Cash savings for purchase, home improvement loan for renovations</p>
+                    <span class="text-[11px] text-warm-400 tabular-nums flex-shrink-0" x-text="count + ' / 2,000'">0 / 2,000</span>
+                </div>
                 {% if form.renovation_funding.errors %}<p class="text-xs text-red-600 font-medium">{{ form.renovation_funding.errors.0 }}</p>{% endif %}
             </div>
 

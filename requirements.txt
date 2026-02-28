@@ -4,7 +4,8 @@
 # Core Django
 Django==6.0.2
 django-htmx==1.27.0
-django-smartbase-admin>=1.1.1
+# django-smartbase-admin==1.1.1 — installed via --no-deps in nixpacks.toml
+# (upper bound django<6.0 is overly cautious; works fine with 6.0.2)
 easy-thumbnails>=2.10
 django-widget-tweaks>=1.5
 django-anymail[resend]==14.0

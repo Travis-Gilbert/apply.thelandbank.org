@@ -1,3 +1,624 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════
+   GCLBA Application Portal — Custom Component Styles
+   Migrated from inline <style> block in base.html → compiled build
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Warm Linen Background ──────────────────────── */
+.civic-bg {
+    background-color: #F5F2ED;
+    position: relative;
+}
+.civic-bg::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+}
+.civic-bg::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(210, 200, 185, 0.08) 100%);
+}
+
+/* Content above pseudo-elements */
+main, header, footer, .sticky { position: relative; z-index: 1; }
+
+/* ── Section Cards ───────────────────────────────── */
+.section-card {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(210, 204, 194, 0.45);
+    border-radius: 0.75rem;
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.04),
+        0 4px 12px rgba(0,0,0,0.02),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+.section-card-optional {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1.5px dashed rgba(210, 204, 194, 0.5);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.gclba-input { background: rgba(255,255,255,0.7); border: 1.5px solid #c4bfb7; border-radius: 0.5rem; padding: 0.625rem 0.875rem; font-size: 1rem; width: 100%; transition: all 0.15s; color: #2A2622; }
+@media (min-width: 640px) { .gclba-input { font-size: 0.875rem; } }
+.gclba-input::placeholder { color: #A09890; }
+.gclba-input:focus { border-color: #2d6a8a; box-shadow: 0 0 0 3px rgba(45, 106, 138, 0.10); outline: none; background-color: #fff; }
+.gclba-input.has-error { border-color: #dc2626; }
+.field-error-accent { border-left: 3px solid #dc2626; padding-left: 0.75rem; border-radius: 2px; }
+.gclba-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237A746C' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; }
+/* Mobile: prevent iOS zoom on focus (requires 16px+ font-size) */
+@media (max-width: 639px) {
+    select.gclba-input, textarea.gclba-input { font-size: 1rem; }
+}
+
+/* ── Input Focus Ring (civic-blue for neutral interaction) ─ */
+/* Exclude checkbox/radio — those use @tailwindcss/forms styling */
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus, textarea:focus {
+    border-color: #2d6a8a !important;
+    box-shadow: 0 0 0 3px rgba(45, 106, 138, 0.10) !important;
+    background-color: #fff !important;
+    outline: none;
+}
+input:not([type="checkbox"]):not([type="radio"]):not(:focus),
+select:not(:focus), textarea:not(:focus) {
+    background-color: #fafaf8;
+}
+
+/* Preserve native date/month picker controls */
+input[type="month"], input[type="date"] {
+    -webkit-appearance: auto;
+    appearance: auto;
+}
+
+/* ── Field Group Divider ────────────────────────── */
+.field-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(210, 204, 194, 0.5) 20%, rgba(210, 204, 194, 0.5) 80%, transparent);
+    margin: 0.5rem 0;
+}
+
+/* ── Step Entrance Animation ─────────────────────── */
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.animate-step { animation: fadeSlideIn 0.4s ease forwards; }
+@keyframes stepIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Primary Button ──────────────────────────────── */
+.gclba-btn-primary {
+    background: linear-gradient(180deg, #2e7d32 0%, #256b29 100%);
+    border: 1px solid #1f5c36;
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+    transition: all 0.2s ease;
+}
+.gclba-btn-primary:hover {
+    background: linear-gradient(180deg, #339637 0%, #2e7d32 100%);
+    box-shadow: 0 2px 6px rgba(46,125,50,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* ── Sticky Collapsing Progress Bar ──────────────── */
+.progress-strip {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid rgba(200, 192, 180, 0.3);
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.progress-strip.is-collapsed {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-100%);
+}
+.progress-pill {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+.progress-pill.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.progress-pill-track {
+    height: 3px;
+    background: rgba(200, 192, 180, 0.25);
+    width: 100%;
+}
+.progress-pill-fill {
+    height: 100%;
+    background: #2e7d32;
+    border-radius: 0 2px 2px 0;
+    transition: width 0.5s ease-out;
+}
+.progress-pill-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 0 8px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(200, 192, 180, 0.2);
+}
+.progress-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(210, 204, 194, 0.5);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #5a5550;
+}
+.progress-pill-badge .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2e7d32;
+}
+.progress-pill-badge .step-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #ccc7bf;
+}
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ── Accordion v2 ───────────────────────────────── */
+
+/* Summary bar: collapsed completed section */
+.summary-bar {
+    display: flex; align-items: center; gap: 0.625rem;
+    min-height: 48px; padding: 0.5rem 0.875rem;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(210, 204, 194, 0.3);
+    border-radius: 0.625rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    animation: fadeSlideIn 200ms ease;
+}
+.summary-bar:hover { background: rgba(255,255,255,0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+/* Expanded section card - heavy shadow for elevation hierarchy */
+.section-card-v2 {
+    background: rgba(255,255,255,0.97);
+    border: 1px solid rgba(210, 204, 194, 0.35);
+    border-radius: 0.875rem;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 12px 48px rgba(0,0,0,0.05);
+}
+/* Header band: colored via inline style in each template */
+.section-card-v2-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-bottom: none;
+}
+
+/* Section expand/collapse animation */
+.section-body { max-height: 0; overflow: hidden; transition: max-height 250ms ease; }
+.section-body.expanded { max-height: 3000px; }
+
+/* Continue button: civic-blue for navigation; Submit stays program-color */
+.continue-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    background: #2d6a8a !important;
+    border: 1.5px solid #2d6a8a !important;
+    border-radius: 0.625rem;
+    font-size: 0.875rem; font-weight: 600;
+    color: #fff !important;
+    transition: all 150ms;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(45,106,138,0.18), 0 2px 8px rgba(45,106,138,0.10);
+}
+.continue-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(45,106,138,0.25), 0 4px 12px rgba(45,106,138,0.12); }
+
+/* Acknowledgment cards - individual bordered items with checked state */
+.ack-card {
+    padding: 0.875rem 1rem;
+    border: 1.5px solid rgba(210, 204, 194, 0.5);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.5);
+    transition: border-color 200ms, background-color 200ms, box-shadow 200ms;
+}
+.ack-card:has(:checked) {
+    border-color: #b8ddb9;
+    background-color: rgba(232, 245, 233, 0.35);
+    box-shadow: 0 0 0 1px rgba(184, 221, 185, 0.3);
+}
+
+/* Radio/checkbox card selected state (purchase type, etc.) */
+label.touch-label:has(input[type="radio"]:checked) {
+    border-color: #2d6a8a !important;
+    background: rgba(45, 106, 138, 0.06) !important;
+    box-shadow: 0 0 0 1px rgba(45, 106, 138, 0.15);
+}
+
+/* Document capture buttons - warm dashed squares */
+.doc-capture-btn {
+    aspect-ratio: 1 / 1;
+    max-width: 140px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+    border: 2px dashed rgba(45, 106, 138, 0.25);
+    border-radius: 0.75rem;
+    background: rgba(45, 106, 138, 0.03);
+    cursor: pointer;
+    transition: all 150ms;
+    padding: 1rem;
+    text-align: center;
+}
+.doc-capture-btn:hover { border-color: rgba(45, 106, 138, 0.45); background: rgba(45, 106, 138, 0.06); }
+
+/* Entity dropdown (LLC/Trust collapsible) */
+.entity-dropdown summary { cursor: pointer; list-style: none; }
+.entity-dropdown summary::-webkit-details-marker { display: none; }
+.entity-dropdown[open] .entity-chevron { transform: rotate(180deg); }
+.entity-chevron { transition: transform 150ms ease; }
+
+/* Scroll offset for edit-jump behavior */
+.accordion-section { scroll-margin-top: 60px; }
+
+/* Spacing between accordion items */
+.accordion-gap { margin-top: 0.375rem; }      /* 6px between collapsed bars */
+.accordion-gap-active { margin-top: 2rem; }   /* 32px before active section */
+
+/* Section transition divider */
+.section-divider {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.25rem 0; margin: 0.75rem 0;
+}
+.section-divider::before, .section-divider::after {
+    content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.08);
+}
+
+/* ── 2B: Field Focus Label Color Shift ──────────── */
+.space-y-1\.5:focus-within > label:first-child {
+    color: #256929;
+    transition: color 0.15s ease;
+}
+.space-y-1\.5 > label:first-child {
+    transition: color 0.15s ease;
+}
+.space-y-1\.5:focus-within .text-warm-500 {
+    opacity: 1;
+    transition: opacity 0.15s ease;
+}
+
+/* ── 2C: Progress Bar Spark Animation ──────────── */
+@keyframes progressSpark {
+    0%   { left: -30%; opacity: 0; }
+    20%  { opacity: 0.6; }
+    100% { left: 110%; opacity: 0; }
+}
+.progress-pill-fill.just-advanced::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -30%;
+    width: 30%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressSpark 600ms ease-out forwards;
+}
+.progress-pill-fill { position: relative; overflow: hidden; }
+
+@keyframes stepBounce {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+}
+.step-num.just-advanced {
+    animation: stepBounce 300ms ease;
+}
+
+/* ── 2D: Scroll-Aware Card Reveal ──────────────── */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── 2E: Touch Feedback :active States ─────────── */
+.ack-card:active {
+    background-color: rgba(46,125,50,0.04);
+    transition: background-color 100ms;
+}
+.gclba-btn-primary:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px rgba(46,125,50,0.4);
+    transition: transform 100ms, box-shadow 100ms;
+}
+.summary-bar button:active {
+    background: rgba(0,0,0,0.06);
+    transition: background 100ms;
+}
+.touch-label:active {
+    transform: scale(0.97);
+    transition: transform 100ms;
+}
+.continue-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 2px rgba(45,106,138,0.4);
+    transition: transform 100ms, box-shadow 100ms;
+}
+[type="radio"]:checked + label:active,
+.program-card:active {
+    transform: scale(0.97);
+    transition: transform 100ms;
+}
+
+/* ── 2A: Fixed Bottom Nav on Mobile ────────────── */
+@media (max-width: 639px) {
+    .mobile-fixed-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 45;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(210, 204, 194, 0.4);
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+        animation: slideUpNav 300ms ease forwards;
+    }
+    .mobile-fixed-nav.is-last-step {
+        border-top: 3px solid #2d6a8a;
+    }
+    @keyframes slideUpNav {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+    }
+    /* Spacer to prevent content overlap */
+    .mobile-nav-spacer {
+        height: calc(140px + env(safe-area-inset-bottom, 0px));
+    }
+}
+@media (min-width: 640px) {
+    .mobile-nav-spacer { display: none; }
+}
+
+/* ── 3A: Confirmation Confetti ──────────────────── */
+@keyframes confettiFall {
+    0%   { opacity: 0.9; transform: translateY(-10px) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(85vh) rotate(720deg); }
+}
+
+/* ── 3B: Success Icon Pulse Ring ───────────────── */
+.confirmation-pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--pulse-color, #2E7D32);
+    opacity: 0;
+    animation: pulseRing 1s ease-out 0.4s 2;
+}
+@keyframes pulseRing {
+    0%   { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.6); }
+}
+
+/* ── 3D: Ack Progressive Satisfaction ──────────── */
+.ack-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(46, 125, 50, 0.08);
+    color: #2e7d32;
+    border: 1px solid rgba(46, 125, 50, 0.15);
+    transition: all 0.3s ease;
+}
+.ack-counter.all-checked {
+    background: rgba(46, 125, 50, 0.12);
+    color: #1b5e20;
+    border-color: rgba(46, 125, 50, 0.3);
+}
+@keyframes submitGlow {
+    0%, 100% { box-shadow: 0 1px 3px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.12); }
+    50%      { box-shadow: 0 0 16px rgba(46,125,50,0.3), 0 1px 3px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.12); }
+}
+.submit-glow {
+    animation: submitGlow 2s ease-in-out infinite;
+}
+
+/* ── 3E: Document Upload Checkmark Draw ────────── */
+.doc-check-draw {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    transition: stroke-dashoffset 300ms ease;
+}
+.doc-check-draw.is-drawn {
+    stroke-dashoffset: 0;
+}
+@keyframes fadeSlideRight {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.doc-filename-reveal {
+    animation: fadeSlideRight 200ms ease 100ms both;
+}
+
+/* ── 3F: Info Card Left-Accent ─────────────────── */
+.info-card-accent {
+    border-left: 3px solid;
+    border-radius: 0.75rem;
+    padding-left: 1rem;
+}
+.info-card-accent-blue  { border-left-color: #2d6a8a; }
+.info-card-accent-green { border-left-color: #2e7d32; }
+.info-card-accent-amber { border-left-color: #2d6a8a; }
+
+/* ── Alpine.js Cloak ──────────────────────────── */
+[x-cloak] { display: none !important; }
+
+/* ── Section Expand Animation ────────────────── */
+@keyframes sectionExpand {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.section-expand { animation: sectionExpand 300ms ease-out; }
+
+/* ── Checkmark Pop on Section Completion ──────── */
+@keyframes checkPop {
+    0%   { transform: scale(0); }
+    60%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+.check-icon { animation: checkPop 400ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ── Validation Error Shake ──────────────────── */
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-4px); }
+    40%      { transform: translateX(4px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(2px); }
+}
+.error-shake { animation: errorShake 400ms ease-out; }
+
+/* ── HTMX Indicator Spinner ──────────────────── */
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator { display: inline-flex; }
+.htmx-request .continue-btn svg:first-of-type { display: none; }
+
+/* ── Reduced Motion ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .reveal-on-scroll { opacity: 1; transform: none; transition: none; }
+    .progress-pill-fill.just-advanced::after { animation: none; }
+    .step-num.just-advanced { animation: none; }
+    .mobile-fixed-nav { animation: none; }
+    .animate-step { animation: none; }
+    .animate-scale-in { animation: none; }
+    .confetti-container { display: none; }
+    .confirmation-pulse-ring { animation: none; }
+    .submit-glow { animation: none; }
+    .doc-filename-reveal { animation: none; opacity: 1; transform: none; }
+    .section-expand { animation: none; opacity: 1; transform: none; }
+    .check-icon { animation: none; transform: none; }
+    .error-shake { animation: none; transform: none; }
+}
+
+/* ── Mobile Optimizations ─────────────────────── */
+
+/* Touch targets: 44px minimum for radio/checkbox labels */
+.touch-label {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+.touch-label input[type="radio"],
+.touch-label input[type="checkbox"] {
+    width: 1.125rem; height: 1.125rem;
+    flex-shrink: 0;
+}
+
+/* Continue / Submit buttons: full-width on mobile */
+@media (max-width: 639px) {
+    .continue-btn { width: 100%; justify-content: center; padding: 0.875rem 1.5rem; font-size: 1rem; }
+}
+
+/* Summary bar Edit button: 44px touch area */
+.summary-bar button {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Document capture: mobile-first sizing */
+@media (max-width: 639px) {
+    .doc-capture-btn {
+        aspect-ratio: auto;
+        max-width: none;
+        flex: 1;
+        min-height: 72px;
+        padding: 0.875rem;
+    }
+    .doc-capture-btn-primary {
+        background: rgba(46,125,50,0.06);
+        border-color: rgba(46,125,50,0.25);
+        flex: 1.3;
+    }
+}
+
+/* File upload zone: bigger tap target on mobile */
+@media (max-width: 639px) {
+    .file-upload-zone { min-height: 80px; padding: 1.25rem; }
+}
+
+/* Hide number input spinners on renovation fields */
+input[data-reno-group]::-webkit-outer-spin-button,
+input[data-reno-group]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[data-reno-group] { -moz-appearance: textfield; }
+
+/* Renovation line items: stack label above input at narrow widths */
+@media (max-width: 400px) {
+    .reno-line-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.25rem;
+    }
+    .reno-line-item .reno-input-wrap {
+        width: 100%;
+        flex-shrink: unset;
+    }
+}
+
+/* Section divider: safe edge padding */
+.section-divider { padding-left: 1rem; padding-right: 1rem; }
+
+/* Program cards: horizontal layout on mobile */
+@media (max-width: 639px) {
+    .program-card-inner {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.875rem;
+    }
+    .program-card-inner .program-card-text {
+        text-align: left;
+    }
+}

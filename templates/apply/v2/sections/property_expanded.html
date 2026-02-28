@@ -36,18 +36,17 @@
                 <p class="text-xs text-warm-500">You can find this on the property listing or Genesee County records</p>
             </div>
 
-            {# Open house checkbox + date #}
-            <div class="space-y-3">
+            {# Open house checkbox + date (Alpine-controlled) #}
+            <div class="space-y-3" x-data="{ attended: {% if form.attended_open_house.value %}true{% else %}false{% endif %} }">
                 <label class="touch-label items-start">
                     <input type="checkbox" name="{{ form.attended_open_house.html_name }}"
-                           {% if form.attended_open_house.value %}checked{% endif %}
-                           class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200"
-                           onchange="document.getElementById('open-house-date-row').style.display = this.checked ? '' : 'none'">
+                           x-model="attended"
+                           class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
                     <span class="text-sm text-warm-900">I have attended an open house or visited this property</span>
                 </label>
 
                 <div id="open-house-date-row" class="space-y-1.5 ml-7"
-                     style="{% if not form.attended_open_house.value %}display: none{% endif %}">
+                     x-show="attended" x-collapse x-cloak>
                     <label for="{{ form.open_house_date.id_for_label }}" class="block text-sm font-medium text-warm-700">
                         Date of visit
                     </label>

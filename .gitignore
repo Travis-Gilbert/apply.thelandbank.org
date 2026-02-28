@@ -29,5 +29,9 @@ staticfiles/
 .DS_Store
 Thumbs.db
 
+# Tailwind / Node
+theme/static_src/node_modules/
+theme/static/css/dist/
+
 # Serena MCP
 .serena/

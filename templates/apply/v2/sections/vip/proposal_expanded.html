@@ -10,7 +10,12 @@
     </div>
 
     <div class="section-body expanded">
-        <div class="px-5 pt-3 pb-6 space-y-6">
+        <div class="px-5 pt-3 pb-6 space-y-6"
+             x-data="{
+                 q2Prior: '{{ form.vip_q2_prior_purchases.value|default:"" }}',
+                 q5Exp: '{{ form.vip_q5_has_experience.value|default:"" }}',
+                 q6Plan: '{{ form.vip_q6_completion_plan.value|default:"" }}'
+             }">
             {# Scoring criteria callout #}
             <div class="p-4 rounded-xl border bg-opacity-5" style="border-color: {{ program_color }}40; background: {{ program_color }}08">
                 <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: {{ program_color }}">How VIP Proposals Are Evaluated</p>
@@ -21,14 +26,16 @@
             </div>
 
             {# Q1: Who and why #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.vip_q1_who_and_why.id_for_label }}" class="block text-sm font-medium text-warm-900 leading-relaxed">
                     {{ form.vip_q1_who_and_why.label }} <span class="text-red-500 text-xs">*</span>
                 </label>
                 <textarea name="{{ form.vip_q1_who_and_why.html_name }}" id="{{ form.vip_q1_who_and_why.id_for_label }}"
                           rows="5" required
                           placeholder="Include your proposed purchase price, contact information, and buyer/entity name..."
-                          class="gclba-input{% if form.vip_q1_who_and_why.errors %} has-error{% endif %}">{{ form.vip_q1_who_and_why.value|default:"" }}</textarea>
+                          class="gclba-input{% if form.vip_q1_who_and_why.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q1_who_and_why.value|default:"" }}</textarea>
+                <p class="text-[11px] text-warm-400 tabular-nums text-right" x-text="count + ' / 2,000'">0 / 2,000</p>
                 {% if form.vip_q1_who_and_why.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q1_who_and_why.errors.0 }}</p>{% endif %}
             </div>
 
@@ -44,7 +51,7 @@
                                {% if form.vip_q2_prior_purchases.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
                                class="border-warm-300 focus:ring-2"
                                style="color: {{ program_color }}"
-                               onchange="document.getElementById('q2-detail').style.display = this.value === 'True' ? '' : 'none'">
+                               x-model="q2Prior">
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
                     {% endfor %}
@@ -53,7 +60,7 @@
 
                 {# Conditional detail - shown only when "Yes" is selected #}
                 <div id="q2-detail" class="space-y-1.5"
-                     style="{% if form.vip_q2_prior_purchases.value|stringformat:'s' != 'True' %}display: none{% endif %}">
+                     x-show="q2Prior === 'True'" x-collapse x-cloak>
                     <label for="{{ form.vip_q2_prior_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q2_prior_detail.label }}
                     </label>
@@ -66,27 +73,33 @@
             </div>
 
             {# Q3: Renovation costs and timeline #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.vip_q3_renovation_costs_timeline.id_for_label }}" class="block text-sm font-medium text-warm-900 leading-relaxed">
                     {{ form.vip_q3_renovation_costs_timeline.label }} <span class="text-red-500 text-xs">*</span>
                 </label>
                 <textarea name="{{ form.vip_q3_renovation_costs_timeline.html_name }}" id="{{ form.vip_q3_renovation_costs_timeline.id_for_label }}"
                           rows="5" required
                           placeholder="Break down estimated costs by trade and provide a project timeline..."
-                          class="gclba-input{% if form.vip_q3_renovation_costs_timeline.errors %} has-error{% endif %}">{{ form.vip_q3_renovation_costs_timeline.value|default:"" }}</textarea>
-                <p class="text-xs text-warm-400 leading-relaxed">Include specific line items (roof, electrical, plumbing, HVAC, etc.) with estimated costs and a project timeline with milestones.</p>
+                          class="gclba-input{% if form.vip_q3_renovation_costs_timeline.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q3_renovation_costs_timeline.value|default:"" }}</textarea>
+                <div class="flex items-baseline justify-between gap-2">
+                    <p class="text-xs text-warm-400 leading-relaxed">Include specific line items (roof, electrical, plumbing, HVAC, etc.) with estimated costs and a project timeline with milestones.</p>
+                    <span class="text-[11px] text-warm-400 tabular-nums flex-shrink-0" x-text="count + ' / 2,000'">0 / 2,000</span>
+                </div>
                 {% if form.vip_q3_renovation_costs_timeline.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q3_renovation_costs_timeline.errors.0 }}</p>{% endif %}
             </div>
 
             {# Q4: Financing #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.vip_q4_financing.id_for_label }}" class="block text-sm font-medium text-warm-900 leading-relaxed">
                     {{ form.vip_q4_financing.label }} <span class="text-red-500 text-xs">*</span>
                 </label>
                 <textarea name="{{ form.vip_q4_financing.html_name }}" id="{{ form.vip_q4_financing.id_for_label }}"
                           rows="4" required
                           placeholder="Describe your financing plan, including equity and any construction loans..."
-                          class="gclba-input{% if form.vip_q4_financing.errors %} has-error{% endif %}">{{ form.vip_q4_financing.value|default:"" }}</textarea>
+                          class="gclba-input{% if form.vip_q4_financing.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q4_financing.value|default:"" }}</textarea>
+                <p class="text-[11px] text-warm-400 tabular-nums text-right" x-text="count + ' / 2,000'">0 / 2,000</p>
                 {% if form.vip_q4_financing.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q4_financing.errors.0 }}</p>{% endif %}
             </div>
 
@@ -102,7 +115,7 @@
                                {% if form.vip_q5_has_experience.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
                                class="border-warm-300 focus:ring-2"
                                style="color: {{ program_color }}"
-                               onchange="document.getElementById('q5-detail').style.display = this.value === 'True' ? '' : 'none'">
+                               x-model="q5Exp">
                         <span class="text-sm text-warm-800">{{ label }}</span>
                     </label>
                     {% endfor %}
@@ -111,7 +124,7 @@
 
                 {# Conditional detail - shown only when "Yes" is selected #}
                 <div id="q5-detail" class="space-y-1.5"
-                     style="{% if form.vip_q5_has_experience.value|stringformat:'s' != 'True' %}display: none{% endif %}">
+                     x-show="q5Exp === 'True'" x-collapse x-cloak>
                     <label for="{{ form.vip_q5_experience_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q5_experience_detail.label }}
                     </label>
@@ -132,7 +145,7 @@
                     </label>
                     <select name="{{ form.vip_q6_completion_plan.html_name }}" id="{{ form.vip_q6_completion_plan.id_for_label }}"
                             class="gclba-input gclba-select" style="min-height: 44px;" required
-                            onchange="document.getElementById('q6-detail-wrapper').style.display = this.value ? '' : 'none'">
+                            x-model="q6Plan">
                         {% for value, label in form.vip_q6_completion_plan.field.choices %}
                         <option value="{{ value }}" {% if form.vip_q6_completion_plan.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
@@ -141,7 +154,7 @@
                 </div>
 
                 <div id="q6-detail-wrapper" class="space-y-1.5"
-                     style="{% if not form.vip_q6_completion_plan.value %}display: none{% endif %}">
+                     x-show="q6Plan !== ''" x-collapse x-cloak>
                     <label for="{{ form.vip_q6_completion_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q6_completion_detail.label }} <span class="text-red-500 text-xs">*</span>
                     </label>
@@ -154,26 +167,30 @@
             </div>
 
             {# Q7: Contractor info (optional) #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.vip_q7_contractor_info.id_for_label }}" class="block text-sm font-medium text-warm-900 leading-relaxed">
                     {{ form.vip_q7_contractor_info.label }}
                 </label>
                 <textarea name="{{ form.vip_q7_contractor_info.html_name }}" id="{{ form.vip_q7_contractor_info.id_for_label }}"
                           rows="3"
                           placeholder="Contractor names and their Genesee County experience..."
-                          class="gclba-input{% if form.vip_q7_contractor_info.errors %} has-error{% endif %}">{{ form.vip_q7_contractor_info.value|default:"" }}</textarea>
+                          class="gclba-input{% if form.vip_q7_contractor_info.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q7_contractor_info.value|default:"" }}</textarea>
+                <p class="text-[11px] text-warm-400 tabular-nums text-right" x-text="count + ' / 2,000'">0 / 2,000</p>
                 {% if form.vip_q7_contractor_info.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q7_contractor_info.errors.0 }}</p>{% endif %}
             </div>
 
             {# Q8: Additional info (optional) #}
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" x-data="{ count: 0 }">
                 <label for="{{ form.vip_q8_additional_info.id_for_label }}" class="block text-sm font-medium text-warm-900 leading-relaxed">
                     {{ form.vip_q8_additional_info.label }}
                 </label>
                 <textarea name="{{ form.vip_q8_additional_info.html_name }}" id="{{ form.vip_q8_additional_info.id_for_label }}"
                           rows="3"
                           placeholder="Letters of support, references, community ties..."
-                          class="gclba-input{% if form.vip_q8_additional_info.errors %} has-error{% endif %}">{{ form.vip_q8_additional_info.value|default:"" }}</textarea>
+                          class="gclba-input{% if form.vip_q8_additional_info.errors %} has-error{% endif %}"
+                          x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q8_additional_info.value|default:"" }}</textarea>
+                <p class="text-[11px] text-warm-400 tabular-nums text-right" x-text="count + ' / 2,000'">0 / 2,000</p>
                 {% if form.vip_q8_additional_info.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q8_additional_info.errors.0 }}</p>{% endif %}
             </div>
 
