@@ -1,77 +1,55 @@
 {# Property information - expanded section #}
-<div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
-    <div class="px-5 pt-5 flex items-center gap-3">
-        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: {{ program_color|default:'#2E7D32' }}12; color: {{ program_color|default:'#2E7D32' }};">{{ section_number }}</span>
-        <div>
-            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
-            <p class="text-[13px] text-warm-500 mt-0.5">Which property are you interested in?</p>
+<c-section_header number="{{ section_number }}"
+                  title="{{ section_title }}"
+                  subtitle="Which property are you interested in?"
+                  color="{{ program_color }}">
+
+    {# Property address #}
+    <c-field name="{{ form.property_address.html_name }}"
+             id="{{ form.property_address.id_for_label }}"
+             label="Property Address"
+             value="{{ form.property_address.value|default:'' }}"
+             placeholder="1234 Elm Street, Flint, MI"
+             required="true"
+             error="{{ form.property_address.errors.0 }}" />
+
+    {# Parcel ID #}
+    <c-field name="{{ form.parcel_id.html_name }}"
+             id="{{ form.parcel_id.id_for_label }}"
+             label="Parcel ID"
+             value="{{ form.parcel_id.value|default:'' }}"
+             placeholder="e.g. 41-08-123-456"
+             right_hint="Optional"
+             mono="true"
+             hint="You can find this on the property listing or Genesee County records"
+             error="{{ form.parcel_id.errors.0 }}" />
+
+    {# Open house checkbox + date (Alpine-controlled) #}
+    <div class="space-y-3" x-data="{ attended: {% if form.attended_open_house.value %}true{% else %}false{% endif %} }">
+        <label class="touch-label items-start">
+            <input type="checkbox" name="{{ form.attended_open_house.html_name }}"
+                   x-model="attended"
+                   class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
+            <span class="text-sm text-warm-900">I have attended an open house or visited this property</span>
+        </label>
+
+        <div id="open-house-date-row" class="space-y-1.5 ml-7"
+             x-show="attended" x-collapse x-cloak>
+            <label for="{{ form.open_house_date.id_for_label }}" class="block text-sm font-medium text-warm-700">
+                Date of visit
+            </label>
+            <input type="date" name="{{ form.open_house_date.html_name }}" id="{{ form.open_house_date.id_for_label }}"
+                   value="{{ form.open_house_date.value|default:'' }}"
+                   class="gclba-input max-w-[200px]{% if form.open_house_date.errors %} has-error{% endif %}">
         </div>
     </div>
 
-    <div class="section-body expanded">
-        <div class="px-5 pt-3 pb-6 space-y-5">
-            {# Property address #}
-            <div class="space-y-1.5">
-                <label for="{{ form.property_address.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                    Property Address <span class="text-red-500 text-xs">*</span>
-                </label>
-                <input type="text" name="{{ form.property_address.html_name }}" id="{{ form.property_address.id_for_label }}"
-                       value="{{ form.property_address.value|default:'' }}" required
-                       placeholder="1234 Elm Street, Flint, MI" class="gclba-input{% if form.property_address.errors %} has-error{% endif %}">
-                {% if form.property_address.errors %}<p class="text-xs text-red-600 font-medium">{{ form.property_address.errors.0 }}</p>{% endif %}
-            </div>
+    {# Hidden: program_type is already set by the program selector section #}
+    <input type="hidden" name="program_type" value="{{ program_type }}">
 
-            {# Parcel ID #}
-            <div class="space-y-1.5">
-                <div class="flex items-baseline justify-between">
-                    <label for="{{ form.parcel_id.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        Parcel ID
-                    </label>
-                    <span class="text-[11px] text-warm-400">Optional</span>
-                </div>
-                <input type="text" name="{{ form.parcel_id.html_name }}" id="{{ form.parcel_id.id_for_label }}"
-                       value="{{ form.parcel_id.value|default:'' }}"
-                       placeholder="e.g. 41-08-123-456" class="gclba-input font-mono{% if form.parcel_id.errors %} has-error{% endif %}">
-                <p class="text-xs text-warm-500">You can find this on the property listing or Genesee County records</p>
-            </div>
+    {# Continue button #}
+    <c-continue_btn validate_url="{{ validate_url }}"
+                     section_id="{{ section_id }}"
+                     program_color="{{ program_color }}" />
 
-            {# Open house checkbox + date (Alpine-controlled) #}
-            <div class="space-y-3" x-data="{ attended: {% if form.attended_open_house.value %}true{% else %}false{% endif %} }">
-                <label class="touch-label items-start">
-                    <input type="checkbox" name="{{ form.attended_open_house.html_name }}"
-                           x-model="attended"
-                           class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200">
-                    <span class="text-sm text-warm-900">I have attended an open house or visited this property</span>
-                </label>
-
-                <div id="open-house-date-row" class="space-y-1.5 ml-7"
-                     x-show="attended" x-collapse x-cloak>
-                    <label for="{{ form.open_house_date.id_for_label }}" class="block text-sm font-medium text-warm-700">
-                        Date of visit
-                    </label>
-                    <input type="date" name="{{ form.open_house_date.html_name }}" id="{{ form.open_house_date.id_for_label }}"
-                           value="{{ form.open_house_date.value|default:'' }}"
-                           class="gclba-input max-w-[200px]{% if form.open_house_date.errors %} has-error{% endif %}">
-                </div>
-            </div>
-
-            {# Hidden: program_type is already set by the program selector section #}
-            <input type="hidden" name="program_type" value="{{ program_type }}">
-
-            {# Continue button #}
-            <div class="flex justify-end pt-2">
-                <button type="button"
-                        hx-post="{{ validate_url }}"
-                        hx-target="#section-{{ section_id }}"
-                        hx-swap="outerHTML"
-                        hx-disabled-elt="this"
-                        class="continue-btn"
-                        style="background: {{ program_color }}; border-color: {{ program_color }}">
-                    Continue
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+</c-section_header>

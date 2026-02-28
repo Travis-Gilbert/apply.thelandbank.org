@@ -46,18 +46,8 @@
                 </ul>
             </div>
 
-            {# Submit button (filled, program-color - intentionally green for "final action") #}
-            <div class="pt-3">
-                <button type="button"
-                        hx-post="{{ validate_url }}"
-                        hx-target="#section-{{ section_id }}"
-                        hx-swap="outerHTML"
-                        hx-disabled-elt="this"
-                        class="w-full sm:w-auto sm:float-right inline-flex items-center justify-center gap-2 px-8 py-3.5 sm:py-3 rounded-lg text-base sm:text-sm font-semibold text-white transition-all duration-200 hover:opacity-90"
-                        style="background: {{ program_color }}">
-                    Submit Application
-                </button>
-            </div>
+            {# Submit button #}
+            {% include "apply/v2/_continue_button.html" with program_color=program_color section_id=section_id validate_url=validate_url is_submit=True %}
         </div>
     </div>
 </div>

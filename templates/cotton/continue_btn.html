@@ -1,27 +1,63 @@
 {% comment %}
-  HTMX continue button with program color accent and chevron icon.
+  HTMX continue / submit button with program color accent.
 
-  Usage:
+  Usage (continue):
     <c-continue_btn validate_url="{{ validate_url }}"
                      section_id="{{ section_id }}"
                      program_color="{{ program_color }}" />
+
+  Usage (submit):
+    <c-continue_btn validate_url="{{ validate_url }}"
+                     section_id="{{ section_id }}"
+                     program_color="{{ program_color }}"
+                     is_submit="true"
+                     label="Submit Application" />
+
+  Usage (document upload — adds hx-encoding):
+    <c-continue_btn validate_url="{{ validate_url }}"
+                     section_id="{{ section_id }}"
+                     program_color="{{ program_color }}"
+                     is_multipart="true" />
 
   Props:
     validate_url  : HTMX hx-post URL for section validation
     section_id    : Section element ID (without #) for hx-target
     program_color : Button background/border color — default "#2E7D32"
-    label         : Button text — default "Continue"
+    label         : Button text — default "Continue" (or "Submit Application" for submit)
+    is_submit     : "true" for full-width submit button style
+    is_multipart  : "true" to add hx-encoding="multipart/form-data" (document uploads)
 {% endcomment %}
 
-<div class="flex justify-end pt-2">
+{% if is_submit == "true" %}
+<div class="pt-3">
   <button type="button"
           hx-post="{{ validate_url }}"
           hx-target="#section-{{ section_id }}"
           hx-swap="outerHTML"
           hx-disabled-elt="this"
+          class="w-full sm:w-auto sm:float-right inline-flex items-center justify-center gap-2 px-8 py-3.5 sm:py-3 rounded-lg text-base sm:text-sm font-semibold text-white transition-all duration-200 hover:opacity-90"
+          style="background: {{ program_color|default:'#2E7D32' }}">
+    {{ label|default:"Submit Application" }}
+    <span class="htmx-indicator">
+      <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+    </span>
+  </button>
+</div>
+{% else %}
+<div class="flex justify-end pt-2">
+  <button type="button"
+          hx-post="{{ validate_url }}"
+          hx-target="#section-{{ section_id }}"
+          hx-swap="outerHTML"
+          {% if is_multipart == "true" %}hx-encoding="multipart/form-data"{% endif %}
+          hx-disabled-elt="this"
           class="continue-btn"
           style="background: {{ program_color|default:'#2E7D32' }}; border-color: {{ program_color|default:'#2E7D32' }}">
     {{ label|default:"Continue" }}
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    <span class="htmx-indicator">
+      <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+    </span>
   </button>
 </div>
+{% endif %}

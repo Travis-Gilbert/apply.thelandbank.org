@@ -49,19 +49,7 @@
             </p>
 
             {# Continue button #}
-            <div class="flex justify-end pt-2">
-                <button type="button"
-                        hx-post="{{ validate_url }}"
-                        hx-target="#section-{{ section_id }}"
-                        hx-swap="outerHTML"
-                        hx-encoding="multipart/form-data"
-                        hx-disabled-elt="this"
-                        class="continue-btn"
-                        style="background: {{ program_color }}; border-color: {{ program_color }}">
-                    Continue
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-            </div>
+            {% include "apply/v2/_continue_button.html" with program_color=program_color section_id=section_id validate_url=validate_url is_multipart=True %}
         </div>
     </div>
 </div>

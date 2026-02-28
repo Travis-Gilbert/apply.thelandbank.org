@@ -110,18 +110,15 @@
             {# ── Post-selection fields (hidden until property selected or resuming draft) ── #}
             <div id="post-selection-fields"{% if not form.property_id.value and not form.parcel_id.value %} class="hidden"{% endif %}>
                 {# ── Parcel ID (auto-filled from selection or manual entry) ── #}
-                <div class="space-y-1.5">
-                    <div class="flex items-baseline justify-between">
-                        <label for="id_parcel_id" class="block text-sm font-medium text-warm-900">
-                            Parcel ID
-                        </label>
-                        <span class="text-[11px] text-warm-400">Optional</span>
-                    </div>
-                    <input type="text" name="parcel_id" id="id_parcel_id"
-                           value="{{ form.parcel_id.value|default:'' }}"
-                           placeholder="e.g. 41-08-123-456" class="gclba-input font-mono{% if form.parcel_id.errors %} has-error{% endif %}">
-                    <p class="text-xs text-warm-500">Auto-filled when you select a property, or enter manually</p>
-                </div>
+                <c-field name="parcel_id"
+                         id="id_parcel_id"
+                         label="Parcel ID"
+                         value="{{ form.parcel_id.value|default:'' }}"
+                         placeholder="e.g. 41-08-123-456"
+                         right_hint="Optional"
+                         mono="true"
+                         hint="Auto-filled when you select a property, or enter manually"
+                         error="{{ form.parcel_id.errors.0 }}" />
 
                 {# ── Open house checkbox + date ── #}
                 <div class="space-y-3 mt-5">
@@ -206,19 +203,10 @@
                 Next up: your contact information.
             </p>
 
-            {# ── Continue button ── #}
-            <div class="flex justify-end pt-2">
-                <button type="button"
-                        hx-post="{{ validate_url }}"
-                        hx-target="#section-{{ section_id }}"
-                        hx-swap="outerHTML"
-                        hx-disabled-elt="this"
-                        class="continue-btn"
-                        style="background: #2d6a8a; border-color: #2d6a8a;">
-                    Continue
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-            </div>
+            {# Continue button #}
+            <c-continue_btn validate_url="{{ validate_url }}"
+                             section_id="{{ section_id }}"
+                             program_color="#2d6a8a" />
         </div>
     </div>
 </div>

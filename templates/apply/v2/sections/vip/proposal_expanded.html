@@ -60,14 +60,16 @@
 
                 {# Conditional detail - shown only when "Yes" is selected #}
                 <div id="q2-detail" class="space-y-1.5"
-                     x-show="q2Prior === 'True'" x-collapse x-cloak>
+                     x-show="q2Prior === 'True'" x-collapse x-cloak x-data="{ count: 0 }">
                     <label for="{{ form.vip_q2_prior_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q2_prior_detail.label }}
                     </label>
                     <textarea name="{{ form.vip_q2_prior_detail.html_name }}" id="{{ form.vip_q2_prior_detail.id_for_label }}"
                               rows="3"
                               placeholder="List properties and investment amounts..."
-                              class="gclba-input{% if form.vip_q2_prior_detail.errors %} has-error{% endif %}">{{ form.vip_q2_prior_detail.value|default:"" }}</textarea>
+                              class="gclba-input{% if form.vip_q2_prior_detail.errors %} has-error{% endif %}"
+                              x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q2_prior_detail.value|default:"" }}</textarea>
+                    <p class="text-[11px] text-warm-400 tabular-nums text-right" x-text="count + ' / 2,000'">0 / 2,000</p>
                     {% if form.vip_q2_prior_detail.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q2_prior_detail.errors.0 }}</p>{% endif %}
                 </div>
             </div>
@@ -124,15 +126,19 @@
 
                 {# Conditional detail - shown only when "Yes" is selected #}
                 <div id="q5-detail" class="space-y-1.5"
-                     x-show="q5Exp === 'True'" x-collapse x-cloak>
+                     x-show="q5Exp === 'True'" x-collapse x-cloak x-data="{ count: 0 }">
                     <label for="{{ form.vip_q5_experience_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q5_experience_detail.label }}
                     </label>
                     <textarea name="{{ form.vip_q5_experience_detail.html_name }}" id="{{ form.vip_q5_experience_detail.id_for_label }}"
                               rows="4"
                               placeholder="Addresses of renovated homes, before/after photos..."
-                              class="gclba-input{% if form.vip_q5_experience_detail.errors %} has-error{% endif %}">{{ form.vip_q5_experience_detail.value|default:"" }}</textarea>
-                    <p class="text-xs text-warm-400 leading-relaxed">Include addresses of renovated properties, scope of work, and before/after photos if available.</p>
+                              class="gclba-input{% if form.vip_q5_experience_detail.errors %} has-error{% endif %}"
+                              x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q5_experience_detail.value|default:"" }}</textarea>
+                    <div class="flex items-baseline justify-between gap-2">
+                        <p class="text-xs text-warm-400 leading-relaxed">Include addresses of renovated properties, scope of work, and before/after photos if available.</p>
+                        <span class="text-[11px] text-warm-400 tabular-nums flex-shrink-0" x-text="count + ' / 2,000'">0 / 2,000</span>
+                    </div>
                     {% if form.vip_q5_experience_detail.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q5_experience_detail.errors.0 }}</p>{% endif %}
                 </div>
             </div>
@@ -154,14 +160,16 @@
                 </div>
 
                 <div id="q6-detail-wrapper" class="space-y-1.5"
-                     x-show="q6Plan !== ''" x-collapse x-cloak>
+                     x-show="q6Plan !== ''" x-collapse x-cloak x-data="{ count: 0 }">
                     <label for="{{ form.vip_q6_completion_detail.id_for_label }}" class="block text-sm text-warm-700">
                         {{ form.vip_q6_completion_detail.label }} <span class="text-red-500 text-xs">*</span>
                     </label>
                     <textarea name="{{ form.vip_q6_completion_detail.html_name }}" id="{{ form.vip_q6_completion_detail.id_for_label }}"
                               rows="3" required
                               placeholder="Describe your plans for the property after renovation..."
-                              class="gclba-input{% if form.vip_q6_completion_detail.errors %} has-error{% endif %}">{{ form.vip_q6_completion_detail.value|default:"" }}</textarea>
+                              class="gclba-input{% if form.vip_q6_completion_detail.errors %} has-error{% endif %}"
+                              x-on:input="count = $el.value.length" x-init="count = $el.value.length">{{ form.vip_q6_completion_detail.value|default:"" }}</textarea>
+                    <p class="text-[11px] text-warm-400 tabular-nums text-right" x-text="count + ' / 2,000'">0 / 2,000</p>
                     {% if form.vip_q6_completion_detail.errors %}<p class="text-xs text-red-600 font-medium">{{ form.vip_q6_completion_detail.errors.0 }}</p>{% endif %}
                 </div>
             </div>
@@ -200,18 +208,7 @@
             </p>
 
             {# Continue button #}
-            <div class="flex justify-end pt-2">
-                <button type="button"
-                        hx-post="{{ validate_url }}"
-                        hx-target="#section-{{ section_id }}"
-                        hx-swap="outerHTML"
-                        hx-disabled-elt="this"
-                        class="continue-btn"
-                        style="background: {{ program_color }}; border-color: {{ program_color }}">
-                    Continue
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-            </div>
+            {% include "apply/v2/_continue_button.html" with program_color=program_color section_id=section_id validate_url=validate_url %}
         </div>
     </div>
 </div>
