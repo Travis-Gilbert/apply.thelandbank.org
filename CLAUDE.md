@@ -27,7 +27,7 @@ and nobody has delivered it. Build it well.
 | Buyer forms | Custom Django views + Tailwind CSS + HTMX | Server-rendered, HTMX for conditional field logic |
 | Database | PostgreSQL (Railway) | Prod DB via Railway plugin |
 | File storage | Django Storages + S3 or Backblaze B2 | Secure document storage, pre-signed URLs for staff viewing |
-| Email | SendGrid or Resend | Confirmation on submission, staff notification |
+| Email | Resend (via django-anymail) | Confirmation on submission, staff notification |
 | Deployment | Railway | Auto-deploy from GitHub, Postgres built in |
 | Auth | Django built-in | Staff login; buyers use UUID magic links, no account required |
 
@@ -449,6 +449,7 @@ python manage.py runserver 8199   # Terminal 2: Dev server (port 8199 avoids con
 python manage.py tailwind build   # One-time CSS build (for CI/deploy)
 python manage.py check            # Validate models, urls, templates
 python manage.py makemigrations --check  # Verify no missing migrations
+python manage.py test applications # Run test suite (8 e2e accordion tests)
 ```
 
 **⚠ Broken venv:** The virtualenv symlinks point to an old project path. `./venv/bin/pip` fails.
@@ -587,25 +588,31 @@ AWS_S3_REGION_NAME
 24. **Dashboard greeting** — `admin_utils.py` computes `greeting_time` (morning/afternoon/evening)
     from `timezone.now().hour`. Django's `{% now "A" %}` outputs AM/PM format codes, not time-of-day words.
 
+25. **Yes/No questions use ChoiceField + RadioSelect, not BooleanField** — `BooleanField` renders as a
+    checkbox that reads like an acknowledgment. For actual questions ("Have you purchased from GCLBA?"),
+    use `ChoiceField(choices=[("no", "No"), ("yes", "Yes")], widget=RadioSelect, initial="no")`.
+    Values stored as strings in `form_data` JSON. Backward compat with legacy boolean drafts:
+    `form_data.get("field") in ("yes", True)`. Templates: `{% if value == "yes" %}` not `{% if value %}`.
+
 ---
 
 ## Phase 1 MVP Scope
 
-- [ ] Featured Homes path: cash and land contract sub-paths
-- [ ] Ready for Rehab path: line-item renovation estimate
-- [ ] VIP Spotlight path: proposal questions
-- [ ] Eligibility gate shared across all programs
-- [ ] Save-and-return with magic link email
-- [ ] Program-specific document requirements enforced before submission
-- [ ] Down payment minimum validation for land contract
-- [ ] Renovation totals auto-calculated via HTMX
-- [ ] Self-employed income label swap via HTMX
-- [ ] Submission confirmation email to buyer
-- [ ] New application notification to staff
-- [ ] django-unfold staff dashboard: list view + detail view
-- [ ] Status workflow with staff notes and audit log
-- [ ] Pre-signed URLs for staff document access
-- [ ] Railway deployment with PostgreSQL
+- [x] Featured Homes path: cash and land contract sub-paths
+- [x] Ready for Rehab path: line-item renovation estimate
+- [x] VIP Spotlight path: proposal questions
+- [x] Eligibility gate shared across all programs
+- [x] Save-and-return with magic link email
+- [x] Program-specific document requirements enforced before submission
+- [x] Down payment minimum validation for land contract
+- [x] Renovation totals auto-calculated via HTMX
+- [x] Self-employed income label swap via HTMX
+- [x] Submission confirmation email to buyer
+- [x] New application notification to staff
+- [x] django-unfold staff dashboard: list view + detail view
+- [x] Status workflow with staff notes and audit log
+- [x] Pre-signed URLs for staff document access
+- [x] Railway deployment with PostgreSQL
 
 **Not in Phase 1:**
 - Vacant Lot program
@@ -621,6 +628,11 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
+| Buyer form — all 3 programs | Done | FH (cash+LC), R4R (line items), VIP (proposal) — accordion v2 |
+| Admin dashboard + status workflow | Done | django-unfold, status badges, audit log, bulk actions |
+| 10 buyer UX improvements | Done | Simplified step 1, better summaries, inline eligibility, helper text |
+| QA punchlist | Done | 13-item punch from QA testing + 7-item polish pass |
+| R4R prior purchase radio fix | Done | BooleanField → ChoiceField with Yes/No radios |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
 | Better icons | Open | SVG icon set would improve polish over current emoji icons |
@@ -664,6 +676,7 @@ command before production launch with real user data.
 | Procfile is Railway's source of truth, not nixpacks.toml | Railpack ignores nixpacks.toml [start].cmd when Procfile exists. Keep both in sync. | 2026-02-26 |
 | LOGGING config added to settings.py | DEBUG=False silently swallows all errors without explicit LOGGING. django.request at ERROR level captures tracebacks to stdout. | 2026-02-26 |
 | Tailwind via CDN only — no compiled build | CompressedManifestStaticFilesStorage + missing compiled CSS = hard 500 on every page. CDN avoids needing a Tailwind build step on Railway. | 2026-02-26 |
+| ChoiceField + RadioSelect for Yes/No questions | BooleanField checkbox reads as acknowledgment, not question. RadioSelect with "no"/"yes" strings requires backward-compat check `in ("yes", True)` for legacy drafts. | 2026-02-27 |
 
 ---
 
@@ -701,7 +714,7 @@ applications/
   models.py                   # Application, Draft, Document, StatusLog, User
   status_notifications.py     # Status-email and note-requirement helpers
   forms/                      # Program-specific form classes
-  management/commands/         # ensure_superuser (prototype login), import_properties
+  management/commands/         # ensure_superuser (prototype login), import_properties, import_fm_csv
   views/                      # Accordion flow, shared steps, submission
 config/
   settings.py                 # App config, Unfold, email, DB
@@ -711,6 +724,8 @@ static/
     gclba-logo-icon-400.png   # Header logo: 400x197 transparent PNG (diamond+swoosh)
     gclba-logo-icon.png       # High-res source: 2083x1027 transparent PNG
     gclba-logo-full.png       # Full logo with text: 2386x1724 transparent PNG
+    gclba-logo.png            # Alternate logo (raster)
+    gclba-logo.jpg            # JPEG version of logo
     gclba-logo.svg            # Old hand-drawn SVG (no longer referenced)
 templates/
   apply/                      # Buyer templates (v2 accordion)
@@ -720,7 +735,10 @@ requirements/                 # (local only — not yet deployed)
   base.txt                    # Shared dependencies
   development.txt             # Dev extras (debug-toolbar, etc.)
   production.txt              # Prod extras (gunicorn, whitenoise, etc.)
-docs/records/                 # Design decisions and feature specs
+docs/
+  design/                     # UX design specs (infrastructure, buyer form, admin)
+  plans/                      # Implementation plans
+  ux-qa-2026-02-25/           # QA screenshots and punch list
 ```
 
 ---
