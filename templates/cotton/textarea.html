@@ -1,0 +1,49 @@
+{% comment %}
+  Textarea with label, help text, and error display.
+
+  Usage:
+    <c-textarea name="{{ form.renovations.html_name }}"
+                id="{{ form.renovations.id_for_label }}"
+                label="What renovations will you be making?"
+                value="{{ form.renovations.value|default:'' }}"
+                required="true"
+                rows="4"
+                error="{{ form.renovations.errors.0 }}" />
+
+  Props:
+    name      : Textarea name attribute
+    label     : Label text
+    value     : Current field value
+    placeholder : Placeholder text
+    required  : Show asterisk + HTML required — set to "true"
+    hint      : Help text below the field
+    error     : Error message string
+    rows      : Number of visible text lines — default "3"
+    id        : Textarea element ID
+    css_class : Additional wrapper div classes
+{% endcomment %}
+
+<div class="space-y-1.5 {{ css_class }}">
+  {% if label %}
+  <label{% if id %} for="{{ id }}"{% endif %}
+         class="block text-sm font-medium text-warm-900">
+    {{ label }}
+    {% if required == "true" %}<span class="text-red-500 text-xs" aria-hidden="true">*</span>{% endif %}
+  </label>
+  {% endif %}
+
+  <textarea name="{{ name }}"
+            {% if id %}id="{{ id }}"{% endif %}
+            rows="{{ rows|default:'3' }}"
+            {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+            {% if required == "true" %}required{% endif %}
+            class="gclba-input{% if error %} has-error{% endif %}">{{ value }}</textarea>
+
+  {% if hint %}
+  <p class="text-xs text-warm-500 leading-relaxed">{{ hint }}</p>
+  {% endif %}
+
+  {% if error %}
+  <p class="text-xs text-red-600 font-medium">{{ error }}</p>
+  {% endif %}
+</div>

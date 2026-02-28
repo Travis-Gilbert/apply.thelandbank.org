@@ -1,0 +1,40 @@
+{% comment %}
+  Section card header with colored top border, number badge, title, and subtitle.
+  Uses {{ slot }} for the section body content (fields, buttons, etc.).
+
+  Usage:
+    <c-section_header number="{{ section_number }}"
+                      title="{{ section_title }}"
+                      subtitle="How we'll reach you about your application"
+                      color="{{ program_color }}">
+      ... section fields ...
+      <c-continue_btn validate_url="{{ validate_url }}"
+                       section_id="{{ section_id }}"
+                       program_color="{{ program_color }}" />
+    </c-section_header>
+
+  Props:
+    number   : Section number displayed in the circular badge
+    title    : Section heading text (h3)
+    subtitle : Smaller description text below title
+    color    : Accent color for border and badge — default "#2E7D32"
+{% endcomment %}
+
+<div class="section-card-v2" style="border-top: 3px solid {{ color|default:'#2E7D32' }}">
+  <div class="px-5 pt-5 flex items-center gap-3">
+    <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+          style="background: {{ color|default:'#2E7D32' }}12; color: {{ color|default:'#2E7D32' }};">{{ number }}</span>
+    <div>
+      <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ title }}</h3>
+      {% if subtitle %}
+      <p class="text-[13px] text-warm-500 mt-0.5">{{ subtitle }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="section-body expanded">
+    <div class="px-5 pt-3 pb-6 space-y-5">
+      {{ slot }}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+{% comment %}
+  HTMX continue button with program color accent and chevron icon.
+
+  Usage:
+    <c-continue_btn validate_url="{{ validate_url }}"
+                     section_id="{{ section_id }}"
+                     program_color="{{ program_color }}" />
+
+  Props:
+    validate_url  : HTMX hx-post URL for section validation
+    section_id    : Section element ID (without #) for hx-target
+    program_color : Button background/border color — default "#2E7D32"
+    label         : Button text — default "Continue"
+{% endcomment %}
+
+<div class="flex justify-end pt-2">
+  <button type="button"
+          hx-post="{{ validate_url }}"
+          hx-target="#section-{{ section_id }}"
+          hx-swap="outerHTML"
+          hx-disabled-elt="this"
+          class="continue-btn"
+          style="background: {{ program_color|default:'#2E7D32' }}; border-color: {{ program_color|default:'#2E7D32' }}">
+    {{ label|default:"Continue" }}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+</div>

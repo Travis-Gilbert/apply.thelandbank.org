@@ -1,0 +1,61 @@
+{% comment %}
+  Self-closing text input with label, help text, and error display.
+
+  Usage:
+    <c-field name="{{ form.first_name.html_name }}"
+             id="{{ form.first_name.id_for_label }}"
+             label="First Name"
+             value="{{ form.first_name.value|default:'' }}"
+             placeholder="First name"
+             required="true"
+             error="{{ form.first_name.errors.0 }}" />
+
+  Props:
+    name           : Input name attribute
+    label          : Label text
+    value          : Current field value
+    type           : Input type — default "text"
+    placeholder    : Placeholder text
+    required       : Show asterisk + HTML required — set to "true"
+    hint           : Help text below the field
+    right_hint     : Right-aligned hint next to label
+    error          : Error message string
+    inputmode      : HTML inputmode (decimal, tel, numeric, email)
+    autocomplete   : HTML autocomplete attribute
+    autocapitalize : HTML autocapitalize attribute
+    css_class      : Additional wrapper div classes
+    id             : Input element ID
+    mono           : Add font-mono class — set to "true"
+    maxlength      : Maximum input length
+{% endcomment %}
+
+<div class="space-y-1.5 {{ css_class }}">
+  {% if label %}
+  <label{% if id %} for="{{ id }}"{% endif %}
+         class="block text-sm font-medium text-warm-900">
+    {{ label }}
+    {% if required == "true" %}<span class="text-red-500 text-xs" aria-hidden="true">*</span>{% endif %}
+    {% if right_hint %}<span class="float-right text-xs text-warm-400 font-normal">{{ right_hint }}</span>{% endif %}
+  </label>
+  {% endif %}
+
+  <input type="{{ type|default:'text' }}"
+         name="{{ name }}"
+         {% if id %}id="{{ id }}"{% endif %}
+         value="{{ value }}"
+         {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+         {% if required == "true" %}required{% endif %}
+         {% if inputmode %}inputmode="{{ inputmode }}"{% endif %}
+         {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+         {% if autocapitalize %}autocapitalize="{{ autocapitalize }}"{% endif %}
+         {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+         class="gclba-input{% if error %} has-error{% endif %}{% if mono == 'true' %} font-mono{% endif %}">
+
+  {% if hint %}
+  <p class="text-xs text-warm-500 leading-relaxed">{{ hint }}</p>
+  {% endif %}
+
+  {% if error %}
+  <p class="text-xs text-red-600 font-medium">{{ error }}</p>
+  {% endif %}
+</div>

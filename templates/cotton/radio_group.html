@@ -1,0 +1,43 @@
+{% comment %}
+  Radio button group with label and error display.
+  Uses {{ slot }} for individual radio <label> elements.
+
+  Usage:
+    <c-radio_group label="Have you previously purchased from GCLBA?"
+                   required="true"
+                   error="{{ form.has_prior_purchase.errors.0 }}">
+      <label class="touch-label">
+        <input type="radio" name="has_prior_purchase" value="no"
+               {% if form.has_prior_purchase.value == "no" %}checked{% endif %}>
+        No
+      </label>
+      <label class="touch-label">
+        <input type="radio" name="has_prior_purchase" value="yes"
+               {% if form.has_prior_purchase.value == "yes" %}checked{% endif %}>
+        Yes
+      </label>
+    </c-radio_group>
+
+  Props:
+    label    : Group label text
+    required : Show asterisk — set to "true"
+    error    : Error message string
+    layout   : "row" (default, horizontal) or "column" (vertical stack)
+{% endcomment %}
+
+<div class="space-y-1.5">
+  {% if label %}
+  <p class="block text-sm font-medium text-warm-900">
+    {{ label }}
+    {% if required == "true" %}<span class="text-red-500 text-xs" aria-hidden="true">*</span>{% endif %}
+  </p>
+  {% endif %}
+
+  <div class="flex {% if layout == 'column' %}flex-col{% else %}flex-row{% endif %} gap-3 flex-wrap">
+    {{ slot }}
+  </div>
+
+  {% if error %}
+  <p class="text-xs text-red-600 font-medium">{{ error }}</p>
+  {% endif %}
+</div>

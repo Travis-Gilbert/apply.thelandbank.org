@@ -1,0 +1,62 @@
+{% comment %}
+  Select dropdown with label, help text, error, and HTMX support.
+  Uses {{ slot }} for <option> elements — choices come from Django form fields.
+
+  Usage:
+    <c-select name="{{ form.program_type.html_name }}"
+              id="{{ form.program_type.id_for_label }}"
+              label="Program"
+              required="true"
+              hx_post="/apply/select-program/"
+              hx_target="#program-section"
+              error="{{ form.program_type.errors.0 }}">
+      {% for value, label in form.program_type.field.choices %}
+      <option value="{{ value }}"
+              {% if form.program_type.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
+        {{ label }}
+      </option>
+      {% endfor %}
+    </c-select>
+
+  Props:
+    name       : Select name attribute
+    label      : Label text
+    required   : Show asterisk — set to "true"
+    hint       : Help text below the field
+    error      : Error message string
+    id         : Select element ID
+    css_class  : Additional wrapper div classes
+    hx_post    : HTMX hx-post URL
+    hx_target  : HTMX hx-target selector
+    hx_swap    : HTMX hx-swap mode — default "innerHTML"
+    hx_include : HTMX hx-include selector
+{% endcomment %}
+
+<div class="space-y-1.5 {{ css_class }}">
+  {% if label %}
+  <label{% if id %} for="{{ id }}"{% endif %}
+         class="block text-sm font-medium text-warm-900">
+    {{ label }}
+    {% if required == "true" %}<span class="text-red-500 text-xs" aria-hidden="true">*</span>{% endif %}
+  </label>
+  {% endif %}
+
+  <select name="{{ name }}"
+          {% if id %}id="{{ id }}"{% endif %}
+          {% if hx_post %}hx-post="{{ hx_post }}"{% endif %}
+          {% if hx_target %}hx-target="{{ hx_target }}"{% endif %}
+          {% if hx_post %}hx-swap="{{ hx_swap|default:'innerHTML' }}"{% endif %}
+          {% if hx_include %}hx-include="{{ hx_include }}"{% endif %}
+          class="gclba-input gclba-select{% if error %} has-error{% endif %}"
+          style="min-height: 44px;">
+    {{ slot }}
+  </select>
+
+  {% if hint %}
+  <p class="text-xs text-warm-500 leading-relaxed">{{ hint }}</p>
+  {% endif %}
+
+  {% if error %}
+  <p class="text-xs text-red-600 font-medium">{{ error }}</p>
+  {% endif %}
+</div>
