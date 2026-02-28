@@ -37,7 +37,7 @@
             {% include "apply/v2/_document_capture.html" with field_name="reno_funding_proof" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.reno_funding_proof hide_camera=True %}
 
             {# Prior GCLBA investment proof (conditional) #}
-            {% if form_data.has_prior_gclba_purchase %}
+            {% if form_data.has_prior_gclba_purchase == "yes" %}
             <div class="animate-step">
                 {% include "apply/v2/_document_capture.html" with field_name="prior_investment_proof" label="Proof of Prior GCLBA Investment" required=True hint="Photos, receipts, or other documentation showing investment in your previously purchased GCLBA property." existing_file=uploaded.prior_investment_proof %}
             </div>

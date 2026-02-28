@@ -46,7 +46,7 @@ def _get_required_docs(program_type, purchase_type, form_data):
             docs.append("proof_of_funds")
     elif program_type == "ready_for_rehab":
         docs.extend(["proof_of_funds", "reno_funding_proof"])
-        if form_data.get("has_prior_gclba_purchase"):
+        if form_data.get("has_prior_gclba_purchase") in ("yes", True):
             docs.append("prior_investment_proof")
     elif program_type == "vip_spotlight":
         docs.append("proof_of_funds")

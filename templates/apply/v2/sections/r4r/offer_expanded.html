@@ -38,21 +38,30 @@
                 {% if form.offer_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>{% endif %}
             </div>
 
-            {# Prior GCLBA purchase #}
+            {# Prior GCLBA purchase — Yes/No question #}
             <div class="space-y-2">
-                <label class="touch-label items-start p-3 rounded-lg hover:bg-warm-50/50 transition-colors">
-                    <input type="checkbox" name="{{ form.has_prior_gclba_purchase.html_name }}"
-                           {% if form.has_prior_gclba_purchase.value %}checked{% endif %}
-                           class="mt-0.5 rounded border-warm-300 focus:ring-2 flex-shrink-0"
-                           style="color: {{ program_color }}"
-                           onchange="document.getElementById('prior-purchase-note').style.display = this.checked ? '' : 'none'">
-                    <div>
-                        <span class="text-sm text-warm-900">{{ form.has_prior_gclba_purchase.label }}</span>
-                        <p class="text-xs text-warm-500 mt-0.5">{{ form.has_prior_gclba_purchase.help_text }}</p>
-                    </div>
-                </label>
-                <div id="prior-purchase-note" class="ml-7 p-3 rounded-lg border text-xs text-warm-600 leading-relaxed"
-                     style="border-color: {{ program_color }}30; background: {{ program_color }}08;{% if not form.has_prior_gclba_purchase.value %} display: none{% endif %}">
+                <p class="text-sm font-medium text-warm-900">
+                    {{ form.has_prior_gclba_purchase.label }}
+                </p>
+                <div class="flex gap-4">
+                    {% for value, label in form.has_prior_gclba_purchase.field.widget.choices %}
+                    <label class="touch-label items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors cursor-pointer
+                                  {% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}border-current bg-opacity-5{% else %}border-warm-200 hover:border-warm-300{% endif %}"
+                           style="{% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}border-color: {{ program_color }}; background: {{ program_color }}08;{% endif %}">
+                        <input type="radio" name="{{ form.has_prior_gclba_purchase.html_name }}"
+                               value="{{ value }}"
+                               {% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}checked{% endif %}
+                               class="flex-shrink-0" style="color: {{ program_color }}"
+                               onchange="document.getElementById('prior-purchase-note').style.display = this.value === 'yes' ? '' : 'none'">
+                        <span class="text-sm text-warm-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.has_prior_gclba_purchase.errors %}
+                <p class="text-xs text-red-600 font-medium">{{ form.has_prior_gclba_purchase.errors.0 }}</p>
+                {% endif %}
+                <div id="prior-purchase-note" class="p-3 rounded-lg border text-xs text-warm-600 leading-relaxed"
+                     style="border-color: {{ program_color }}30; background: {{ program_color }}08;{% if form.has_prior_gclba_purchase.value|stringformat:'s' != 'yes' %} display: none{% endif %}">
                     You'll be asked to upload proof of investment in your previously purchased GCLBA property in the Documents step.
                 </div>
             </div>

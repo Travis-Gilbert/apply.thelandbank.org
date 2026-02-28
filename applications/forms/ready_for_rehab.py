@@ -31,10 +31,12 @@ class R4ROfferForm(forms.Form):
         label="Offer Amount ($)",
         widget=forms.NumberInput(attrs={"placeholder": "Enter amount", "inputmode": "decimal"}),
     )
-    has_prior_gclba_purchase = forms.BooleanField(
-        required=False,
-        label="I have previously purchased property from GCLBA",
-        help_text="If yes, you will need to provide proof of investment in your prior purchase",
+    has_prior_gclba_purchase = forms.ChoiceField(
+        choices=[("no", "No"), ("yes", "Yes")],
+        widget=forms.RadioSelect,
+        initial="no",
+        label="Have you previously purchased property from GCLBA?",
+        help_text="If yes, you will need to provide proof of investment in your prior purchase.",
     )
 
 

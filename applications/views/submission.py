@@ -109,7 +109,9 @@ def submit_application(request, draft):
                 setattr(app, total_field, Decimal(str(val)))
 
     # R4R prior purchase
-    app.has_prior_gclba_purchase = data.get("has_prior_gclba_purchase", False)
+    # Accept both "yes" string (new ChoiceField) and True bool (legacy drafts)
+    prior_val = data.get("has_prior_gclba_purchase", False)
+    app.has_prior_gclba_purchase = prior_val in ("yes", True)
 
     # Homebuyer education (FH land contract only)
     app.homebuyer_ed_completed = data.get("homebuyer_ed_completed", False)
