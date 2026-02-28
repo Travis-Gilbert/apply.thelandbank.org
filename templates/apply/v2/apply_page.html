@@ -49,7 +49,7 @@
                 {# Collapsed summary bar #}
                 <div id="section-{{ section.id }}" class="accordion-section accordion-gap">
                     <div class="summary-bar">
-                        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-600">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-civic-green-600 check-icon">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 6L9 17l-5-5"/>
                             </svg>
@@ -72,7 +72,7 @@
 
             {% elif section.state == "expanded" %}
                 {# Active expanded section #}
-                <div id="section-{{ section.id }}" class="accordion-section {% if not forloop.first %}accordion-gap-active{% endif %}">
+                <div id="section-{{ section.id }}" class="accordion-section section-expand {% if not forloop.first %}accordion-gap-active{% endif %}">
                     {% include section.template with section_id=section.id section_number=section.number section_title=section.title program_color=program_color form=section.form validate_url=section.validate_url %}
                 </div>
             {% endif %}
@@ -133,6 +133,13 @@
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 150);
             }
+        }
+
+        // Progress bar spark: shimmer effect when section advances
+        var fill = document.querySelector('.progress-pill-fill');
+        if (fill) {
+            fill.classList.add('just-advanced');
+            setTimeout(function() { fill.classList.remove('just-advanced'); }, 800);
         }
     });
 
