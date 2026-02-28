@@ -47,7 +47,10 @@
             </div>
 
             {# Submit button #}
-            {% include "apply/v2/_continue_button.html" with program_color=program_color section_id=section_id validate_url=validate_url is_submit=True %}
+            <c-continue_btn validate_url="{{ validate_url }}"
+                             section_id="{{ section_id }}"
+                             program_color="{{ program_color }}"
+                             is_submit="true" />
         </div>
     </div>
 </div>

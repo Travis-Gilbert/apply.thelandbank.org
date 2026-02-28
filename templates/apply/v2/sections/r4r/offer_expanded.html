@@ -1,78 +1,71 @@
 {# Ready for Rehab offer - cash only, prior GCLBA purchase question #}
-<div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
-    <div class="px-5 pt-5 flex items-center gap-3">
-        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: {{ program_color|default:'#2E7D32' }}12; color: {{ program_color|default:'#2E7D32' }};">{{ section_number }}</span>
-        <div>
-            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
-            <p class="text-[13px] text-warm-500 mt-0.5">Your purchase offer for this property</p>
+<c-section_header number="{{ section_number }}"
+                  title="{{ section_title }}"
+                  subtitle="Your purchase offer for this property"
+                  color="{{ program_color }}">
+
+    {# Cash-only note #}
+    <div class="p-4 rounded-xl border border-program-rehab/20 bg-program-rehab/5 space-y-1.5">
+        <p class="text-sm leading-relaxed" style="color: {{ program_color }}">
+            <strong>Ready for Rehab properties are cash purchase only.</strong>
+            No land contract or financing options are available for this program.
+        </p>
+        <p class="text-xs leading-relaxed" style="color: {{ program_color }}">
+            You'll need proof of funds for both the offer amount and your estimated renovation costs.
+        </p>
+    </div>
+
+    {# Offer amount — $ prefix requires custom relative positioning #}
+    <div class="space-y-1.5">
+        <label for="{{ form.offer_amount.id_for_label }}" class="block text-sm font-medium text-warm-900">
+            Offer Amount <span class="text-red-500 text-xs">*</span>
+        </label>
+        <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
+            <input type="number" step="0.01" min="1" inputmode="decimal"
+                   name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
+                   value="{{ form.offer_amount.value|default:'' }}" required
+                   placeholder="Enter amount"
+                   class="gclba-input pl-7 font-mono{% if form.offer_amount.errors %} has-error{% endif %}">
+        </div>
+        {% if form.offer_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>{% endif %}
+    </div>
+
+    {# Prior GCLBA purchase — Yes/No radio with JS-driven conditional note #}
+    <div class="space-y-2">
+        <p class="text-sm font-medium text-warm-900">
+            {{ form.has_prior_gclba_purchase.label }}
+        </p>
+        <div class="flex gap-4">
+            {% for value, label in form.has_prior_gclba_purchase.field.widget.choices %}
+            <label class="touch-label items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors cursor-pointer
+                          {% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}border-current bg-opacity-5{% else %}border-warm-200 hover:border-warm-300{% endif %}"
+                   style="{% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}border-color: {{ program_color }}; background: {{ program_color }}08;{% endif %}">
+                <input type="radio" name="{{ form.has_prior_gclba_purchase.html_name }}"
+                       value="{{ value }}"
+                       {% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}checked{% endif %}
+                       class="flex-shrink-0" style="color: {{ program_color }}"
+                       onchange="document.getElementById('prior-purchase-note').style.display = this.value === 'yes' ? '' : 'none'">
+                <span class="text-sm text-warm-700">{{ label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {% if form.has_prior_gclba_purchase.errors %}
+        <p class="text-xs text-red-600 font-medium">{{ form.has_prior_gclba_purchase.errors.0 }}</p>
+        {% endif %}
+        <div id="prior-purchase-note" class="p-3 rounded-lg border text-xs text-warm-600 leading-relaxed"
+             style="border-color: {{ program_color }}30; background: {{ program_color }}08;{% if form.has_prior_gclba_purchase.value|stringformat:'s' != 'yes' %} display: none{% endif %}">
+            You'll be asked to upload proof of investment in your previously purchased GCLBA property in the Documents step.
         </div>
     </div>
 
-    <div class="section-body expanded">
-        <div class="px-5 pt-3 pb-6 space-y-5">
-            {# Cash-only note #}
-            <div class="p-4 rounded-xl border border-program-rehab/20 bg-program-rehab/5 space-y-1.5">
-                <p class="text-sm leading-relaxed" style="color: {{ program_color }}">
-                    <strong>Ready for Rehab properties are cash purchase only.</strong>
-                    No land contract or financing options are available for this program.
-                </p>
-                <p class="text-xs leading-relaxed" style="color: {{ program_color }}">
-                    You'll need proof of funds for both the offer amount and your estimated renovation costs.
-                </p>
-            </div>
+    {# Progress nudge #}
+    <p class="text-xs text-warm-400 text-center pt-1">
+        Next: upload your documents, then your detailed renovation estimate.
+    </p>
 
-            {# Offer amount #}
-            <div class="space-y-1.5">
-                <label for="{{ form.offer_amount.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                    Offer Amount <span class="text-red-500 text-xs">*</span>
-                </label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-warm-500 font-mono text-sm">$</span>
-                    <input type="number" step="0.01" min="1" inputmode="decimal"
-                           name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
-                           value="{{ form.offer_amount.value|default:'' }}" required
-                           placeholder="Enter amount"
-                           class="gclba-input pl-7 font-mono{% if form.offer_amount.errors %} has-error{% endif %}">
-                </div>
-                {% if form.offer_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>{% endif %}
-            </div>
-
-            {# Prior GCLBA purchase — Yes/No question #}
-            <div class="space-y-2">
-                <p class="text-sm font-medium text-warm-900">
-                    {{ form.has_prior_gclba_purchase.label }}
-                </p>
-                <div class="flex gap-4">
-                    {% for value, label in form.has_prior_gclba_purchase.field.widget.choices %}
-                    <label class="touch-label items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors cursor-pointer
-                                  {% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}border-current bg-opacity-5{% else %}border-warm-200 hover:border-warm-300{% endif %}"
-                           style="{% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}border-color: {{ program_color }}; background: {{ program_color }}08;{% endif %}">
-                        <input type="radio" name="{{ form.has_prior_gclba_purchase.html_name }}"
-                               value="{{ value }}"
-                               {% if form.has_prior_gclba_purchase.value|stringformat:'s' == value|stringformat:'s' %}checked{% endif %}
-                               class="flex-shrink-0" style="color: {{ program_color }}"
-                               onchange="document.getElementById('prior-purchase-note').style.display = this.value === 'yes' ? '' : 'none'">
-                        <span class="text-sm text-warm-700">{{ label }}</span>
-                    </label>
-                    {% endfor %}
-                </div>
-                {% if form.has_prior_gclba_purchase.errors %}
-                <p class="text-xs text-red-600 font-medium">{{ form.has_prior_gclba_purchase.errors.0 }}</p>
-                {% endif %}
-                <div id="prior-purchase-note" class="p-3 rounded-lg border text-xs text-warm-600 leading-relaxed"
-                     style="border-color: {{ program_color }}30; background: {{ program_color }}08;{% if form.has_prior_gclba_purchase.value|stringformat:'s' != 'yes' %} display: none{% endif %}">
-                    You'll be asked to upload proof of investment in your previously purchased GCLBA property in the Documents step.
-                </div>
-            </div>
-
-            {# Progress nudge #}
-            <p class="text-xs text-warm-400 text-center pt-1">
-                Next: upload your documents, then your detailed renovation estimate.
-            </p>
-
-            {# Continue button #}
-            {% include "apply/v2/_continue_button.html" with program_color=program_color section_id=section_id validate_url=validate_url %}
-        </div>
-    </div>
-</div>
+    {# Continue button #}
+    <c-continue_btn validate_url="{{ validate_url }}"
+                     section_id="{{ section_id }}"
+                     program_color="{{ program_color }}" />
+</c-section_header>

@@ -1,55 +1,49 @@
 {# Ready for Rehab documents - expanded #}
-<div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
-    <div class="px-5 pt-5 flex items-center gap-3">
-        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: {{ program_color|default:'#2E7D32' }}12; color: {{ program_color|default:'#2E7D32' }};">{{ section_number }}</span>
-        <div>
-            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
-            <p class="text-[13px] text-warm-500 mt-0.5">Upload the documents required for your application</p>
-        </div>
+<c-section_header number="{{ section_number }}"
+                  title="{{ section_title }}"
+                  subtitle="Upload the documents required for your application"
+                  color="{{ program_color }}">
+
+    {# Completion counter #}
+    {% if required_count %}
+    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-warm-50 border border-warm-200">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="{% if uploaded_required_count >= required_count %}text-civic-green-600{% else %}text-warm-400{% endif %}"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="text-xs {% if uploaded_required_count >= required_count %}text-civic-green-700 font-semibold{% else %}text-warm-600{% endif %}">{{ uploaded_required_count }} of {{ required_count }} required documents uploaded</span>
     </div>
+    {% endif %}
 
-    <div class="section-body expanded">
-        <div class="px-5 pt-3 pb-6 space-y-6">
-            {# Completion counter #}
-            {% if required_count %}
-            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-warm-50 border border-warm-200">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="{% if uploaded_required_count >= required_count %}text-civic-green-600{% else %}text-warm-400{% endif %}"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span class="text-xs {% if uploaded_required_count >= required_count %}text-civic-green-700 font-semibold{% else %}text-warm-600{% endif %}">{{ uploaded_required_count }} of {{ required_count }} required documents uploaded</span>
-            </div>
-            {% endif %}
+    {% if errors %}
+    <c-alert type="error">
+        {% for error in errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
 
-            {% if errors %}
-            <c-alert type="error">
-                {% for error in errors %}
-                <p>{{ error }}</p>
-                {% endfor %}
-            </c-alert>
-            {% endif %}
+    {# Photo ID #}
+    {% include "apply/v2/_document_capture.html" with field_name="photo_id" label="Photo ID" required=True hint="State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted." existing_file=uploaded.photo_id %}
 
-            {# Photo ID #}
-            {% include "apply/v2/_document_capture.html" with field_name="photo_id" label="Photo ID" required=True hint="State-issued ID, driver's license, military ID, or passport only. Student IDs and non-picture IDs are not accepted." existing_file=uploaded.photo_id %}
+    {# Proof of funds for offer amount #}
+    {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds - Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds hide_camera=True %}
 
-            {# Proof of funds for offer amount #}
-            {% include "apply/v2/_document_capture.html" with field_name="proof_of_funds" label="Proof of Funds - Offer Amount" required=True hint="Bank statement, investment account, or pre-approval letter showing available funds for your offer amount." existing_file=uploaded.proof_of_funds hide_camera=True %}
+    {# Proof of funds OR financing for renovation costs #}
+    {% include "apply/v2/_document_capture.html" with field_name="reno_funding_proof" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.reno_funding_proof hide_camera=True %}
 
-            {# Proof of funds OR financing for renovation costs #}
-            {% include "apply/v2/_document_capture.html" with field_name="reno_funding_proof" label="Proof of Renovation Funding" required=True hint="Bank statement, construction loan pre-approval, or other documentation showing how you will finance the renovation work." existing_file=uploaded.reno_funding_proof hide_camera=True %}
-
-            {# Prior GCLBA investment proof (conditional) #}
-            {% if form_data.has_prior_gclba_purchase == "yes" %}
-            <div class="animate-step">
-                {% include "apply/v2/_document_capture.html" with field_name="prior_investment_proof" label="Proof of Prior GCLBA Investment" required=True hint="Photos, receipts, or other documentation showing investment in your previously purchased GCLBA property." existing_file=uploaded.prior_investment_proof %}
-            </div>
-            {% endif %}
-
-            {# Progress nudge #}
-            <p class="text-xs text-warm-400 text-center pt-1">
-                Nice work - next up is your itemized renovation estimate.
-            </p>
-
-            {# Continue button #}
-            {% include "apply/v2/_continue_button.html" with program_color=program_color section_id=section_id validate_url=validate_url is_multipart=True %}
-        </div>
+    {# Prior GCLBA investment proof (conditional) #}
+    {% if form_data.has_prior_gclba_purchase == "yes" %}
+    <div class="animate-step">
+        {% include "apply/v2/_document_capture.html" with field_name="prior_investment_proof" label="Proof of Prior GCLBA Investment" required=True hint="Photos, receipts, or other documentation showing investment in your previously purchased GCLBA property." existing_file=uploaded.prior_investment_proof %}
     </div>
-</div>
+    {% endif %}
+
+    {# Progress nudge #}
+    <p class="text-xs text-warm-400 text-center pt-1">
+        Nice work - next up is your itemized renovation estimate.
+    </p>
+
+    {# Continue button #}
+    <c-continue_btn validate_url="{{ validate_url }}"
+                     section_id="{{ section_id }}"
+                     program_color="{{ program_color }}"
+                     is_multipart="true" />
+</c-section_header>
