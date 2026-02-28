@@ -10,7 +10,7 @@ packets to offers@thelandbank.org, and staff chase down missing documents.
 The portal has two surfaces:
 - **Buyer-facing:** Program-specific multi-step application with save-and-return, document
   uploads, and email confirmation on submission
-- **Staff-facing:** Review dashboard built on django-unfold where Alex's sales team can
+- **Staff-facing:** Review dashboard built on django-smartbase-admin where Alex's sales team can
   see all incoming applications, their status, and attached documents
 
 Alex Riley (Director) is the primary stakeholder. She has been asking for this for years
@@ -23,7 +23,7 @@ and nobody has delivered it. Build it well.
 | Layer | Choice | Why |
 |-------|--------|-----|
 | Framework | Django 6.0.2 | Built-in admin, forms, auth, migrations |
-| Admin theme | django-unfold | Modern Tailwind-based replacement for Django Admin |
+| Admin theme | django-smartbase-admin | Modern admin replacement; migrated from django-unfold |
 | Buyer forms | Custom Django views + Tailwind CSS + HTMX | Server-rendered, HTMX for conditional field logic |
 | Database | PostgreSQL (Railway) | Prod DB via Railway plugin |
 | File storage | Django Storages + S3 or Backblaze B2 | Secure document storage, pre-signed URLs for staff viewing |
@@ -628,11 +628,8 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Buyer form — all 3 programs | Done | FH (cash+LC), R4R (line items), VIP (proposal) — accordion v2 |
-| Admin dashboard + status workflow | Done | django-unfold, status badges, audit log, bulk actions |
-| 10 buyer UX improvements | Done | Simplified step 1, better summaries, inline eligibility, helper text |
-| QA punchlist | Done | 13-item punch from QA testing + 7-item polish pass |
-| R4R prior purchase radio fix | Done | BooleanField → ChoiceField with Yes/No radios |
+| SmartBase admin migration | Done | django-unfold → django-smartbase-admin; `config/sbadmin_config.py` added |
+| Tailwind build + cotton components | Planned | Plan written: `docs/plans/2026-02-28-tailwind-build-cotton-components.md` |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
 | Better icons | Open | SVG icon set would improve polish over current emoji icons |
@@ -643,20 +640,21 @@ command before production launch with real user data.
 
 ## Next Step
 
-1. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-2. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
-3. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
-4. **Better icons** — audit program cards, section headers, upload boxes; explore SVG icon set
+1. **Execute Tailwind build + cotton components plan** — 3 phases, 9 commit batches. Run `/execute-plan docs/plans/2026-02-28-tailwind-build-cotton-components.md`. Phase 1 replaces CDN with compiled CSS, Phase 2 introduces `<c-field>` etc., Phase 3 verifies pixel-identical output.
+2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+4. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
 
 ### Future
 
 | Todo | Priority | Problem | Solution |
 |------|----------|---------|----------|
 | Property CSV upload + auto-program routing | High | Buyers must know which program a property is in; staff re-enters data | Weekly CSV upload populates Property model; buyer types address → auto-selects program, pre-fills parcel ID. Improves admin too. Direct DB sync not feasible (office policy). |
-| Better icons/emojis across form | Medium | Current emoji icons (🏠🔧⭐) are basic; sections could feel more polished | Audit all icons in program cards, section headers, and upload boxes; consider SVG icon set |
+| Better icons/emojis across form | Medium | Current emoji icons are basic; sections could feel more polished | Audit all icons in program cards, section headers, and upload boxes; consider SVG icon set |
 | Vacant Lot program | Low | Phase 2 — requirements TBD | Build when GCLBA defines lot program rules |
 | FileMaker sync | Low | Staff currently dual-enter some data | API or CSV export TBD |
 | Spanish language version | Medium | Flint has Spanish-speaking residents | i18n after MVP launch |
+| Remove prototype superuser | Pre-launch | Admin/Admin123 auto-created on every deploy | Remove `ensure_superuser` from Procfile before production launch |
 
 ---
 
@@ -664,19 +662,17 @@ command before production launch with real user data.
 
 | Decision | Why | Date |
 |----------|-----|------|
-| Django 6.0.2 instead of spec's 5.2 | 6.0 released after spec written; no breaking changes; already deployed | 2026-02-19 |
 | Port 8199 for dev server | Avoids conflict with other local services | 2026-02-20 |
 | font-mono restricted to numeric data only | Phone/email/address/labels use body font; mono only for $ amounts, ref numbers, PIDs | 2026-02-20 |
 | Single-page accordion over multi-step wizard | Better UX: one page, HTMX validates per section, collapsed summaries show progress | 2026-02-20 |
-| Color role separation: blue=navigation, green=completion | Green was overused (buttons, progress, focus, checkmarks). Blue (#2d6a8a) now handles all interactive/nav elements; green reserved for completion signals only. | 2026-02-24 |
-| Property data via CSV upload, not direct DB sync | Office policy restricts direct database access. Weekly CSV upload achieves same buyer UX (address → auto-program routing). | 2026-02-24 |
-| Application outline sidebar (desktop) | `_application_outline.html` with OOB swap on transitions. `hidden lg:block` for desktop-only. Sticky positioning inside CSS grid. | 2026-02-25 |
+| Color role separation: blue=navigation, green=completion | Blue (#2d6a8a) handles interactive/nav; green reserved for completion signals only. | 2026-02-24 |
+| Property data via CSV upload, not direct DB sync | Office policy restricts direct database access. Weekly CSV upload achieves same buyer UX. | 2026-02-24 |
 | Rate limiting on validation + search endpoints | `django-ratelimit` 30/m on section_validate, 30/m on property search. Prevents abuse before launch. | 2026-02-25 |
-| Magic-byte file validation over extension-only | PIL header check for images, `%PDF` prefix for PDFs. Extension-only validation lets renamed files through. | 2026-02-25 |
 | Procfile is Railway's source of truth, not nixpacks.toml | Railpack ignores nixpacks.toml [start].cmd when Procfile exists. Keep both in sync. | 2026-02-26 |
-| LOGGING config added to settings.py | DEBUG=False silently swallows all errors without explicit LOGGING. django.request at ERROR level captures tracebacks to stdout. | 2026-02-26 |
-| Tailwind via CDN only — no compiled build | CompressedManifestStaticFilesStorage + missing compiled CSS = hard 500 on every page. CDN avoids needing a Tailwind build step on Railway. | 2026-02-26 |
-| ChoiceField + RadioSelect for Yes/No questions | BooleanField checkbox reads as acknowledgment, not question. RadioSelect with "no"/"yes" strings requires backward-compat check `in ("yes", True)` for legacy drafts. | 2026-02-27 |
+| LOGGING config added to settings.py | DEBUG=False silently swallows all errors without explicit LOGGING. django.request at ERROR level → stdout. | 2026-02-26 |
+| ChoiceField + RadioSelect for Yes/No questions | BooleanField checkbox reads as acknowledgment. RadioSelect with "no"/"yes" strings; backward-compat `in ("yes", True)`. | 2026-02-27 |
+| SmartBase admin over django-unfold | Unfold had compatibility issues; SmartBase provides simpler config via `sbadmin_config.py`. | 2026-02-28 |
+| Compiled Tailwind build replacing CDN | Plan written to migrate from Play CDN to django-tailwind compiled pipeline. Enables cotton components and proper CSS architecture. Supersedes prior "CDN only" decision. | 2026-02-28 |
 
 ---
 
@@ -699,7 +695,7 @@ command before production launch with real user data.
 Two surfaces sharing one Django project:
 
 - **Buyer surface** (`/apply/`): Accordion-style form flow in `applications/views/accordion.py`. Each section validates via program-specific Django forms, saves progress to `ApplicationDraft.form_data` (JSON). Final submission hydrates a flat `Application` record + `Document` rows.
-- **Staff surface** (`/admin/`): django-unfold admin with status workflow, audit log (`StatusLog`), and pre-signed document viewing. Status changes can trigger buyer email notifications.
+- **Staff surface** (`/admin/`): django-smartbase-admin with status workflow, audit log (`StatusLog`), and pre-signed document viewing. Config in `config/sbadmin_config.py`. Status changes can trigger buyer email notifications.
 
 Data flow: `ApplicationDraft` (in-progress) → `Application` (submitted) → `StatusLog` (audit trail)
 
@@ -710,14 +706,15 @@ Data flow: `ApplicationDraft` (in-progress) → `Application` (submitted) → `S
 ```
 applications/
   admin.py                    # Admin UX + workflow actions (+ UserAdmin)
-  admin_utils.py              # Unfold dashboard callbacks/badges
+  admin_utils.py              # SmartBase dashboard callbacks/badges
   models.py                   # Application, Draft, Document, StatusLog, User
   status_notifications.py     # Status-email and note-requirement helpers
   forms/                      # Program-specific form classes
   management/commands/         # ensure_superuser (prototype login), import_properties, import_fm_csv
   views/                      # Accordion flow, shared steps, submission
 config/
-  settings.py                 # App config, Unfold, email, DB
+  settings.py                 # App config, SmartBase, email, DB
+  sbadmin_config.py           # SmartBase admin theme config (colors, nav, dashboard)
   urls.py                     # /apply + /admin routing
 static/
   img/
