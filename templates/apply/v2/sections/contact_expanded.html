@@ -1,142 +1,122 @@
 {# Contact information - expanded section #}
-<div class="section-card-v2" style="border-top: 3px solid {{ program_color|default:'#2E7D32' }}">
-    <div class="px-5 pt-5 flex items-center gap-3">
-        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: {{ program_color|default:'#2E7D32' }}12; color: {{ program_color|default:'#2E7D32' }};">{{ section_number }}</span>
-        <div>
-            <h3 class="text-[17px] font-bold font-heading text-warm-900">{{ section_title }}</h3>
-            <p class="text-[13px] text-warm-500 mt-0.5">How we'll reach you about your application</p>
-        </div>
+<c-section_header number="{{ section_number }}"
+                  title="{{ section_title }}"
+                  subtitle="How we'll reach you about your application"
+                  color="{{ program_color }}">
+
+    {# Name row #}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <c-field name="{{ form.first_name.html_name }}"
+                 id="{{ form.first_name.id_for_label }}"
+                 label="First Name"
+                 value="{{ form.first_name.value|default:'' }}"
+                 placeholder="First name"
+                 required="true"
+                 autocomplete="given-name"
+                 autocapitalize="words"
+                 error="{{ form.first_name.errors.0 }}" />
+        <c-field name="{{ form.last_name.html_name }}"
+                 id="{{ form.last_name.id_for_label }}"
+                 label="Last Name"
+                 value="{{ form.last_name.value|default:'' }}"
+                 placeholder="Last name"
+                 required="true"
+                 autocomplete="family-name"
+                 autocapitalize="words"
+                 error="{{ form.last_name.errors.0 }}" />
     </div>
 
-    <div class="section-body expanded">
-        <div class="px-5 pt-3 pb-6 space-y-5">
-            {# Name row #}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        First Name <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <input type="text" name="{{ form.first_name.html_name }}" id="{{ form.first_name.id_for_label }}"
-                           value="{{ form.first_name.value|default:'' }}" required
-                           placeholder="First name" class="gclba-input{% if form.first_name.errors %} has-error{% endif %}">
-                    {% if form.first_name.errors %}<p class="text-xs text-red-600 font-medium">{{ form.first_name.errors.0 }}</p>{% endif %}
-                </div>
-                <div class="space-y-1.5">
-                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        Last Name <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <input type="text" name="{{ form.last_name.html_name }}" id="{{ form.last_name.id_for_label }}"
-                           value="{{ form.last_name.value|default:'' }}" required
-                           placeholder="Last name" class="gclba-input{% if form.last_name.errors %} has-error{% endif %}">
-                    {% if form.last_name.errors %}<p class="text-xs text-red-600 font-medium">{{ form.last_name.errors.0 }}</p>{% endif %}
-                </div>
-            </div>
-
-            {# Email + phone #}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        Email <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}"
-                           value="{{ form.email.value|default:'' }}" required inputmode="email"
-                           placeholder="you@example.com" class="gclba-input{% if form.email.errors %} has-error{% endif %}">
-                    {% if form.email.errors %}<p class="text-xs text-red-600 font-medium">{{ form.email.errors.0 }}</p>{% endif %}
-                </div>
-                <div class="space-y-1.5">
-                    <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        Phone <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <input type="tel" name="{{ form.phone.html_name }}" id="{{ form.phone.id_for_label }}"
-                           value="{{ form.phone.value|default:'' }}" required inputmode="tel"
-                           placeholder="(810) 555-0123" class="gclba-input{% if form.phone.errors %} has-error{% endif %}">
-                    {% if form.phone.errors %}<p class="text-xs text-red-600 font-medium">{{ form.phone.errors.0 }}</p>{% endif %}
-                </div>
-            </div>
-
-            {# Preferred contact method #}
-            <div class="space-y-1.5">
-                <label for="{{ form.preferred_contact.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                    Preferred Contact Method <span class="text-red-500 text-xs">*</span>
-                </label>
-                <select name="{{ form.preferred_contact.html_name }}" id="{{ form.preferred_contact.id_for_label }}"
-                        class="gclba-input gclba-select" style="min-height: 44px;">
-                    {% for value, label in form.preferred_contact.field.choices %}
-                    <option value="{{ value }}" {% if form.preferred_contact.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            {# ── Divider: personal → address ── #}
-            <div class="field-divider"></div>
-
-            {# Mailing address #}
-            <div class="space-y-1.5">
-                <label for="{{ form.mailing_address.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                    Mailing Address <span class="text-red-500 text-xs">*</span>
-                </label>
-                <input type="text" name="{{ form.mailing_address.html_name }}" id="{{ form.mailing_address.id_for_label }}"
-                       value="{{ form.mailing_address.value|default:'' }}" required
-                       placeholder="123 Main Street" class="gclba-input{% if form.mailing_address.errors %} has-error{% endif %}">
-                {% if form.mailing_address.errors %}<p class="text-xs text-red-600 font-medium">{{ form.mailing_address.errors.0 }}</p>{% endif %}
-            </div>
-
-            {# City / State / ZIP #}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="col-span-2 sm:col-span-2 space-y-1.5">
-                    <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        City <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <input type="text" name="{{ form.city.html_name }}" id="{{ form.city.id_for_label }}"
-                           value="{{ form.city.value|default:'' }}" required
-                           placeholder="City" class="gclba-input{% if form.city.errors %} has-error{% endif %}">
-                    {% if form.city.errors %}<p class="text-xs text-red-600 font-medium">{{ form.city.errors.0 }}</p>{% endif %}
-                </div>
-                <div class="space-y-1.5">
-                    <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        State <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <select name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}"
-                            class="gclba-input gclba-select{% if form.state.errors %} has-error{% endif %}" style="min-height: 44px;">
-                        {% for value, label in form.state.field.choices %}
-                        <option value="{{ value }}" {% if form.state.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                    {% if form.state.errors %}<p class="text-xs text-red-600 font-medium">{{ form.state.errors.0 }}</p>{% endif %}
-                </div>
-                <div class="space-y-1.5">
-                    <label for="{{ form.zip_code.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                        ZIP <span class="text-red-500 text-xs">*</span>
-                    </label>
-                    <input type="text" name="{{ form.zip_code.html_name }}" id="{{ form.zip_code.id_for_label }}"
-                           value="{{ form.zip_code.value|default:'' }}" required maxlength="10" inputmode="numeric"
-                           placeholder="ZIP code" class="gclba-input{% if form.zip_code.errors %} has-error{% endif %}">
-                    {% if form.zip_code.errors %}<p class="text-xs text-red-600 font-medium">{{ form.zip_code.errors.0 }}</p>{% endif %}
-                </div>
-            </div>
-
-            {# Entity dropdown #}
-            {% include "apply/v2/_entity_dropdown.html" with form=form %}
-
-            {# Progress nudge #}
-            <p class="text-xs text-warm-400 text-center pt-1">
-                Next up: a quick eligibility check.
-            </p>
-
-            {# Continue button #}
-            <div class="flex justify-end pt-2">
-                <button type="button"
-                        hx-post="{{ validate_url }}"
-                        hx-target="#section-{{ section_id }}"
-                        hx-swap="outerHTML"
-                        hx-disabled-elt="this"
-                        class="continue-btn"
-                        style="background: {{ program_color }}; border-color: {{ program_color }}">
-                    Continue
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-            </div>
-        </div>
+    {# Email + phone #}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <c-field name="{{ form.email.html_name }}"
+                 id="{{ form.email.id_for_label }}"
+                 label="Email"
+                 type="email"
+                 value="{{ form.email.value|default:'' }}"
+                 placeholder="you@example.com"
+                 required="true"
+                 inputmode="email"
+                 autocomplete="email"
+                 error="{{ form.email.errors.0 }}" />
+        <c-field name="{{ form.phone.html_name }}"
+                 id="{{ form.phone.id_for_label }}"
+                 label="Phone"
+                 type="tel"
+                 value="{{ form.phone.value|default:'' }}"
+                 placeholder="(810) 555-0123"
+                 required="true"
+                 inputmode="tel"
+                 autocomplete="tel"
+                 error="{{ form.phone.errors.0 }}" />
     </div>
-</div>
+
+    {# Preferred contact method #}
+    <c-select name="{{ form.preferred_contact.html_name }}"
+              id="{{ form.preferred_contact.id_for_label }}"
+              label="Preferred Contact Method"
+              required="true">
+        {% for value, label in form.preferred_contact.field.choices %}
+        <option value="{{ value }}" {% if form.preferred_contact.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </c-select>
+
+    {# ── Divider: personal → address ── #}
+    <div class="field-divider"></div>
+
+    {# Mailing address #}
+    <c-field name="{{ form.mailing_address.html_name }}"
+             id="{{ form.mailing_address.id_for_label }}"
+             label="Mailing Address"
+             value="{{ form.mailing_address.value|default:'' }}"
+             placeholder="123 Main Street"
+             required="true"
+             autocomplete="street-address"
+             error="{{ form.mailing_address.errors.0 }}" />
+
+    {# City / State / ZIP #}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <c-field name="{{ form.city.html_name }}"
+                 id="{{ form.city.id_for_label }}"
+                 label="City"
+                 value="{{ form.city.value|default:'' }}"
+                 placeholder="City"
+                 required="true"
+                 autocomplete="address-level2"
+                 autocapitalize="words"
+                 css_class="col-span-2 sm:col-span-2"
+                 error="{{ form.city.errors.0 }}" />
+        <c-select name="{{ form.state.html_name }}"
+                  id="{{ form.state.id_for_label }}"
+                  label="State"
+                  required="true"
+                  error="{{ form.state.errors.0 }}">
+            {% for value, label in form.state.field.choices %}
+            <option value="{{ value }}" {% if form.state.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </c-select>
+        <c-field name="{{ form.zip_code.html_name }}"
+                 id="{{ form.zip_code.id_for_label }}"
+                 label="ZIP"
+                 value="{{ form.zip_code.value|default:'' }}"
+                 placeholder="ZIP code"
+                 required="true"
+                 inputmode="numeric"
+                 autocomplete="postal-code"
+                 maxlength="10"
+                 error="{{ form.zip_code.errors.0 }}" />
+    </div>
+
+    {# Entity dropdown #}
+    {% include "apply/v2/_entity_dropdown.html" with form=form %}
+
+    {# Progress nudge #}
+    <p class="text-xs text-warm-400 text-center pt-1">
+        Next up: a quick eligibility check.
+    </p>
+
+    {# Continue button #}
+    <c-continue_btn validate_url="{{ validate_url }}"
+                     section_id="{{ section_id }}"
+                     program_color="{{ program_color }}" />
+
+</c-section_header>
