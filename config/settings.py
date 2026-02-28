@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 
 import dj_database_url
-from django.urls import reverse_lazy
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -45,10 +44,6 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
 # Application definition
 
 INSTALLED_APPS = [
-    # Unfold must come BEFORE django.contrib.admin
-    "unfold",
-    "unfold.contrib.filters",
-    "unfold.contrib.forms",
     # Django core
     "django.contrib.admin",
     "django.contrib.auth",
@@ -69,14 +64,20 @@ INSTALLED_APPS = [
     "theme",
     # Custom crispy template pack
     "crispy_gclba",
-    # Local apps
+    # SmartBase Admin dependencies
+    "easy_thumbnails",
+    "widget_tweaks",
+    # Local apps (MUST come BEFORE smartbase admin)
     "applications",
+    # SmartBase Admin (MUST come AFTER apps with model admin registrations)
+    "django_smartbase_admin",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -241,148 +242,11 @@ if not DEBUG:
 
 
 # ---------------------------------------------------------------------------
-# Django Unfold - Admin Theme Configuration
+# SmartBase Admin — configuration class pointer
 # ---------------------------------------------------------------------------
 
-UNFOLD = {
-    "SITE_TITLE": "GCLBA Application Portal",
-    "SITE_HEADER": "Genesee County Land Bank",
-    "SITE_SUBHEADER": "Application Management",
-    "SITE_SYMBOL": "home_work",
-    "SHOW_HISTORY": True,
-    "SHOW_VIEW_ON_SITE": False,
-
-    # Environment indicator (shows "Development" or "Production" badge in header)
-    "ENVIRONMENT": "applications.admin_utils.environment_callback",
-
-    # Dashboard stat cards (shown on admin index page)
-    "DASHBOARD_CALLBACK": "applications.admin_utils.dashboard_callback",
-
-    # Sidebar navigation with quick filters
-    "SIDEBAR": {
-        "show_search": True,
-        "show_all_applications": False,
-        "navigation": [
-            {
-                "title": "Applications",
-                "separator": True,
-                "collapsible": False,
-                "items": [
-                    {
-                        "title": "Dashboard",
-                        "icon": "dashboard",
-                        "link": reverse_lazy("admin:index"),
-                    },
-                    {
-                        "title": "All Applications",
-                        "icon": "description",
-                        "link": reverse_lazy("admin:applications_application_changelist"),
-                        "badge": "applications.admin_utils.pending_count_badge",
-                    },
-                    {
-                        "title": "Applications in Progress",
-                        "icon": "edit_note",
-                        "link": reverse_lazy("admin:applications_applicationdraft_changelist"),
-                    },
-                ],
-            },
-            {
-                "title": "Quick Filters",
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": "Needs Review",
-                        "icon": "pending_actions",
-                        "link": "/admin/applications/application/?status__exact=received",
-                    },
-                    {
-                        "title": "Needs Reviewer",
-                        "icon": "person_off",
-                        "link": "/admin/applications/application/?status__exact=received&assigned_to__isnull=True",
-                    },
-                    {
-                        "title": "Under Review",
-                        "icon": "rate_review",
-                        "link": "/admin/applications/application/?status__exact=under_review",
-                    },
-                    {
-                        "title": "Needs More Info",
-                        "icon": "upload_file",
-                        "link": "/admin/applications/application/?status__exact=needs_more_info",
-                    },
-                    {
-                        "title": "Approved",
-                        "icon": "check_circle",
-                        "link": "/admin/applications/application/?status__exact=approved",
-                    },
-                    {
-                        "title": "Declined",
-                        "icon": "cancel",
-                        "link": "/admin/applications/application/?status__exact=declined",
-                    },
-                    {
-                        "title": "Missing Docs",
-                        "icon": "folder_off",
-                        "link": "/admin/applications/application/?docs_state=missing",
-                    },
-                ],
-            },
-            {
-                "title": "Property Inventory",
-                "separator": True,
-                "collapsible": False,
-                "items": [
-                    {
-                        "title": "All Properties",
-                        "icon": "home_work",
-                        "link": reverse_lazy("admin:applications_property_changelist"),
-                        "badge": "applications.admin_utils.available_properties_badge",
-                    },
-                    {
-                        "title": "Available",
-                        "icon": "check_circle",
-                        "link": "/admin/applications/property/?status__exact=available",
-                    },
-                    {
-                        "title": "Under Offer",
-                        "icon": "handshake",
-                        "link": "/admin/applications/property/?status__exact=under_offer",
-                    },
-                ],
-            },
-            {
-                "title": "System",
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": "Users",
-                        "icon": "people",
-                        "link": reverse_lazy("admin:applications_user_changelist"),
-                    },
-                ],
-            },
-        ],
-    },
-
-    # Theme: civic green primary with blue accents
-    "COLORS": {
-        "primary": {
-            "50": "#f0f7f1",
-            "100": "#dceede",
-            "200": "#b8ddb9",
-            "300": "#8bc98d",
-            "400": "#5ab35d",
-            "500": "#3a9a3e",
-            "600": "#2e7d32",
-            "700": "#256929",
-            "800": "#1b5e20",
-            "900": "#0d3311",
-            "950": "#071a09",
-        },
-    },
-}
+SB_ADMIN_CONFIGURATION = "config.sbadmin_config.SBAdminConfiguration"
+PROJECT_NAME = "GCLBA Application Portal"
 
 
 # ---------------------------------------------------------------------------

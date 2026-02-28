@@ -1,19 +1,22 @@
 """
 Admin configuration for the GCLBA Application Portal.
 
-Uses Django Unfold for a modern staff dashboard with colored status badges,
+Uses SmartBase Admin for a modern staff dashboard with colored status badges,
 organized fieldsets, inline documents, and automatic status audit logging.
 """
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import TabularInline
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
+from django.db.models import Count, F
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html, format_html_join
-from unfold.admin import ModelAdmin, TabularInline
-from unfold.decorators import display
+from django_smartbase_admin.admin.admin_base import SBAdmin
+from django_smartbase_admin.admin.site import sb_admin_site
+from django_smartbase_admin.engine.field import SBAdminField
 
 from .csv_import import import_properties_from_csv
 from .models import Application, ApplicationDraft, Document, Property, StatusLog, User
@@ -36,9 +39,13 @@ class CustomUserChangeForm(UserChangeForm):
 # ── User Admin (required for autocomplete_fields on assigned_to) ──
 
 
-@admin.register(User)
-class UserAdmin(BaseUserAdmin, ModelAdmin):
-    """Custom User admin inheriting from both Django's UserAdmin and Unfold's ModelAdmin."""
+@admin.register(User, site=sb_admin_site)
+class UserAdmin(SBAdmin, BaseUserAdmin):
+    """Custom User admin for the GCLBA staff portal.
+
+    SBAdmin must come first in the MRO so SmartBase's init_view_static()
+    is available. BaseUserAdmin provides the user-specific fieldsets and forms.
+    """
 
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
@@ -47,8 +54,8 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 # ── Property Admin ───────────────────────────────────────────────
 
 
-@admin.register(Property)
-class PropertyAdmin(ModelAdmin):
+@admin.register(Property, site=sb_admin_site)
+class PropertyAdmin(SBAdmin):
     list_display = (
         "address",
         "parcel_id",
@@ -58,6 +65,20 @@ class PropertyAdmin(ModelAdmin):
         "application_count",
         "imported_at",
     )
+    # SmartBase requires SBAdminField with annotate for queryset-annotation columns
+    sbadmin_list_display = [
+        "address",
+        "parcel_id",
+        "display_program",
+        "display_status",
+        "listing_price_display",
+        SBAdminField(
+            name="application_count",
+            title="Apps",
+            annotate=Count("applications"),
+        ),
+        "imported_at",
+    ]
     list_filter = ("program_type", "status", "csv_batch")
     search_fields = ("address", "parcel_id")
     readonly_fields = ("address_normalized", "imported_at")
@@ -92,37 +113,49 @@ class PropertyAdmin(ModelAdmin):
             .annotate(_application_count=Count("applications"))
         )
 
-    @display(
-        description="Program",
-        label={
-            Application.ProgramType.FEATURED_HOMES: "success",
-            Application.ProgramType.READY_FOR_REHAB: "warning",
-            Application.ProgramType.VIP_SPOTLIGHT: "info",
-            Application.ProgramType.VACANT_LOT: "info",
-        },
-    )
+    @admin.display(description="Program", ordering="program_type")
     def display_program(self, instance):
-        return instance.program_type
+        palette = {
+            Application.ProgramType.FEATURED_HOMES: ("#dcfce7", "#166534"),
+            Application.ProgramType.READY_FOR_REHAB: ("#fef3c7", "#92400e"),
+            Application.ProgramType.VIP_SPOTLIGHT: ("#dbeafe", "#1e40af"),
+            Application.ProgramType.VACANT_LOT: ("#dbeafe", "#1e40af"),
+        }
+        bg, fg = palette.get(instance.program_type, ("#e5e7eb", "#374151"))
+        return format_html(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:{};color:{}'>{}</span>",
+            bg,
+            fg,
+            instance.get_program_type_display(),
+        )
 
-    @display(
-        description="Status",
-        label={
-            Property.Status.AVAILABLE: "success",
-            Property.Status.UNDER_OFFER: "warning",
-            Property.Status.SOLD: "info",
-            Property.Status.WITHDRAWN: "danger",
-        },
-    )
+    @admin.display(description="Status", ordering="status")
     def display_status(self, instance):
-        return instance.status
+        palette = {
+            Property.Status.AVAILABLE: ("#dcfce7", "#166534"),
+            Property.Status.UNDER_OFFER: ("#fef3c7", "#92400e"),
+            Property.Status.SOLD: ("#dbeafe", "#1e40af"),
+            Property.Status.WITHDRAWN: ("#fee2e2", "#991b1b"),
+        }
+        bg, fg = palette.get(instance.status, ("#e5e7eb", "#374151"))
+        return format_html(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:{};color:{}'>{}</span>",
+            bg,
+            fg,
+            instance.get_status_display(),
+        )
 
-    @display(description="Price")
+    @admin.display(description="Price", ordering="listing_price")
     def listing_price_display(self, instance):
         if instance.listing_price is None:
             return "N/A"
         return f"${instance.listing_price:,.2f}"
 
-    @display(description="Apps", ordering="_application_count")
+    @admin.display(description="Apps")
     def application_count(self, instance):
         return instance._application_count
 
@@ -159,7 +192,7 @@ class DocumentInline(TabularInline):
     fields = ("doc_type", "file", "view_file", "original_filename", "uploaded_at")
     readonly_fields = ("view_file", "uploaded_at")
 
-    @display(description="View")
+    @admin.display(description="View", ordering="uploaded_at")
     def view_file(self, instance):
         if not instance.pk or not instance.file:
             return "N/A"
@@ -292,8 +325,8 @@ class ApplicationAdminForm(forms.ModelForm):
 # ── Application Admin ────────────────────────────────────────────
 
 
-@admin.register(Application)
-class ApplicationAdmin(ModelAdmin):
+@admin.register(Application, site=sb_admin_site)
+class ApplicationAdmin(SBAdmin):
     COMMON_FIELDSET_TITLES = {
         "Review Snapshot",
         "Applicant Identity",
@@ -333,7 +366,7 @@ class ApplicationAdmin(ModelAdmin):
 
     list_display = (
         "reference_number",
-        "full_name",
+        "display_full_name",
         "property_address",
         "display_program",
         "display_purchase_type",
@@ -344,6 +377,23 @@ class ApplicationAdmin(ModelAdmin):
         "display_assignee",
         "submitted_age",
     )
+    sbadmin_list_display = [
+        "reference_number",
+        "display_full_name",
+        "property_address",
+        "display_program",
+        "display_purchase_type",
+        "display_offer",
+        "display_status",
+        "display_docs",
+        "quick_docs",
+        SBAdminField(
+            name="display_assignee",
+            title="Reviewer",
+            list_visible=True,
+        ),
+        "submitted_age",
+    ]
     list_filter = (
         AssignmentFilter,
         FreshnessFilter,
@@ -353,8 +403,7 @@ class ApplicationAdmin(ModelAdmin):
         DocsStateFilter,
         "submitted_at",
     )
-    list_display_links = ("reference_number", "full_name")
-    list_filter_submit = True
+    list_display_links = ("reference_number", "display_full_name")
     date_hierarchy = "submitted_at"
     ordering = ("status", "-submitted_at")
     list_per_page = 50
@@ -598,7 +647,11 @@ class ApplicationAdmin(ModelAdmin):
             .prefetch_related("documents")
         )
 
-    @display(description="Status", ordering="status")
+    @admin.display(description="Name", ordering="last_name")
+    def display_full_name(self, instance):
+        return instance.full_name
+
+    @admin.display(description="Status", ordering="status")
     def display_status(self, instance):
         palette = {
             Application.Status.RECEIVED: ("#dbeafe", "#1e40af"),
@@ -619,17 +672,17 @@ class ApplicationAdmin(ModelAdmin):
             instance.get_status_display(),
         )
 
-    @display(description="Program")
+    @admin.display(description="Program", ordering="program_type")
     def display_program(self, instance):
         return instance.get_program_type_display()
 
-    @display(description="Purchase Type", ordering="purchase_type")
+    @admin.display(description="Purchase Type", ordering="purchase_type")
     def display_purchase_type(self, instance):
         if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
             return "Proposal"
         return instance.get_purchase_type_display()
 
-    @display(description="Offer")
+    @admin.display(description="Offer", ordering="offer_amount")
     def display_offer(self, instance):
         if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
             return "See Proposal"
@@ -637,13 +690,21 @@ class ApplicationAdmin(ModelAdmin):
             return "N/A"
         return f"${instance.offer_amount:,.2f}"
 
-    @display(description="Docs", label={"Complete": "success", "Incomplete": "danger"})
+    @admin.display(description="Docs", ordering="submitted_at")
     def display_docs(self, instance):
         if instance.docs_complete:
-            return "Complete"
-        return "Incomplete"
+            return format_html(
+                "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+                "border-radius:999px;font-size:12px;font-weight:600;"
+                "background:#dcfce7;color:#166534'>Complete</span>"
+            )
+        return format_html(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:#fee2e2;color:#991b1b'>Incomplete</span>"
+        )
 
-    @display(description="Quick Docs")
+    @admin.display(description="Quick Docs", ordering="submitted_at")
     def quick_docs(self, instance):
         docs = list(instance.documents.all())
         if not docs:
@@ -679,13 +740,13 @@ class ApplicationAdmin(ModelAdmin):
             )
         return format_html(wrap, links_html)
 
-    @display(description="Reviewer", ordering="assigned_to__username")
+    @admin.display(description="Reviewer", ordering="assigned_to")
     def display_assignee(self, instance):
         if not instance.assigned_to:
             return "Needs reviewer"
         return instance.assigned_to.get_full_name() or instance.assigned_to.get_username()
 
-    @display(description="Age", ordering="submitted_at")
+    @admin.display(description="Age", ordering="submitted_at")
     def submitted_age(self, instance):
         days_open = (timezone.now() - instance.submitted_at).days
         if days_open == 0:
@@ -698,7 +759,7 @@ class ApplicationAdmin(ModelAdmin):
             return format_html("<span style='color:#b91c1c;font-weight:600'>{}</span>", label)
         return label
 
-    @display(description="Closing Fee")
+    @admin.display(description="Closing Fee", ordering="purchase_type")
     def closing_fee_display(self, instance):
         if instance.program_type == Application.ProgramType.FEATURED_HOMES:
             if instance.purchase_type == Application.PurchaseType.LAND_CONTRACT:
@@ -849,8 +910,8 @@ class ApplicationAdmin(ModelAdmin):
 # ── Draft Admin (debugging) ─────────────────────────────────────
 
 
-@admin.register(ApplicationDraft)
-class ApplicationDraftAdmin(ModelAdmin):
+@admin.register(ApplicationDraft, site=sb_admin_site)
+class ApplicationDraftAdmin(SBAdmin):
     list_display = (
         "token_short",
         "email",
@@ -872,13 +933,10 @@ class ApplicationDraftAdmin(ModelAdmin):
         "submitted_at",
     )
 
+    @admin.display(description="Token", ordering="token")
     def token_short(self, obj):
         return obj.token.hex[:8]
 
-    token_short.short_description = "Token"
-
+    @admin.display(description="Expired?", boolean=True, ordering="expires_at")
     def is_expired_display(self, obj):
         return obj.is_expired
-
-    is_expired_display.short_description = "Expired?"
-    is_expired_display.boolean = True
