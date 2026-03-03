@@ -4,8 +4,15 @@
 # Core Django
 Django==6.0.2
 django-htmx==1.27.0
-# django-smartbase-admin==1.1.1 — installed via --no-deps in nixpacks.toml
-# (upper bound django<6.0 is overly cautious; works fine with 6.0.2)
+# django-smartbase-admin==1.1.1 — installed via --no-deps in railpack.json build step
+# (its django<6.0 upper bound is overly cautious; works fine with 6.0.2)
+# Transitive deps listed explicitly because --no-deps skips them:
+django-admin-inline-paginator>=0.4.0,<0.5.0
+django-ckeditor>=6.7.1,<7.0.0
+django-filer>=3.1.1,<4.0.0
+django-nested-admin>=4.1.1,<5.0.0
+setuptools>=67.0.0,<68.0.0
+xlsxwriter>=3.2.0,<4.0.0
 easy-thumbnails>=2.10
 django-widget-tweaks>=1.5
 django-anymail[resend]==14.0
