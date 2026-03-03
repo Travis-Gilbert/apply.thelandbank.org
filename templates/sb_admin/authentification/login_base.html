@@ -1,0 +1,23 @@
+{% extends "sb_admin/sb_admin_base_no_sidebar.html" %}
+{% load i18n static %}
+
+{% block main_wrapper %}
+    {% include "sb_admin/includes/notifications.html" with classes="top-16 xl:!left-0" %}
+    <div class="flex items-center max-h-screen">
+        <img loading="lazy"
+             src="{% static 'img/gclba-logo-icon-400.png' %}"
+             alt="Genesee County Land Bank Authority"
+             class="h-48 w-auto absolute md:left-40 md:top-40 left-24 top-24">
+        <div class="md:max-w-640 w-full flex justify-center items-center h-screen">
+            <div class="max-w-370 w-full mx-24">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        <div class="w-full md:block hidden">
+            <picture>
+                <source srcset="{% static 'sb_admin/images/login.webp' %}" type="image/webp">
+                <img src="{% static 'sb_admin/images/login.jpg' %}" alt="Flint property" class="w-full h-screen object-cover">
+            </picture>
+        </div>
+    </div>
+{% endblock %}
