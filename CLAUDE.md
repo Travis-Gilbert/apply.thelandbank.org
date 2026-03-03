@@ -632,8 +632,6 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Comprehensive improvement plan — Phase A | Done | 12 fixes: security (1.1-1.6), error handling (2.1, 2.7), accessibility (6.1-6.4). Commit `f467008`. |
-| Comprehensive improvement plan — Phase B | Done | Dashboard widget (3.1), hx-sync (2.6), DRY forms+templates (4.3-4.7), dead template cleanup (4.9). Commit `63941e0`. |
 | Tailwind build + cotton components | Planned | Plan: `docs/plans/2026-02-28-tailwind-build-cotton-components.md` |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
@@ -674,8 +672,7 @@ command before production launch with real user data.
 | Procfile is Railway's source of truth, not nixpacks.toml | Railpack ignores nixpacks.toml [start].cmd when Procfile exists. Keep both in sync. | 2026-02-26 |
 | LOGGING config added to settings.py | DEBUG=False silently swallows all errors without explicit LOGGING. django.request at ERROR level → stdout. | 2026-02-26 |
 | Compiled Tailwind build replacing CDN | Plan written to migrate from Play CDN to django-tailwind compiled pipeline. Enables cotton components and proper CSS architecture. Supersedes prior "CDN only" decision. | 2026-02-28 |
-| ALLOWED_TRANSITIONS state machine on Application model | Prevents invalid status jumps (e.g. RECEIVED→APPROVED). Enforced in admin form clean + bulk actions. | 2026-03-03 |
-| aria-label on Edit buttons via shared partial | 10/15 collapsed templates use `_summary_bar.html`; 5 inline ones still duplicate structure. Phase B should DRY them. | 2026-03-03 |
+| ALLOWED_TRANSITIONS state machine on Application model | Prevents invalid status jumps (e.g. RECEIVED→APPROVED). Enforced in admin form clean + bulk actions. See Code Pattern #26. | 2026-03-03 |
 
 ---
 
