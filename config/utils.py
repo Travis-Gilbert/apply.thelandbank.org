@@ -7,7 +7,7 @@ import os
 
 def environment_callback(request):
     """
-    Returns environment label for the Unfold admin header.
+    Returns environment label for the admin header.
     Shows a colored badge so the sales team knows if they're
     in development vs production.
     """

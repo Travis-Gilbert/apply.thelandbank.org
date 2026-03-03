@@ -23,6 +23,11 @@ config = SBAdminRoleConfiguration(
             view_id="dashboard",
         ),
         SBAdminMenuItem(
+            label="Review Queue",
+            icon="Checks",
+            url="/admin/review/",
+        ),
+        SBAdminMenuItem(
             label="Applications",
             icon="Box",
             sub_items=[

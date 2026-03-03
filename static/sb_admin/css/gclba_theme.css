@@ -1,0 +1,44 @@
+/*
+ * GCLBA Green Accent Theme for SmartBase Admin
+ *
+ * Overrides SmartBase's default teal (#00959d) primary palette
+ * with GCLBA's institutional green, derived from #2e7d32.
+ *
+ * The scale below was generated to maintain consistent contrast
+ * ratios across light/dark modes while matching GCLBA brand green.
+ */
+
+:root {
+  --color-primary-900: #1b5e20;
+  --color-primary-800: #236b27;
+  --color-primary-700: #2b7a2f;
+  --color-primary-600: #338a37;
+  --color-primary:     #2e7d32;
+  --color-primary-400: #4caf50;
+  --color-primary-300: #81c784;
+  --color-primary-200: #a5d6a7;
+  --color-primary-100: #c8e6c9;
+  --color-primary-50:  #e8f5e9;
+}
+
+/* Dark mode: same palette, the CSS vars just carry over.
+   SmartBase swaps via [data-theme="dark"] on <html>. */
+[data-theme="dark"] {
+  --color-primary-900: #1b5e20;
+  --color-primary-800: #236b27;
+  --color-primary-700: #2b7a2f;
+  --color-primary-600: #338a37;
+  --color-primary:     #4caf50;
+  --color-primary-400: #66bb6a;
+  --color-primary-300: #81c784;
+  --color-primary-200: #a5d6a7;
+  --color-primary-100: #2e7d32;
+  --color-primary-50:  #1b5e20;
+}
+
+/* Sidebar active item accent — SmartBase uses primary for the
+   active menu indicator and hover states */
+.sidebar-menu .active .menu-icon,
+.sidebar-menu .active .menu-label {
+  color: var(--color-primary);
+}

@@ -1,0 +1,85 @@
+{% extends 'sb_admin/sb_admin_base_no_sidebar.html' %}
+{% load sb_admin_tags static %}
+
+{# Override favicon with GCLBA diamond icon #}
+{% block icons %}
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <meta name="theme-color" content="#2e7d32">
+{% endblock %}
+
+{# Inject GCLBA green accent overrides after SmartBase CSS #}
+{% block style_init %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'sb_admin/css/gclba_theme.css' %}">
+{% endblock %}
+
+{# Pending badge polling for Review Queue sidebar link #}
+{% block additional_js %}
+    {{ block.super }}
+    <script>
+    (function() {
+        // Find the Review Queue link in the sidebar by its href
+        var link = document.querySelector('a[href="/admin/review/"]');
+        if (!link) return;
+
+        // Create badge element
+        var badge = document.createElement('span');
+        badge.id = 'pending-badge';
+        badge.style.cssText = 'display:none;margin-left:auto;padding:1px 7px;border-radius:999px;' +
+            'font-size:11px;font-weight:700;background:#fee2e2;color:#991b1b;min-width:20px;text-align:center';
+        // Append badge inside the link (after the label span)
+        link.appendChild(badge);
+
+        function updateBadge() {
+            fetch('/admin/api/pending/', {credentials: 'same-origin'})
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(function() {});  // silent on error
+        }
+
+        updateBadge();
+        setInterval(updateBadge, 60000);  // Poll every 60 seconds
+    })();
+    </script>
+{% endblock %}
+
+{# Preserve SmartBase's main_wrapper exactly #}
+{% block main_wrapper %}
+    {% get_item request.META 'HTTP_SEC_FETCH_SITE' as sec_fetch_site %}
+    <div class="w-full h-full min-h-full{% if not sec_fetch_site or request.META.HTTP_SEC_FETCH_DEST == 'document' %} xl:pl-260{% endif %}">
+        {% include 'sb_admin/navigation.html' %}
+
+        {% if sbadmin_is_modal %}
+            <div id="modal-content" class="modal-dialog">
+                <div class="modal-content">
+        {% endif %}
+
+        <div id="content" class="relative flex flex-col{% if sbadmin_is_modal %} min-h-0 h-full{% else %} min-h-screen sm:p-24 {% block view_class %}{% endblock %}{% endif %}">
+            {% if sbadmin_is_modal %}
+                {# load media which are missing #}
+                {{ media_json|json_script:"sb-admin-modal-media" }}
+                <script src="{% static 'sb_admin/dist/modal_view.js' %}"></script>
+            {% else %}
+                {% include "sb_admin/includes/loading.html" %}
+                {% include "sb_admin/includes/notifications.html" %}
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+            {{ inner_content }}
+        </div>
+
+        {% if sbadmin_is_modal %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

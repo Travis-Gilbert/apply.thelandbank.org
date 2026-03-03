@@ -1,6 +1,18 @@
 {% extends "sb_admin/sb_admin_base_no_sidebar.html" %}
 {% load i18n static %}
 
+{# GCLBA favicon + theme on login page #}
+{% block icons %}
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <meta name="theme-color" content="#2e7d32">
+{% endblock %}
+
+{% block style_init %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'sb_admin/css/gclba_theme.css' %}">
+{% endblock %}
+
 {% block main_wrapper %}
     {% include "sb_admin/includes/notifications.html" with classes="top-16 xl:!left-0" %}
     <div class="flex items-center max-h-screen">
