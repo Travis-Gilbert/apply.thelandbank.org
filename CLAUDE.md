@@ -594,6 +594,10 @@ AWS_S3_REGION_NAME
     Values stored as strings in `form_data` JSON. Backward compat with legacy boolean drafts:
     `form_data.get("field") in ("yes", True)`. Templates: `{% if value == "yes" %}` not `{% if value %}`.
 
+26. **Status transition state machine** — `Application.ALLOWED_TRANSITIONS` dict defines valid
+    `{from_status: {to_statuses}}` pairs. Enforced in `ApplicationAdminForm.clean()` for single
+    edits and in `_bulk_set_status()` for bulk actions. Prevents invalid jumps (e.g. RECEIVED→APPROVED).
+
 ---
 
 ## Phase 1 MVP Scope
@@ -628,11 +632,11 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| SmartBase admin migration | Done | django-unfold → django-smartbase-admin; `config/sbadmin_config.py` added |
-| Tailwind build + cotton components | Planned | Plan written: `docs/plans/2026-02-28-tailwind-build-cotton-components.md` |
+| Comprehensive improvement plan — Phase A | Done | 12 fixes: security (1.1-1.6), error handling (2.1, 2.7), accessibility (6.1-6.4). Commit `f467008`. |
+| Comprehensive improvement plan — Phase B | Next | Dashboard (3.1), HTMX sync (2.6), bulk action validation (3.2), DRY refactors (4.3-4.7), dead templates (4.9) |
+| Tailwind build + cotton components | Planned | Plan: `docs/plans/2026-02-28-tailwind-build-cotton-components.md` |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
-| Better icons | Open | SVG icon set would improve polish over current emoji icons |
 
 **⚠ Prototype credentials on Railway:** Admin/Admin123 superuser is auto-created on
 every deploy. Remove `ensure_superuser` from Procfile and delete the management
@@ -640,10 +644,10 @@ command before production launch with real user data.
 
 ## Next Step
 
-1. **Execute Tailwind build + cotton components plan** — 3 phases, 9 commit batches. Run `/execute-plan docs/plans/2026-02-28-tailwind-build-cotton-components.md`. Phase 1 replaces CDN with compiled CSS, Phase 2 introduces `<c-field>` etc., Phase 3 verifies pixel-identical output.
-2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
-4. **End-to-end test** — submit a full application through all 3 programs, verify documents stored + emails sent
+1. **Phase B of improvement plan** — post-launch polish: wire SmartBase dashboard (3.1), add `hx-sync` on purchase type radios + property search (2.6), bulk action transition validation (3.2), DRY refactors (4.3-4.7), dead template cleanup (4.9). See `docs/plans/2026-03-02-comprehensive-improvement-plan.md`.
+2. **Execute Tailwind build + cotton components plan** — 3 phases, 9 commit batches. Run `/execute-plan docs/plans/2026-02-28-tailwind-build-cotton-components.md`.
+3. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+4. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
 
 ### Future
 
@@ -670,9 +674,9 @@ command before production launch with real user data.
 | Rate limiting on validation + search endpoints | `django-ratelimit` 30/m on section_validate, 30/m on property search. Prevents abuse before launch. | 2026-02-25 |
 | Procfile is Railway's source of truth, not nixpacks.toml | Railpack ignores nixpacks.toml [start].cmd when Procfile exists. Keep both in sync. | 2026-02-26 |
 | LOGGING config added to settings.py | DEBUG=False silently swallows all errors without explicit LOGGING. django.request at ERROR level → stdout. | 2026-02-26 |
-| ChoiceField + RadioSelect for Yes/No questions | BooleanField checkbox reads as acknowledgment. RadioSelect with "no"/"yes" strings; backward-compat `in ("yes", True)`. | 2026-02-27 |
-| SmartBase admin over django-unfold | Unfold had compatibility issues; SmartBase provides simpler config via `sbadmin_config.py`. | 2026-02-28 |
 | Compiled Tailwind build replacing CDN | Plan written to migrate from Play CDN to django-tailwind compiled pipeline. Enables cotton components and proper CSS architecture. Supersedes prior "CDN only" decision. | 2026-02-28 |
+| ALLOWED_TRANSITIONS state machine on Application model | Prevents invalid status jumps (e.g. RECEIVED→APPROVED). Enforced in admin form clean + bulk actions. | 2026-03-03 |
+| aria-label on Edit buttons via shared partial | 10/15 collapsed templates use `_summary_bar.html`; 5 inline ones still duplicate structure. Phase B should DRY them. | 2026-03-03 |
 
 ---
 
