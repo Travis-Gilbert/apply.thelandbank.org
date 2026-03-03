@@ -25,12 +25,12 @@
     layout   : "row" (default, horizontal) or "column" (vertical stack)
 {% endcomment %}
 
-<div class="space-y-1.5">
+<fieldset class="space-y-1.5 border-0 p-0 m-0 min-w-0">
   {% if label %}
-  <p class="block text-sm font-medium text-warm-900">
+  <legend class="block text-sm font-medium text-warm-900">
     {{ label }}
     {% if required == "true" %}<span class="text-red-500 text-xs" aria-hidden="true">*</span>{% endif %}
-  </p>
+  </legend>
   {% endif %}
 
   <div class="flex {% if layout == 'column' %}flex-col{% else %}flex-row{% endif %} gap-3 flex-wrap">
@@ -38,6 +38,6 @@
   </div>
 
   {% if error %}
-  <p class="text-xs text-red-600 font-medium">{{ error }}</p>
+  <p class="text-xs text-red-600 font-medium" role="alert">{{ error }}</p>
   {% endif %}
-</div>
+</fieldset>

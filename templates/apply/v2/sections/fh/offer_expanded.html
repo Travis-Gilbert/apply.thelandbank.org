@@ -4,6 +4,14 @@
                   subtitle="Your purchase offer for this property"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Purchase type radio #}
     <div class="space-y-2">
         <p class="text-sm font-medium text-warm-900">

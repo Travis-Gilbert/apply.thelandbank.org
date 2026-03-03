@@ -16,6 +16,14 @@
             </c-alert>
             {% endif %}
 
+            {% if form.non_field_errors %}
+            <c-alert type="error">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </c-alert>
+            {% endif %}
+
             <p class="text-sm text-warm-600 leading-relaxed">
                 You're almost done! Please confirm each item below, then submit your proposal.
             </p>

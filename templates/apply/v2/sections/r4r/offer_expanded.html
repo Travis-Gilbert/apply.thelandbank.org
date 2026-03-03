@@ -4,6 +4,14 @@
                   subtitle="Your purchase offer for this property"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Cash-only note #}
     <div class="p-4 rounded-xl border border-program-rehab/20 bg-program-rehab/5 space-y-1.5">
         <p class="text-sm leading-relaxed" style="color: {{ program_color }}">

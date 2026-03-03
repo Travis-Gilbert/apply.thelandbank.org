@@ -4,6 +4,14 @@
                   subtitle="Required for land contract purchases"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Info callout — custom blue styling #}
     <div class="p-4 rounded-xl border border-civic-blue-100 bg-civic-blue-50/60">
         <p class="text-sm text-civic-blue-800 leading-relaxed">

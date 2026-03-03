@@ -339,7 +339,7 @@ def _build_summary(section_id, form_data):
         return label
 
     if section_id == "line_items":
-        total = form_data.get("total_renovation_cost", "")
+        total = form_data.get("reno_total", "")
         if total:
             try:
                 return f"Estimated total: ${Decimal(total):,.0f}"

@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
-from ..models import Application, Document
+from ..models import Application, ApplicationDraft, Document
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,15 @@ def submit_application(request, draft):
         app.down_payment_amount = Decimal(data["down_payment_amount"])
     app.is_self_employed = data.get("is_self_employed", False)
 
-    # Open house date
+    # Open house date — defensive parse since form stores free-text
     if data.get("open_house_date"):
-        app.open_house_date = date.fromisoformat(data["open_house_date"])
+        try:
+            app.open_house_date = date.fromisoformat(data["open_house_date"])
+        except (ValueError, TypeError):
+            logger.warning(
+                "Could not parse open_house_date '%s' for draft %s",
+                data["open_house_date"], draft.token,
+            )
 
     # Intended use + sub-question (FH + R4R)
     app.intended_use = data.get("intended_use", "")
@@ -134,15 +140,33 @@ def submit_application(request, draft):
 
     try:
         with transaction.atomic():
+            # Lock the draft row to prevent double-submit from concurrent requests
+            draft_locked = ApplicationDraft.objects.select_for_update().get(pk=draft.pk)
+            if draft_locked.submitted:
+                # Another request already submitted — redirect to confirmation
+                existing = Application.objects.filter(
+                    email=draft_locked.email
+                ).order_by("-submitted_at").first()
+                if existing:
+                    confirmation_url = reverse(
+                        "applications:confirmation", args=[existing.reference_number]
+                    )
+                    request.session["confirmed_ref"] = existing.reference_number
+                    response = HttpResponse(status=200)
+                    response["HX-Redirect"] = confirmation_url
+                    return response
+                return redirect("applications:apply_page")
+
+            app.full_clean()
             app.save()
 
             # Move uploaded files from drafts/ to applications/
-            _move_documents(draft, app, data)
+            _move_documents(draft_locked, app, data)
 
             # Mark draft as submitted inside the transaction
-            draft.submitted = True
-            draft.submitted_at = timezone.now()
-            draft.save()
+            draft_locked.submitted = True
+            draft_locked.submitted_at = timezone.now()
+            draft_locked.save()
     except Exception:
         logger.exception("Submission failed for draft %s", draft.token)
         return render(request, "apply/submission_error.html", {
@@ -187,6 +211,14 @@ def _move_documents(draft, app, data):
 
             source_path = info.get("path", "")
             if not source_path or not default_storage.exists(source_path):
+                continue
+
+            # Guard against path traversal — source must be under this draft's dir
+            expected_prefix = f"drafts/{draft.token}/"
+            if not source_path.startswith(expected_prefix):
+                logger.warning(
+                    "Suspicious source_path in draft %s: %s", draft.token, source_path
+                )
                 continue
 
             # Sanitize the original filename for the destination path

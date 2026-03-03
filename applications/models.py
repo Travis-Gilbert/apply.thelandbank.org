@@ -212,6 +212,15 @@ class Application(models.Model):
         DECLINED = "declined", "Declined"
         NEEDS_MORE_INFO = "needs_more_info", "Needs More Info"
 
+    # Finite state machine: which transitions are legal from each status
+    ALLOWED_TRANSITIONS = {
+        "received": {"under_review"},
+        "under_review": {"approved", "declined", "needs_more_info"},
+        "needs_more_info": {"under_review"},
+        "approved": set(),  # terminal
+        "declined": {"under_review"},  # allow re-open
+    }
+
     class ProgramType(models.TextChoices):
         FEATURED_HOMES = "featured_homes", "Featured Homes"
         READY_FOR_REHAB = "ready_for_rehab", "Ready for Rehab"

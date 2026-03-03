@@ -4,6 +4,14 @@
                   subtitle="Which property are you interested in?"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Property address #}
     <c-field name="{{ form.property_address.html_name }}"
              id="{{ form.property_address.id_for_label }}"

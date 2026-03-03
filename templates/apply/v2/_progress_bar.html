@@ -12,7 +12,12 @@
             <span class="text-sm font-semibold text-warm-900 truncate max-w-[120px] sm:max-w-none">Application</span>
             {% endif %}
         </div>
-        <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: rgba(0,0,0,0.06)">
+        <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: rgba(0,0,0,0.06)"
+             role="progressbar"
+             aria-valuenow="{{ completed_count }}"
+             aria-valuemin="0"
+             aria-valuemax="{{ total_count }}"
+             aria-label="Application progress: step {{ completed_count|add:1 }} of {{ total_count }}">
             <div class="h-full rounded-full transition-all duration-500 ease-out progress-pill-fill"
                  style="width: {% widthratio completed_count total_count 100 %}%; background: {{ program_color|default:'#2d6a8a' }}">
             </div>

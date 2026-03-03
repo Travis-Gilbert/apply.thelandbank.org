@@ -4,6 +4,14 @@
                   subtitle="A quick eligibility check"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Warning callout #}
     <c-alert type="warning" title="Important">
         <p class="text-xs">

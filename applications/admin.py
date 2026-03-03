@@ -310,6 +310,27 @@ class ApplicationAdminForm(forms.ModelForm):
         if old_status == new_status:
             return cleaned
 
+        # Enforce allowed state transitions
+        allowed = Application.ALLOWED_TRANSITIONS.get(old_status, set())
+        if new_status not in allowed:
+            old_label = dict(Application.Status.choices).get(old_status, old_status)
+            new_label = dict(Application.Status.choices).get(new_status, new_status)
+            if allowed:
+                valid_labels = ", ".join(
+                    dict(Application.Status.choices).get(s, s) for s in sorted(allowed)
+                )
+                self.add_error(
+                    "status",
+                    f"Cannot move from {old_label} to {new_label}. "
+                    f"Valid transitions: {valid_labels}.",
+                )
+            else:
+                self.add_error(
+                    "status",
+                    f"{old_label} is a terminal status and cannot be changed.",
+                )
+            return cleaned
+
         if requires_transition_note(new_status):
             note = (cleaned.get("staff_notes") or "").strip()
             if not note:
@@ -783,8 +804,14 @@ class ApplicationAdmin(SBAdmin):
             return
 
         skipped_missing_note = []
+        skipped_bad_transition = []
         eligible = []
         for app in changed:
+            # Enforce allowed state transitions
+            allowed = Application.ALLOWED_TRANSITIONS.get(app.status, set())
+            if new_status not in allowed:
+                skipped_bad_transition.append(app.reference_number)
+                continue
             note = (app.staff_notes or "").strip()
             if requires_transition_note(new_status) and not note:
                 skipped_missing_note.append(app.reference_number)
@@ -792,9 +819,18 @@ class ApplicationAdmin(SBAdmin):
             eligible.append(app)
 
         if not eligible:
+            parts = []
+            if skipped_bad_transition:
+                parts.append(
+                    f"{len(skipped_bad_transition)} skipped (invalid transition)"
+                )
+            if skipped_missing_note:
+                parts.append(
+                    f"{len(skipped_missing_note)} skipped (missing staff note)"
+                )
             self.message_user(
                 request,
-                "No updates applied. Add a staff note before using this status action.",
+                f"No updates applied. {'; '.join(parts)}.",
                 level=messages.WARNING,
             )
             return
@@ -830,12 +866,15 @@ class ApplicationAdmin(SBAdmin):
                 email_failures += 1
 
         msg = f"Updated {len(ids)} application(s)."
+        if skipped_bad_transition:
+            msg += f" Skipped {len(skipped_bad_transition)} (invalid transition)."
         if skipped_missing_note:
             msg += f" Skipped {len(skipped_missing_note)} without required notes."
         if email_failures:
             msg += f" {email_failures} buyer status email(s) failed."
 
-        level = messages.WARNING if skipped_missing_note or email_failures else messages.SUCCESS
+        has_issues = skipped_bad_transition or skipped_missing_note or email_failures
+        level = messages.WARNING if has_issues else messages.SUCCESS
         self.message_user(request, msg, level=level)
 
     @admin.action(description="Set status to Under Review")

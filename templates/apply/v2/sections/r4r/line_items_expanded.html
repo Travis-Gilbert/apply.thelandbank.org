@@ -4,6 +4,14 @@
                   subtitle="Itemized cost estimate for your renovations"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     <p class="text-sm text-warm-600 leading-relaxed">
         Provide your best estimate for each renovation trade that applies.
         Leave items at $0 if they don't apply to your project. Totals calculate automatically.

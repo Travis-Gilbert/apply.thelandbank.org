@@ -4,6 +4,14 @@
                   subtitle="How we'll reach you about your application"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Name row #}
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <c-field name="{{ form.first_name.html_name }}"

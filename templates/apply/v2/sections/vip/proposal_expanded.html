@@ -4,6 +4,14 @@
                   subtitle="Your development proposal for this property"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Alpine x-data wrapper — manages 3 conditional field states across 8 questions #}
     <div class="space-y-6"
          x-data="{

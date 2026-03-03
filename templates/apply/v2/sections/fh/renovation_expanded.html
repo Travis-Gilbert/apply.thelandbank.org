@@ -4,6 +4,14 @@
                   subtitle="Tell us about your plans for this property"
                   color="{{ program_color }}">
 
+    {% if form.non_field_errors %}
+    <c-alert type="error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </c-alert>
+    {% endif %}
+
     {# Intended use dropdown — HTMX swaps conditional fields below #}
     <c-select name="{{ form.intended_use.html_name }}"
               id="{{ form.intended_use.id_for_label }}"

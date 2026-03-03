@@ -144,19 +144,28 @@
     });
 
     // ── Clear validation errors on re-input (event delegation) ────────
-    // Uses event delegation so it works after HTMX DOM swaps
+    // Uses event delegation so it works after HTMX DOM swaps.
+    // Scoped to the individual field wrapper (.space-y-1\.5) so editing
+    // one field doesn't erase errors on other fields in the same section.
     document.getElementById('accordion-form').addEventListener('input', function(evt) {
         var section = evt.target.closest('.section-card-v2');
         if (!section) return;
-        // Remove field-level error text
-        var errs = section.querySelectorAll('.text-red-600');
-        for (var i = 0; i < errs.length; i++) errs[i].remove();
-        // Remove error banners
+
+        // Scope error clearing to the field wrapper (label + input + error live here)
+        var fieldWrapper = evt.target.closest('[class*="space-y-1"]');
+        if (fieldWrapper) {
+            var errs = fieldWrapper.querySelectorAll('.text-red-600:not(.text-red-500)');
+            for (var i = 0; i < errs.length; i++) errs[i].remove();
+            var errInputs = fieldWrapper.querySelectorAll('.has-error');
+            for (var i = 0; i < errInputs.length; i++) errInputs[i].classList.remove('has-error');
+        } else {
+            // Fallback: clear the changed input's own error state
+            evt.target.classList.remove('has-error');
+        }
+
+        // Section-level error banners are non-field errors — still clear on any input
         var banners = section.querySelectorAll('.border-red-200');
         for (var i = 0; i < banners.length; i++) banners[i].remove();
-        // Remove has-error class from inputs in this section
-        var errInputs = section.querySelectorAll('.has-error');
-        for (var i = 0; i < errInputs.length; i++) errInputs[i].classList.remove('has-error');
     });
 
     // ── Property search: autocomplete + program routing ────────
