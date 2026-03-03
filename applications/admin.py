@@ -7,13 +7,15 @@ organized fieldsets, inline documents, and automatic status audit logging.
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import TabularInline
+from django_smartbase_admin.admin.admin_base import SBAdminTableInline
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
-from django.db.models import Count, F
+from django.db.models import Count, F, Value
+from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html, format_html_join
+from django.utils.safestring import mark_safe
 from django_smartbase_admin.admin.admin_base import SBAdmin
 from django_smartbase_admin.admin.site import sb_admin_site
 from django_smartbase_admin.engine.field import SBAdminField
@@ -65,15 +67,16 @@ class PropertyAdmin(SBAdmin):
         "application_count",
         "imported_at",
     )
-    # SmartBase requires SBAdminField with annotate for queryset-annotation columns
+    # SmartBase AG Grid uses .values() — display methods get (obj_id, value, **kwargs),
+    # NOT model instances. Use sb_* methods + sbadmin_list_display_data for extra fields.
     sbadmin_list_display = [
         "address",
         "parcel_id",
-        "display_program",
-        "display_status",
-        "listing_price_display",
+        SBAdminField(name="sb_program", title="Program", annotate=F("program_type")),
+        SBAdminField(name="sb_status", title="Status", annotate=F("status")),
+        SBAdminField(name="sb_price", title="Price", annotate=F("listing_price")),
         SBAdminField(
-            name="application_count",
+            name="sb_app_count",
             title="Apps",
             annotate=Count("applications"),
         ),
@@ -113,40 +116,74 @@ class PropertyAdmin(SBAdmin):
             .annotate(_application_count=Count("applications"))
         )
 
-    @admin.display(description="Program", ordering="program_type")
-    def display_program(self, instance):
-        palette = {
-            Application.ProgramType.FEATURED_HOMES: ("#dcfce7", "#166534"),
-            Application.ProgramType.READY_FOR_REHAB: ("#fef3c7", "#92400e"),
-            Application.ProgramType.VIP_SPOTLIGHT: ("#dbeafe", "#1e40af"),
-            Application.ProgramType.VACANT_LOT: ("#dbeafe", "#1e40af"),
-        }
-        bg, fg = palette.get(instance.program_type, ("#e5e7eb", "#374151"))
+    # ── SmartBase list view methods (receive obj_id, value, **kwargs) ──
+
+    PROGRAM_PALETTE = {
+        Application.ProgramType.FEATURED_HOMES: ("#dcfce7", "#166534"),
+        Application.ProgramType.READY_FOR_REHAB: ("#fef3c7", "#92400e"),
+        Application.ProgramType.VIP_SPOTLIGHT: ("#dbeafe", "#1e40af"),
+        Application.ProgramType.VACANT_LOT: ("#dbeafe", "#1e40af"),
+    }
+
+    PROPERTY_STATUS_PALETTE = {
+        Property.Status.AVAILABLE: ("#dcfce7", "#166534"),
+        Property.Status.UNDER_OFFER: ("#fef3c7", "#92400e"),
+        Property.Status.SOLD: ("#dbeafe", "#1e40af"),
+        Property.Status.WITHDRAWN: ("#fee2e2", "#991b1b"),
+    }
+
+    def sb_program(self, obj_id, value, **kwargs):
+        """SmartBase list view: program badge. `value` = program_type string."""
+        bg, fg = self.PROGRAM_PALETTE.get(value, ("#e5e7eb", "#374151"))
+        label = dict(Application.ProgramType.choices).get(value, value or "—")
         return format_html(
             "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
             "border-radius:999px;font-size:12px;font-weight:600;"
             "background:{};color:{}'>{}</span>",
-            bg,
-            fg,
-            instance.get_program_type_display(),
+            bg, fg, label,
+        )
+
+    def sb_status(self, obj_id, value, **kwargs):
+        """SmartBase list view: status badge. `value` = status string."""
+        bg, fg = self.PROPERTY_STATUS_PALETTE.get(value, ("#e5e7eb", "#374151"))
+        label = dict(Property.Status.choices).get(value, value or "—")
+        return format_html(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:{};color:{}'>{}</span>",
+            bg, fg, label,
+        )
+
+    def sb_price(self, obj_id, value, **kwargs):
+        """SmartBase list view: formatted price. `value` = listing_price Decimal."""
+        if value is None:
+            return "N/A"
+        return f"${value:,.2f}"
+
+    def sb_app_count(self, obj_id, value, **kwargs):
+        """SmartBase list view: application count. `value` = Count annotation."""
+        return value or 0
+
+    # ── Django detail view methods (receive model instance) ──
+
+    @admin.display(description="Program", ordering="program_type")
+    def display_program(self, instance):
+        bg, fg = self.PROGRAM_PALETTE.get(instance.program_type, ("#e5e7eb", "#374151"))
+        return format_html(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:{};color:{}'>{}</span>",
+            bg, fg, instance.get_program_type_display(),
         )
 
     @admin.display(description="Status", ordering="status")
     def display_status(self, instance):
-        palette = {
-            Property.Status.AVAILABLE: ("#dcfce7", "#166534"),
-            Property.Status.UNDER_OFFER: ("#fef3c7", "#92400e"),
-            Property.Status.SOLD: ("#dbeafe", "#1e40af"),
-            Property.Status.WITHDRAWN: ("#fee2e2", "#991b1b"),
-        }
-        bg, fg = palette.get(instance.status, ("#e5e7eb", "#374151"))
+        bg, fg = self.PROPERTY_STATUS_PALETTE.get(instance.status, ("#e5e7eb", "#374151"))
         return format_html(
             "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
             "border-radius:999px;font-size:12px;font-weight:600;"
             "background:{};color:{}'>{}</span>",
-            bg,
-            fg,
-            instance.get_status_display(),
+            bg, fg, instance.get_status_display(),
         )
 
     @admin.display(description="Price", ordering="listing_price")
@@ -186,7 +223,7 @@ class PropertyAdmin(SBAdmin):
 # ── Inlines ──────────────────────────────────────────────────────
 
 
-class DocumentInline(TabularInline):
+class DocumentInline(SBAdminTableInline):
     model = Document
     extra = 0
     fields = ("doc_type", "file", "view_file", "original_filename", "uploaded_at")
@@ -203,7 +240,7 @@ class DocumentInline(TabularInline):
         )
 
 
-class StatusLogInline(TabularInline):
+class StatusLogInline(SBAdminTableInline):
     model = StatusLog
     extra = 0
     fields = ("from_status", "to_status", "changed_by", "notes", "changed_at")
@@ -348,6 +385,8 @@ class ApplicationAdminForm(forms.ModelForm):
 
 @admin.register(Application, site=sb_admin_site)
 class ApplicationAdmin(SBAdmin):
+    change_form_template = "admin/applications/application/change_form.html"
+
     COMMON_FIELDSET_TITLES = {
         "Review Snapshot",
         "Applicant Identity",
@@ -398,22 +437,47 @@ class ApplicationAdmin(SBAdmin):
         "display_assignee",
         "submitted_age",
     )
+
+    # SmartBase AG Grid uses .values() (flat dicts, not instances).
+    # sb_* methods accept (self, obj_id, value, **kwargs).
+    # Extra fields for kwargs come from sbadmin_list_display_data.
+    sbadmin_list_display_data = [
+        "first_name",
+        "last_name",
+        "program_type",
+        "purchase_type",
+        "offer_amount",
+        "status",
+        "assigned_to__first_name",
+        "assigned_to__last_name",
+        "assigned_to__username",
+    ]
+
     sbadmin_list_display = [
         "reference_number",
-        "display_full_name",
-        "property_address",
-        "display_program",
-        "display_purchase_type",
-        "display_offer",
-        "display_status",
-        "display_docs",
-        "quick_docs",
         SBAdminField(
-            name="display_assignee",
-            title="Reviewer",
-            list_visible=True,
+            name="sb_full_name",
+            title="Name",
+            annotate=Concat(
+                F("first_name"), Value(" "), F("last_name"),
+            ),
         ),
-        "submitted_age",
+        "property_address",
+        SBAdminField(name="sb_program", title="Program", annotate=F("program_type")),
+        SBAdminField(
+            name="sb_purchase_type",
+            title="Purchase Type",
+            annotate=F("purchase_type"),
+        ),
+        SBAdminField(name="sb_offer", title="Offer", annotate=F("offer_amount")),
+        SBAdminField(name="sb_status", title="Status", annotate=F("status")),
+        SBAdminField(name="sb_docs", title="Docs", annotate=Count("documents")),
+        SBAdminField(
+            name="sb_reviewer",
+            title="Reviewer",
+            annotate=F("assigned_to_id"),
+        ),
+        SBAdminField(name="sb_age", title="Age", annotate=F("submitted_at")),
     ]
     list_filter = (
         AssignmentFilter,
@@ -426,7 +490,7 @@ class ApplicationAdmin(SBAdmin):
     )
     list_display_links = ("reference_number", "display_full_name")
     date_hierarchy = "submitted_at"
-    ordering = ("status", "-submitted_at")
+    ordering = ("-submitted_at",)
     list_per_page = 50
     search_fields = (
         "reference_number",
@@ -668,6 +732,140 @@ class ApplicationAdmin(SBAdmin):
             .prefetch_related("documents")
         )
 
+    # ── SmartBase AG Grid list view methods ──────────────────────
+    # These accept (self, obj_id, value, **kwargs) where value comes from
+    # annotate=F(...) and kwargs come from sbadmin_list_display_data.
+
+    APP_STATUS_PALETTE = {
+        Application.Status.RECEIVED: ("#dbeafe", "#1e40af"),
+        Application.Status.UNDER_REVIEW: ("#fef3c7", "#92400e"),
+        Application.Status.NEEDS_MORE_INFO: ("#ffedd5", "#9a3412"),
+        Application.Status.APPROVED: ("#dcfce7", "#166534"),
+        Application.Status.DECLINED: ("#fee2e2", "#991b1b"),
+    }
+
+    APP_PROGRAM_PALETTE = {
+        Application.ProgramType.FEATURED_HOMES: ("#dcfce7", "#166534"),
+        Application.ProgramType.READY_FOR_REHAB: ("#fef3c7", "#92400e"),
+        Application.ProgramType.VIP_SPOTLIGHT: ("#dbeafe", "#1e40af"),
+        Application.ProgramType.VACANT_LOT: ("#dbeafe", "#1e40af"),
+    }
+
+    def sb_full_name(self, obj_id, value, **kwargs):
+        """SmartBase list: full name. `value` = Concat(first, ' ', last)."""
+        return value or "—"
+
+    def sb_program(self, obj_id, value, **kwargs):
+        """SmartBase list: program badge. `value` = program_type string."""
+        bg, fg = self.APP_PROGRAM_PALETTE.get(value, ("#e5e7eb", "#374151"))
+        label = dict(Application.ProgramType.choices).get(value, value or "—")
+        return format_html(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:{};color:{}'>{}</span>",
+            bg, fg, label,
+        )
+
+    def sb_purchase_type(self, obj_id, value, **kwargs):
+        """SmartBase list: purchase type. `value` = purchase_type string."""
+        program = kwargs.get("program_type")
+        if program == Application.ProgramType.VIP_SPOTLIGHT:
+            return "Proposal"
+        return dict(Application.PurchaseType.choices).get(value, value or "—")
+
+    def sb_offer(self, obj_id, value, **kwargs):
+        """SmartBase list: offer amount. `value` = offer_amount Decimal."""
+        program = kwargs.get("program_type")
+        if program == Application.ProgramType.VIP_SPOTLIGHT:
+            return "See Proposal"
+        if value is None:
+            return "N/A"
+        return f"${value:,.2f}"
+
+    def sb_status(self, obj_id, value, **kwargs):
+        """SmartBase list: status badge. `value` = status string."""
+        bg, fg = self.APP_STATUS_PALETTE.get(value, ("#e5e7eb", "#374151"))
+        label = dict(Application.Status.choices).get(value, value or "—")
+        return format_html(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:{};color:{}'>{}</span>",
+            bg, fg, label,
+        )
+
+    def sb_docs(self, obj_id, value, **kwargs):
+        """SmartBase list: doc count badge. `value` = Count(documents)."""
+        count = value or 0
+        if count > 0:
+            return format_html(
+                "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+                "border-radius:999px;font-size:12px;font-weight:600;"
+                "background:#dcfce7;color:#166534'>{} doc{}</span>",
+                count, "s" if count != 1 else "",
+            )
+        return mark_safe(
+            "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
+            "border-radius:999px;font-size:12px;font-weight:600;"
+            "background:#fee2e2;color:#991b1b'>None</span>"
+        )
+
+    def sb_reviewer(self, obj_id, value, **kwargs):
+        """SmartBase list: reviewer name or Claim button. `value` = assigned_to_id."""
+        if not value:
+            return format_html(
+                '<span id="claim-{pk}">'
+                '<button type="button" '
+                'hx-post="/admin/api/assign/{pk}/" '
+                'hx-target="#claim-{pk}" '
+                'hx-swap="innerHTML" '
+                'onclick="event.stopPropagation()" '
+                'style="display:inline-flex;align-items:center;padding:2px 10px;'
+                'border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;'
+                'background:#dbeafe;color:#1e40af;border:1px solid #93c5fd">'
+                'Claim</button></span>',
+                pk=obj_id,
+            )
+        first = kwargs.get("assigned_to__first_name", "")
+        last = kwargs.get("assigned_to__last_name", "")
+        full = f"{first} {last}".strip()
+        return full or kwargs.get("assigned_to__username", "Staff")
+
+    def sb_age(self, obj_id, value, **kwargs):
+        """SmartBase list: age pill. `value` = submitted_at datetime."""
+        if not value:
+            return "—"
+        days_open = (timezone.now() - value).days
+        if days_open == 0:
+            label = "Today"
+        elif days_open == 1:
+            label = "1 day"
+        else:
+            label = f"{days_open} days"
+
+        status = kwargs.get("status")
+        open_statuses = (
+            Application.Status.RECEIVED,
+            Application.Status.UNDER_REVIEW,
+            Application.Status.NEEDS_MORE_INFO,
+        )
+        if status not in open_statuses:
+            return label
+
+        if days_open >= 14:
+            bg, color = "#fee2e2", "#991b1b"
+        elif days_open >= 7:
+            bg, color = "#fef3c7", "#92400e"
+        else:
+            bg, color = "#dcfce7", "#166534"
+
+        return format_html(
+            '<span style="display:inline-block;padding:1px 8px;border-radius:999px;'
+            'font-size:12px;font-weight:600;background:{bg};color:{color}">{label}</span>',
+            bg=bg, color=color, label=label,
+        )
+
+    # ── Django detail view methods (receive model instance) ────
+
     @admin.display(description="Name", ordering="last_name")
     def display_full_name(self, instance):
         return instance.full_name
@@ -714,12 +912,12 @@ class ApplicationAdmin(SBAdmin):
     @admin.display(description="Docs", ordering="submitted_at")
     def display_docs(self, instance):
         if instance.docs_complete:
-            return format_html(
+            return mark_safe(
                 "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
                 "border-radius:999px;font-size:12px;font-weight:600;"
                 "background:#dcfce7;color:#166534'>Complete</span>"
             )
-        return format_html(
+        return mark_safe(
             "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
             "border-radius:999px;font-size:12px;font-weight:600;"
             "background:#fee2e2;color:#991b1b'>Incomplete</span>"
@@ -764,21 +962,55 @@ class ApplicationAdmin(SBAdmin):
     @admin.display(description="Reviewer", ordering="assigned_to")
     def display_assignee(self, instance):
         if not instance.assigned_to:
-            return "Needs reviewer"
+            return format_html(
+                '<span id="claim-{pk}">'
+                '<button type="button" '
+                'hx-post="/admin/api/assign/{pk}/" '
+                'hx-target="#claim-{pk}" '
+                'hx-swap="innerHTML" '
+                'onclick="event.stopPropagation()" '
+                'style="display:inline-flex;align-items:center;padding:2px 10px;'
+                'border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;'
+                'background:#dbeafe;color:#1e40af;border:1px solid #93c5fd">'
+                'Claim</button></span>',
+                pk=instance.pk,
+            )
         return instance.assigned_to.get_full_name() or instance.assigned_to.get_username()
 
     @admin.display(description="Age", ordering="submitted_at")
     def submitted_age(self, instance):
         days_open = (timezone.now() - instance.submitted_at).days
         if days_open == 0:
-            return "Today"
-        label = f"{days_open} day" if days_open == 1 else f"{days_open} days"
-        if (
-            instance.status in (Application.Status.RECEIVED, Application.Status.UNDER_REVIEW)
-            and days_open >= 7
-        ):
-            return format_html("<span style='color:#b91c1c;font-weight:600'>{}</span>", label)
-        return label
+            label = "Today"
+        elif days_open == 1:
+            label = "1 day"
+        else:
+            label = f"{days_open} days"
+
+        # Only color-code open statuses (received, under review, needs more info)
+        open_statuses = (
+            Application.Status.RECEIVED,
+            Application.Status.UNDER_REVIEW,
+            Application.Status.NEEDS_MORE_INFO,
+        )
+        if instance.status not in open_statuses:
+            return label
+
+        # Green < 7 days, amber 7-13, red 14+
+        if days_open >= 14:
+            bg, color = "#fee2e2", "#991b1b"
+        elif days_open >= 7:
+            bg, color = "#fef3c7", "#92400e"
+        else:
+            bg, color = "#dcfce7", "#166534"
+
+        return format_html(
+            '<span style="display:inline-block;padding:1px 8px;border-radius:999px;'
+            'font-size:12px;font-weight:600;background:{bg};color:{color}">{label}</span>',
+            bg=bg,
+            color=color,
+            label=label,
+        )
 
     @admin.display(description="Closing Fee", ordering="purchase_type")
     def closing_fee_display(self, instance):

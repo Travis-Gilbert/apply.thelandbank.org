@@ -283,6 +283,11 @@ class Application(models.Model):
         blank=True,
         help_text="Internal notes - never visible to buyer",
     )
+    document_review = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Per-document review status: {"<doc_pk>": "ok"|"flagged"|"pending"}',
+    )
 
     # ── Section 1: Applicant Identity ───────────────────────────
 

@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     # SmartBase Admin dependencies
     "easy_thumbnails",
     "widget_tweaks",
+    "nested_admin",
     # Local apps (MUST come BEFORE smartbase admin)
     "applications",
     # SmartBase Admin (MUST come AFTER apps with model admin registrations)
