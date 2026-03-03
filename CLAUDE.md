@@ -599,6 +599,18 @@ AWS_S3_REGION_NAME
     `{from_status: {to_statuses}}` pairs. Enforced in `ApplicationAdminForm.clean()` for single
     edits and in `_bulk_set_status()` for bulk actions. Prevents invalid jumps (e.g. RECEIVED→APPROVED).
 
+27. **Claude Code hooks** — `.claude/settings.json` enforces: (a) PreToolUse blocks Edit/Write on `main`
+    branch — always create a feature branch first. (b) PostToolUse auto-formats `.py` files with Ruff and
+    runs Ruff check. (c) PostToolUse auto-runs pytest on test files after edits.
+
+28. **Docs-only branch workflow** — for CLAUDE.md and doc-only changes: `git checkout -b docs/<name>`,
+    commit, `git checkout main && git merge <branch> --no-edit`, then same for develop, push both,
+    delete the branch. Fast-forward merges keep history clean.
+
+29. **Verify plan completion on catchup** — plans in `docs/plans/` may have been fully executed in prior
+    sessions while Current Status still says "Planned". Cross-check `git log --oneline` against the plan's
+    commit strategy table before starting work.
+
 ---
 
 ## Phase 1 MVP Scope
