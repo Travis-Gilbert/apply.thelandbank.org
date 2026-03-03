@@ -1,4 +1,59 @@
 {# Dashboard stats widget — renders all cards from get_dashboard_stats() #}
+{# Utility classes not in SmartBase's compiled CSS — scoped to dashboard #}
+<style>
+  /* Typography (SmartBase uses text-12/text-14/text-16, not Tailwind's text-sm/text-xl/text-2xl) */
+  .dash .text-xs   { font-size: 0.75rem; line-height: 1rem; }
+  .dash .text-sm   { font-size: 0.875rem; line-height: 1.25rem; }
+  .dash .text-xl   { font-size: 1.25rem; line-height: 1.75rem; }
+  .dash .text-2xl  { font-size: 1.5rem; line-height: 2rem; }
+  /* Borders + rounding */
+  .dash .rounded-lg { border-radius: 0.5rem; }
+  .dash .rounded-full { border-radius: 9999px; }
+  .dash .border { border-width: 1px; }
+  .dash .border-b { border-bottom-width: 1px; }
+  .dash .border-t { border-top-width: 1px; }
+  .dash .border-gray-100 { border-color: #f3f4f6; }
+  .dash .border-gray-200 { border-color: #e5e7eb; }
+  /* Layout */
+  .dash .grid { display: grid; }
+  .dash .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .dash .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 640px)  { .dash .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 768px)  { .dash .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { .dash .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .dash .inline-flex { display: inline-flex; }
+  .dash .items-center { align-items: center; }
+  .dash .overflow-x-auto { overflow-x: auto; }
+  /* Colors not in SmartBase */
+  .dash .text-gray-400 { color: #9ca3af; }
+  .dash .text-gray-500 { color: #6b7280; }
+  .dash .text-gray-600 { color: #4b5563; }
+  .dash .text-gray-700 { color: #374151; }
+  .dash .text-gray-900 { color: #111827; }
+  .dash .text-blue-600 { color: #2563eb; }
+  .dash .text-blue-700 { color: #1d4ed8; }
+  .dash .text-blue-800 { color: #1e40af; }
+  .dash .text-amber-600 { color: #d97706; }
+  .dash .text-amber-700 { color: #b45309; }
+  .dash .text-red-600 { color: #dc2626; }
+  .dash .text-red-700 { color: #b91c1c; }
+  .dash .text-green-700 { color: #15803d; }
+  .dash .text-orange-700 { color: #c2410c; }
+  .dash .bg-blue-100 { background-color: #dbeafe; }
+  .dash .bg-amber-100 { background-color: #fef3c7; }
+  .dash .bg-green-100 { background-color: #dcfce7; }
+  .dash .bg-red-100 { background-color: #fee2e2; }
+  .dash .bg-orange-100 { background-color: #ffedd5; }
+  .dash .bg-gray-50 { background-color: #f9fafb; }
+  .dash .hover\:bg-gray-50:hover { background-color: #f9fafb; }
+  .dash .hover\:underline:hover { text-decoration: underline; }
+  /* Spacing */
+  .dash .space-y-8 > * + * { margin-top: 0.5rem; }
+  .dash .tracking-wider { letter-spacing: 0.05em; }
+  .dash .uppercase { text-transform: uppercase; }
+</style>
+
+<div class="dash">
 
 {# ── Greeting + summary row ────────────────────────────────── #}
 <div class="mb-24">
@@ -161,3 +216,5 @@
     <p class="text-sm text-gray-400">No recent submissions</p>
     {% endif %}
 </div>
+
+</div>{# /.dash #}
