@@ -376,7 +376,7 @@ All templates: HTML + plain text versions required.
 
 ---
 
-## Staff Dashboard (django-unfold)
+## Staff Dashboard (django-smartbase-admin)
 
 ### Application List
 Columns: Name / Property / Program / Purchase Type / Offer Amount / Status / Submitted / Docs Complete
@@ -404,7 +404,7 @@ Generated on final submission only. Example: GCLBA-2026-0001
 ## Design System
 
 ### Buyer-Facing
-- Tailwind CSS via Play CDN (no build step, config in base.html `<script>`)
+- Tailwind CSS compiled via django-tailwind build pipeline (`theme/static_src/` → `theme/static/css/dist/styles.css`)
 - Fonts: Bitter (headings, `font-heading`), IBM Plex Sans (body, `font-sans`), JetBrains Mono (`font-mono`)
 - **font-mono rule:** ONLY on dollar amounts, reference numbers (GCLBA-YYYY-NNNN), property IDs, and numeric inputs. Never on phone numbers, emails, addresses, labels, or time phrases.
 - Accordion layout: one page, HTMX validates per section, collapsed summaries show progress
@@ -433,7 +433,7 @@ Generated on final submission only. Example: GCLBA-2026-0001
 - Bold green headers reserved for opening (Program) and closing (Acks) sections only
 
 ### Staff Dashboard
-- django-unfold base theme, primary overridden to #2B6553
+- django-smartbase-admin theme, configured in `config/sbadmin_config.py`
 - Status badges as above
 - Dense table for list view
 - Pre-signed document URLs only — never expose raw S3/B2 URLs
@@ -477,9 +477,9 @@ all tracebacks silently.
 
 **Static files gotcha:** `CompressedManifestStaticFilesStorage` raises `ValueError`
 (not 404) when `{% static 'file.css' %}` references a file not in the manifest.
-This crashes every page load, not just the missing asset. The Tailwind CSS is
-loaded via Play CDN (`<script>` in base.html), NOT a compiled build pipeline.
-Do not switch to compiled CSS without adding a build step to Railway.
+This crashes every page load, not just the missing asset. Tailwind CSS is compiled
+via django-tailwind and served from `theme/static/css/dist/styles.css`. The Procfile
+runs `npm install && npm run build` before `collectstatic` to ensure the CSS exists.
 
 **Domain:** apply.thelandbank.org (separate from compliance.thelandbank.org)
 
@@ -544,9 +544,10 @@ AWS_S3_REGION_NAME
 
 12. **Template-form field alignment** — every `{{ form.field_name }}` in a template must exist on the form class that the dispatcher passes for that step. If a field renders with empty name/id/options, it's missing from the form class.
 
-13. **Tailwind config** — loaded via Play CDN `<script>` in `templates/base.html`, not a build pipeline.
-    Custom colors (`civic-green-*`, `civic-blue-*`, `warm-*`), fonts, and utilities are defined in
-    the inline `tailwind.config` block. No `tailwind.config.js` or PostCSS.
+13. **Tailwind config** — compiled via django-tailwind. Config at `theme/static_src/tailwind.config.js`,
+    custom CSS at `theme/static_src/src/styles.css`, output at `theme/static/css/dist/styles.css`.
+    Custom colors (`civic-green-*`, `civic-blue-*`, `warm-*`), fonts, and utilities in the config.
+    `@tailwindcss/forms` uses `strategy: 'class'` to avoid global resets. PostCSS with nesting enabled.
 
 14. **Plain language** — avoid developer jargon in buyer-facing text. Say "a link to resume your
     application" not "magic link". Say "reference number" not "token". The audience is Flint
@@ -613,7 +614,7 @@ AWS_S3_REGION_NAME
 - [x] Self-employed income label swap via HTMX
 - [x] Submission confirmation email to buyer
 - [x] New application notification to staff
-- [x] django-unfold staff dashboard: list view + detail view
+- [x] django-smartbase-admin staff dashboard: list view + detail view
 - [x] Status workflow with staff notes and audit log
 - [x] Pre-signed URLs for staff document access
 - [x] Railway deployment with PostgreSQL
@@ -632,7 +633,6 @@ AWS_S3_REGION_NAME
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Tailwind build + cotton components | Planned | Plan: `docs/plans/2026-02-28-tailwind-build-cotton-components.md` |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
 
@@ -642,9 +642,8 @@ command before production launch with real user data.
 
 ## Next Step
 
-1. **Execute Tailwind build + cotton components plan** — 3 phases, 9 commit batches. Run `/execute-plan docs/plans/2026-02-28-tailwind-build-cotton-components.md`.
-2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+1. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+2. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
 
 ### Future
 
@@ -671,7 +670,7 @@ command before production launch with real user data.
 | Rate limiting on validation + search endpoints | `django-ratelimit` 30/m on section_validate, 30/m on property search. Prevents abuse before launch. | 2026-02-25 |
 | Procfile is Railway's source of truth, not nixpacks.toml | Railpack ignores nixpacks.toml [start].cmd when Procfile exists. Keep both in sync. | 2026-02-26 |
 | LOGGING config added to settings.py | DEBUG=False silently swallows all errors without explicit LOGGING. django.request at ERROR level → stdout. | 2026-02-26 |
-| Compiled Tailwind build replacing CDN | Plan written to migrate from Play CDN to django-tailwind compiled pipeline. Enables cotton components and proper CSS architecture. Supersedes prior "CDN only" decision. | 2026-02-28 |
+| Compiled Tailwind build replacing CDN | Migrated from Play CDN to django-tailwind compiled pipeline. Custom CSS in `theme/static_src/src/styles.css`, cotton components in `templates/cotton/`. Commits 6fb1762–dd94c9b. | 2026-02-28 |
 | ALLOWED_TRANSITIONS state machine on Application model | Prevents invalid status jumps (e.g. RECEIVED→APPROVED). Enforced in admin form clean + bulk actions. See Code Pattern #26. | 2026-03-03 |
 
 ---
