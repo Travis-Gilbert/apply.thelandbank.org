@@ -3,10 +3,10 @@ nixPkgs = ["python313", "gcc", "nodejs"]
 
 [phases.install]
 cmds = [
-    "pip install django-smartbase-admin==1.1.1 --no-deps",
-    "pip install -r requirements.txt",
+    "python -m pip install django-smartbase-admin==1.1.1 --no-deps",
+    "python -m pip install -r requirements.txt",
     "cd theme/static_src && npm install"
 ]
 
 [start]
-cmd = "pip install django-smartbase-admin==1.1.1 --no-deps && python manage.py tailwind build && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"
+cmd = "python -m pip install django-smartbase-admin==1.1.1 --no-deps && python manage.py tailwind build && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"

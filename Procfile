@@ -1,1 +1,1 @@
-web: pip install django-smartbase-admin==1.1.1 --no-deps && python manage.py tailwind build && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3
+web: python -m pip install django-smartbase-admin==1.1.1 --no-deps && python manage.py tailwind build && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3
