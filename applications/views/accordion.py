@@ -267,6 +267,35 @@ def _uploaded_doc_present(uploads, doc_type):
     return any(True for _ in _iter_uploaded_entries(uploads.get(doc_type)))
 
 
+def _build_document_context(program_type, purchase_type, form_data,
+                            required_docs=None, optional_docs=None, uploaded=None):
+    """Build the template context dict for document upload sections.
+
+    Accepts optional pre-computed values so callers that already have
+    required_docs / optional_docs / uploaded (e.g. the validation error
+    path) can skip redundant work.
+    """
+    from .shared import _get_optional_docs, _get_required_docs
+
+    if required_docs is None:
+        required_docs = _get_required_docs(program_type, purchase_type, form_data)
+    if optional_docs is None:
+        optional_docs = _get_optional_docs(program_type)
+    if uploaded is None:
+        uploaded = form_data.get("uploads", {})
+
+    return {
+        "required_docs": required_docs,
+        "optional_docs": optional_docs,
+        "uploaded": uploaded,
+        "required_count": len(required_docs),
+        "uploaded_required_count": sum(
+            1 for d in required_docs if _uploaded_doc_present(uploaded, d)
+        ),
+        "has_file_upload": True,
+    }
+
+
 def _uploaded_doc_count(uploads):
     """Count total files uploaded across all document types."""
     count = 0
@@ -1001,18 +1030,11 @@ def _validate_documents_section(
     # Re-render with errors
     section_def = SECTION_DEFS[section_id]
     ctx = _section_context(draft, section_id, section_index + 1, program_type, purchase_type)
-    uploaded_required = sum(
-        1 for d in required_docs if _uploaded_doc_present(uploaded, d)
-    )
-    ctx.update({
-        "required_docs": required_docs,
-        "optional_docs": optional_docs,
-        "uploaded": uploaded,
-        "required_count": len(required_docs),
-        "uploaded_required_count": uploaded_required,
-        "errors": errors,
-        "has_file_upload": True,
-    })
+    ctx.update(_build_document_context(
+        program_type, purchase_type, form_data,
+        required_docs=required_docs, optional_docs=optional_docs, uploaded=uploaded,
+    ))
+    ctx["errors"] = errors
     template = _resolve_template(section_def, "expanded_template", program_type)
     return _render_expanded_response(request, template, ctx, section_id)
 
@@ -1072,19 +1094,7 @@ def section_edit(request, section_id):
 
     # For document sections, add doc-specific context
     if section_def.get("is_documents"):
-        from .shared import _get_optional_docs, _get_required_docs
-        req_docs = _get_required_docs(program_type, purchase_type, form_data)
-        uploads = form_data.get("uploads", {})
-        ctx.update({
-            "required_docs": req_docs,
-            "optional_docs": _get_optional_docs(program_type),
-            "uploaded": uploads,
-            "required_count": len(req_docs),
-            "uploaded_required_count": sum(
-                1 for d in req_docs if _uploaded_doc_present(uploads, d)
-            ),
-            "has_file_upload": True,
-        })
+        ctx.update(_build_document_context(program_type, purchase_type, form_data))
 
     template = _resolve_template(section_def, "expanded_template", program_type)
     response = _render_expanded_response(request, template, ctx, section_id)
@@ -1180,19 +1190,7 @@ def _render_transition(
 
         # Document sections need extra context
         if next_section_def.get("is_documents"):
-            from .shared import _get_optional_docs, _get_required_docs
-            req_docs = _get_required_docs(program_type, purchase_type, form_data)
-            uploads = form_data.get("uploads", {})
-            next_ctx.update({
-                "required_docs": req_docs,
-                "optional_docs": _get_optional_docs(program_type),
-                "uploaded": uploads,
-                "required_count": len(req_docs),
-                "uploaded_required_count": sum(
-                    1 for d in req_docs if _uploaded_doc_present(uploads, d)
-                ),
-                "has_file_upload": True,
-            })
+            next_ctx.update(_build_document_context(program_type, purchase_type, form_data))
 
         next_template = _resolve_template(next_section_def, "expanded_template", program_type)
         next_inner = render(request, next_template, next_ctx).content.decode()

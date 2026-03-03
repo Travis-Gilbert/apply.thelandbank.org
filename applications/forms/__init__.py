@@ -17,11 +17,20 @@ from .ready_for_rehab import (
     R4ROfferForm,
     R4RRenovationNarrativeForm,
 )
-from .shared import EligibilityForm, IdentityForm, PropertyForm, PropertySearchForm
+from .shared import (
+    BaseAcknowledgmentsForm,
+    BaseRenovationNarrativeForm,
+    EligibilityForm,
+    IdentityForm,
+    PropertyForm,
+    PropertySearchForm,
+)
 from .vip_spotlight import VIPAcknowledgmentsForm, VIPProposalForm
 
 __all__ = [
     # Shared
+    "BaseAcknowledgmentsForm",
+    "BaseRenovationNarrativeForm",
     "IdentityForm",
     "PropertyForm",
     "PropertySearchForm",

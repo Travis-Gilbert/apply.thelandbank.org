@@ -1,0 +1,59 @@
+{# Base template for program acknowledgments — extend + override blocks #}
+{# Blocks: intro_text, closing_info (required), submit_button #}
+<div class="section-card-v2">
+    <div class="section-card-v2-header" style="background: {{ program_color }}; border-radius: 0.875rem 0.875rem 0 0;">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style="background: rgba(255,255,255,0.2); color: #fff;">{{ section_number }}</span>
+        <h3 class="text-lg font-bold font-heading text-white">Review & Submit</h3>
+    </div>
+
+    <div class="section-body expanded">
+        <div class="px-5 pt-4 pb-6 space-y-4">
+            {% if doc_errors %}
+            <c-alert type="error">
+                {% for error in doc_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </c-alert>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+            <c-alert type="error">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </c-alert>
+            {% endif %}
+
+            <p class="text-sm text-warm-600 leading-relaxed">
+                {% block intro_text %}You're almost done! Please confirm each item below, then submit.{% endblock %}
+            </p>
+
+            {# Acknowledgment cards #}
+            <div class="space-y-3">
+                {% for field in form %}
+                <div class="ack-card">
+                    <label class="touch-label items-start gap-3">
+                        <input type="checkbox" name="{{ field.html_name }}"
+                               {% if field.value %}checked{% endif %} required
+                               class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200 flex-shrink-0">
+                        <span class="text-sm text-warm-700 leading-relaxed">{{ field.label }}</span>
+                    </label>
+                </div>
+                {% if field.errors %}<p class="text-xs text-red-600 font-medium ml-10">{{ field.errors.0 }}</p>{% endif %}
+                {% endfor %}
+            </div>
+
+            {# Program-specific closing info — must be overridden #}
+            {% block closing_info %}{% endblock %}
+
+            {# Submit button #}
+            {% block submit_button %}
+            <c-continue_btn validate_url="{{ validate_url }}"
+                             section_id="{{ section_id }}"
+                             program_color="{{ program_color }}"
+                             is_submit="true" />
+            {% endblock %}
+        </div>
+    </div>
+</div>

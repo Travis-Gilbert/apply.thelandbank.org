@@ -171,6 +171,85 @@ class PropertySearchForm(forms.Form):
         return cleaned
 
 
+class BaseAcknowledgmentsForm(forms.Form):
+    """
+    Shared acknowledgments for all programs.
+
+    Every program requires these four. Program-specific subclasses add their
+    own fields (e.g. ack_highest_not_guaranteed for offer-based programs,
+    ack_reconveyance_deed for VIP). Subclasses must set ``field_order`` to
+    keep ack_info_accurate last, since templates iterate ``{% for field in form %}``.
+    """
+
+    ack_sold_as_is = forms.BooleanField(
+        label=(
+            "I understand that all GCLBA properties are sold as-is and I have "
+            "had the opportunity to inspect the property."
+        ),
+    )
+    ack_quit_claim_deed = forms.BooleanField(
+        label="I understand closing is via Quit Claim Deed.",
+    )
+    ack_no_title_insurance = forms.BooleanField(
+        label="I understand GCLBA does not provide title insurance.",
+    )
+    ack_info_accurate = forms.BooleanField(
+        label="I certify that all information provided in this application is true and accurate.",
+    )
+
+
+class BaseRenovationNarrativeForm(forms.Form):
+    """
+    Shared renovation narrative for Featured Homes and Ready for Rehab.
+
+    Intended use + conditional sub-question, then four open-ended questions
+    about renovation plans, timeline, who performs the work, and funding.
+    FH and R4R share identical fields and validation; both inherit directly.
+    """
+
+    intended_use = forms.ChoiceField(
+        choices=Application.IntendedUse.choices,
+        label="How do you plan to use this property?",
+    )
+    first_home_or_moving = forms.ChoiceField(
+        choices=[("", "Select")] + list(Application.FirstHomeOrMoving.choices),
+        required=False,
+        label="Is this your first home purchase, or are you moving to Michigan?",
+    )
+    renovation_description = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 4, "placeholder": "Describe the renovations you plan to make"}),
+        label="What renovations will you be making?",
+    )
+    renovation_who = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Yourself, licensed contractor, etc."}),
+        label="Who will complete the renovations?",
+    )
+    renovation_when = forms.CharField(
+        max_length=200,
+        label="When will renovations be completed?",
+        widget=forms.TextInput(attrs={"placeholder": "e.g. Within 12 months of closing"}),
+    )
+    renovation_funding = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Cash savings, construction loan, etc."}),
+        label="How will you pay for the purchase and renovations?",
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        intended_use = cleaned.get("intended_use")
+
+        if (
+            intended_use == Application.IntendedUse.RENOVATE_MOVE_IN
+            and not cleaned.get("first_home_or_moving")
+        ):
+            self.add_error(
+                "first_home_or_moving",
+                "Please indicate if this is a first home purchase or relocation.",
+            )
+
+        return cleaned
+
+
 class EligibilityForm(forms.Form):
     """
     Step 3: Eligibility gate - hard disqualifiers.

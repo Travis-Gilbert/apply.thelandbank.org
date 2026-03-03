@@ -1,18 +1,19 @@
 """
-Admin utility functions — dashboard data queries.
-
-These functions provide the query logic for dashboard statistics.
-Originally built for Unfold callbacks; preserved as standalone helpers
-for future SmartBase dashboard widgets.
+Admin utility functions — dashboard data queries and SmartBase widgets.
 
 Provides:
-- Dashboard stat cards (applications by status, recent submissions, property inventory)
-- Personalized workload cards (my reviews, my waiting-on-docs)
-- Queue health metrics (unassigned, stale applications)
+- get_dashboard_stats(): Query logic for all dashboard statistics
+- DashboardStatsWidget: SmartBase dashboard widget that renders stats cards
+
+Dashboard stat cards: applications by status, recent submissions, property inventory.
+Personalized workload cards: my reviews, my waiting-on-docs.
+Queue health metrics: unassigned, stale applications.
 """
 
 from django.db.models import Count
 from django.utils import timezone
+
+from django_smartbase_admin.engine.dashboard import SBAdminDashboardWidget
 
 from applications.models import Application, Property
 
@@ -120,3 +121,74 @@ def get_dashboard_stats(user):
             "unlisted_applications": unlisted_apps,
         },
     }
+
+
+# ── Status badge colors (match admin list view) ─────────────
+STATUS_COLORS = {
+    "received": "#3b82f6",       # blue
+    "under_review": "#f59e0b",   # amber
+    "approved": "#22c55e",       # green
+    "declined": "#ef4444",       # red
+    "needs_more_info": "#f97316",  # orange
+}
+
+# ── Human labels for program types ───────────────────────────
+PROGRAM_LABELS = {
+    "featured_homes": "Featured Homes",
+    "ready_for_rehab": "Ready for Rehab",
+    "vip_spotlight": "VIP Spotlight",
+    "vacant_lot": "Vacant Lot",
+}
+
+
+class DashboardStatsWidget(SBAdminDashboardWidget):
+    """
+    Custom SmartBase dashboard widget that renders application statistics.
+
+    Instead of using SmartBase's model-based chart/list widgets (which expect
+    queryset annotation pipelines), this widget calls get_dashboard_stats()
+    and renders the pre-computed data through a custom template.
+    """
+
+    template_name = "admin/dashboard/stats_widget.html"
+    name = "dashboard_stats"
+
+    def __init__(self):
+        super().__init__(name=self.name, model=Application)
+
+    def get_widget_context_data(self, request):
+        context = super().get_widget_context_data(request)
+        stats = get_dashboard_stats(request.user)
+
+        # Build ordered status cards with colors
+        status_cards = []
+        for status_value, status_label in Application.Status.choices:
+            status_cards.append({
+                "label": status_label,
+                "count": stats["status_counts"].get(status_value, 0),
+                "color": STATUS_COLORS.get(status_value, "#6b7280"),
+            })
+
+        # Build program breakdown cards
+        program_cards = []
+        for prog_value, prog_label in Application.ProgramType.choices:
+            count = stats["program_counts"].get(prog_value, 0)
+            if count > 0:
+                program_cards.append({"label": prog_label, "count": count})
+
+        # Build property inventory cards
+        property_cards = []
+        for prog_value in stats["property_stats"]["by_program"]:
+            property_cards.append({
+                "label": PROGRAM_LABELS.get(prog_value, prog_value),
+                "count": stats["property_stats"]["by_program"][prog_value],
+            })
+
+        context.update({
+            "stats": stats,
+            "user": request.user,
+            "status_cards": status_cards,
+            "program_cards": program_cards,
+            "property_cards": property_cards,
+        })
+        return context

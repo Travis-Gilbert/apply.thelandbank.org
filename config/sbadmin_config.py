@@ -11,6 +11,8 @@ from django_smartbase_admin.engine.configuration import (
 from django_smartbase_admin.engine.menu_item import SBAdminMenuItem
 from django_smartbase_admin.views.dashboard_view import SBAdminDashboardView
 
+from applications.admin_utils import DashboardStatsWidget
+
 
 config = SBAdminRoleConfiguration(
     default_view=SBAdminMenuItem(view_id="dashboard"),
@@ -46,7 +48,10 @@ config = SBAdminRoleConfiguration(
         ),
     ],
     registered_views=[
-        SBAdminDashboardView(widgets=[], title="GCLBA Application Portal"),
+        SBAdminDashboardView(
+            widgets=[DashboardStatsWidget()],
+            title="GCLBA Application Portal",
+        ),
     ],
 )
 

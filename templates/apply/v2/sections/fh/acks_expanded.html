@@ -1,64 +1,14 @@
-{# Featured Homes acknowledgments - final section with Submit #}
-<div class="section-card-v2">
-    <div class="section-card-v2-header" style="background: {{ program_color }}; border-radius: 0.875rem 0.875rem 0 0;">
-        <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style="background: rgba(255,255,255,0.2); color: #fff;">{{ section_number }}</span>
-        <h3 class="text-lg font-bold font-heading text-white">Review & Submit</h3>
-    </div>
+{# Featured Homes acknowledgments — extends shared acks base #}
+{% extends "apply/v2/sections/_acks_base.html" %}
 
-    <div class="section-body expanded">
-        <div class="px-5 pt-4 pb-6 space-y-4">
-            {% if doc_errors %}
-            <c-alert type="error">
-                {% for error in doc_errors %}
-                <p>{{ error }}</p>
-                {% endfor %}
-            </c-alert>
-            {% endif %}
-
-            {% if form.non_field_errors %}
-            <c-alert type="error">
-                {% for error in form.non_field_errors %}
-                <p>{{ error }}</p>
-                {% endfor %}
-            </c-alert>
-            {% endif %}
-
-            <p class="text-sm text-warm-600 leading-relaxed">
-                You're almost done! Please confirm each item below, then submit.
-            </p>
-
-            {# Acknowledgment cards #}
-            <div class="space-y-3">
-                {% for field in form %}
-                <div class="ack-card">
-                    <label class="touch-label items-start gap-3">
-                        <input type="checkbox" name="{{ field.html_name }}"
-                               {% if field.value %}checked{% endif %} required
-                               class="mt-0.5 rounded border-warm-300 text-civic-green-600 focus:ring-civic-green-200 flex-shrink-0">
-                        <span class="text-sm text-warm-700 leading-relaxed">{{ field.label }}</span>
-                    </label>
-                </div>
-                {% if field.errors %}<p class="text-xs text-red-600 font-medium ml-10">{{ field.errors.0 }}</p>{% endif %}
-                {% endfor %}
-            </div>
-
-            {# Closing info callout #}
-            <div class="p-4 rounded-xl border border-warm-200 bg-warm-50/50 mt-2">
-                <p class="text-xs font-semibold text-warm-700 uppercase tracking-wider mb-2">Closing Information</p>
-                <ul class="text-xs text-warm-600 space-y-1 leading-relaxed">
-                    <li>&#8226; Payment due in full at closing via cashier's check or money order</li>
-                    <li>&#8226; Closing within 21 days of offer acceptance</li>
-                    <li>&#8226; Closing fee: <span class="font-mono">{% if form_data.purchase_type == "land_contract" %}$125{% else %}$75{% endif %}</span></li>
-                    <li>&#8226; Quit Claim Deed &mdash; no title insurance provided by GCLBA</li>
-                </ul>
-            </div>
-
-            {# Submit button #}
-            <c-continue_btn validate_url="{{ validate_url }}"
-                             section_id="{{ section_id }}"
-                             program_color="{{ program_color }}"
-                             is_submit="true" />
-        </div>
-    </div>
+{% block closing_info %}
+<div class="p-4 rounded-xl border border-warm-200 bg-warm-50/50 mt-2">
+    <p class="text-xs font-semibold text-warm-700 uppercase tracking-wider mb-2">Closing Information</p>
+    <ul class="text-xs text-warm-600 space-y-1 leading-relaxed">
+        <li>&#8226; Payment due in full at closing via cashier's check or money order</li>
+        <li>&#8226; Closing within 21 days of offer acceptance</li>
+        <li>&#8226; Closing fee: <span class="font-mono">{% if form_data.purchase_type == "land_contract" %}$125{% else %}$75{% endif %}</span></li>
+        <li>&#8226; Quit Claim Deed &mdash; no title insurance provided by GCLBA</li>
+    </ul>
 </div>
+{% endblock %}

@@ -10,6 +10,7 @@ from decimal import Decimal
 from django import forms
 
 from ..models import Application
+from .shared import BaseAcknowledgmentsForm, BaseRenovationNarrativeForm
 
 
 class FHOfferForm(forms.Form):
@@ -73,56 +74,8 @@ class FHOfferForm(forms.Form):
         return cleaned
 
 
-class FHRenovationNarrativeForm(forms.Form):
-    """
-    Renovation narrative for Featured Homes.
-
-    Intended use + sub-question, then four open-ended questions about
-    renovation plans, timeline, who performs the work, and how it's funded.
-    """
-
-    intended_use = forms.ChoiceField(
-        choices=Application.IntendedUse.choices,
-        label="How do you plan to use this property?",
-    )
-    first_home_or_moving = forms.ChoiceField(
-        choices=[("", "Select")] + list(Application.FirstHomeOrMoving.choices),
-        required=False,
-        label="Is this your first home purchase, or are you moving to Michigan?",
-    )
-    renovation_description = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 4, "placeholder": "Describe the renovations you plan to make"}),
-        label="What renovations will you be making?",
-    )
-    renovation_who = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Yourself, licensed contractor, etc."}),
-        label="Who will complete the renovations?",
-    )
-    renovation_when = forms.CharField(
-        max_length=200,
-        label="When will renovations be completed?",
-        widget=forms.TextInput(attrs={"placeholder": "e.g. Within 12 months of closing"}),
-    )
-    renovation_funding = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Cash savings, construction loan, etc."}),
-        label="How will you pay for the purchase and renovations?",
-    )
-
-    def clean(self):
-        cleaned = super().clean()
-        intended_use = cleaned.get("intended_use")
-
-        # first_home_or_moving only relevant when intended_use is RENOVATE_MOVE_IN
-        if (
-            intended_use == Application.IntendedUse.RENOVATE_MOVE_IN
-            and not cleaned.get("first_home_or_moving")
-        ):
-            self.add_error(
-                "first_home_or_moving",
-                "Please indicate if this is a first home purchase or relocation.",
-            )
-
-        return cleaned
+# FH and R4R renovation narratives are identical (same 6 fields, same validation).
+FHRenovationNarrativeForm = BaseRenovationNarrativeForm
 
 
 class FHHomebuyerEdForm(forms.Form):
@@ -149,25 +102,24 @@ class FHHomebuyerEdForm(forms.Form):
     )
 
 
-class FHAcknowledgmentsForm(forms.Form):
+class FHAcknowledgmentsForm(BaseAcknowledgmentsForm):
     """
-    Acknowledgments for Featured Homes - standard set.
+    Acknowledgments for Featured Homes — standard set.
 
-    All are required checkboxes. The buyer must affirmatively agree to each.
+    Inherits 4 shared acks from BaseAcknowledgmentsForm, adds
+    ack_highest_not_guaranteed + ack_tax_capture for offer-based programs.
+    field_order keeps ack_info_accurate last for template iteration.
     """
 
-    ack_sold_as_is = forms.BooleanField(
-        label=(
-            "I understand that all GCLBA properties are sold as-is and I have "
-            "had the opportunity to inspect the property."
-        ),
-    )
-    ack_quit_claim_deed = forms.BooleanField(
-        label="I understand closing is via Quit Claim Deed.",
-    )
-    ack_no_title_insurance = forms.BooleanField(
-        label="I understand GCLBA does not provide title insurance.",
-    )
+    field_order = [
+        "ack_sold_as_is",
+        "ack_quit_claim_deed",
+        "ack_no_title_insurance",
+        "ack_highest_not_guaranteed",
+        "ack_tax_capture",
+        "ack_info_accurate",
+    ]
+
     ack_highest_not_guaranteed = forms.BooleanField(
         label="I understand the highest offer is not guaranteed to be accepted.",
     )
@@ -177,7 +129,4 @@ class FHAcknowledgmentsForm(forms.Form):
             "be made before the Land Bank accepts my offer. Otherwise the request "
             "will not be considered."
         ),
-    )
-    ack_info_accurate = forms.BooleanField(
-        label="I certify that all information provided in this application is true and accurate.",
     )

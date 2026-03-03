@@ -27,6 +27,7 @@
                        hx-target="#purchase-type-fields"
                        hx-swap="innerHTML"
                        hx-include="closest form"
+                       hx-sync="closest form:replace"
                        required>
                 <span class="text-sm text-warm-800">{{ label }}</span>
             </label>

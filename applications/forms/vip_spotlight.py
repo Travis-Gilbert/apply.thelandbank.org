@@ -11,6 +11,7 @@ field - purchase price is stated within Q1.
 from django import forms
 
 from ..models import Application
+from .shared import BaseAcknowledgmentsForm
 
 
 class VIPProposalForm(forms.Form):
@@ -139,30 +140,29 @@ class VIPProposalForm(forms.Form):
         return cleaned
 
 
-class VIPAcknowledgmentsForm(forms.Form):
+class VIPAcknowledgmentsForm(BaseAcknowledgmentsForm):
     """
     Acknowledgments for VIP Spotlight - includes additional VIP-specific items.
 
-    Standard acks plus:
+    Inherits 4 shared acks from BaseAcknowledgmentsForm, adds:
+    - Tax capture with VIP-specific label (mentions Brownfield abatements)
     - Reconveyance deed: property reverts if project not completed per agreement
     - No transfer: cannot transfer or encumber without prior GCLBA written consent
-    - Tax capture: 5/50 waiver must be requested before offer acceptance
 
     Does NOT include ack_highest_not_guaranteed (VIP is proposal-based, not highest-offer).
+    field_order keeps ack_info_accurate last for template iteration.
     """
 
-    ack_sold_as_is = forms.BooleanField(
-        label=(
-            "I understand that all GCLBA properties are sold as-is and I have "
-            "had the opportunity to inspect the property."
-        ),
-    )
-    ack_quit_claim_deed = forms.BooleanField(
-        label="I understand closing is via Quit Claim Deed.",
-    )
-    ack_no_title_insurance = forms.BooleanField(
-        label="I understand GCLBA does not provide title insurance.",
-    )
+    field_order = [
+        "ack_sold_as_is",
+        "ack_quit_claim_deed",
+        "ack_no_title_insurance",
+        "ack_tax_capture",
+        "ack_reconveyance_deed",
+        "ack_no_transfer",
+        "ack_info_accurate",
+    ]
+
     ack_tax_capture = forms.BooleanField(
         label=(
             "I understand any request to waive the Land Bank 5/50 tax capture must "
@@ -182,7 +182,4 @@ class VIPAcknowledgmentsForm(forms.Form):
             "I will not transfer or encumber the property without prior written "
             "GCLBA consent until a Release of Interest is recorded."
         ),
-    )
-    ack_info_accurate = forms.BooleanField(
-        label="I certify that all information provided in this application is true and accurate.",
     )
