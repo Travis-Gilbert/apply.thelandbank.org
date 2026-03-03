@@ -56,7 +56,7 @@ class StatusNotificationTests(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_admin_form_requires_note_when_setting_needs_more_info(self):
-        app = self._create_application(status=Application.Status.RECEIVED, ref="GCLBA-2026-0003")
+        app = self._create_application(status=Application.Status.UNDER_REVIEW, ref="GCLBA-2026-0003")
         editable_fields = [f.name for f in Application._meta.fields if f.editable and f.name != "id"]
         data = model_to_dict(app, fields=editable_fields)
         data["status"] = Application.Status.NEEDS_MORE_INFO
