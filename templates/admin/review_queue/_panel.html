@@ -1,0 +1,135 @@
+{% load static %}
+
+{# Application summary card #}
+<div class="card mb-16">
+    <div class="flex items-start justify-between mb-16">
+        <div>
+            <h2 class="text-20 font-bold text-dark-900">
+                {{ app.first_name }} {{ app.last_name }}
+                <span class="text-dark-400 font-normal text-14 ml-8">{{ app.reference_number }}</span>
+            </h2>
+            <p class="text-dark-600 text-14 mt-4">{{ app.property_address }}</p>
+        </div>
+        <a href="/admin/applications/application/{{ app.pk }}/change/"
+           class="btn btn-empty text-14"
+           target="_blank" rel="noopener">
+            Full Detail
+            <svg class="w-14 h-14 ml-4"><use xlink:href="#External-link"></use></svg>
+        </a>
+    </div>
+
+    {# Key facts grid #}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-16 mb-16">
+        <div>
+            <span class="text-dark-400 text-12 uppercase tracking-wider block mb-4">Program</span>
+            <span class="text-dark-900 font-semibold text-14">{{ app.get_program_type_display }}</span>
+        </div>
+        <div>
+            <span class="text-dark-400 text-12 uppercase tracking-wider block mb-4">Purchase</span>
+            <span class="text-dark-900 font-semibold text-14">
+                {% if app.program_type == "vip_spotlight" %}
+                    Proposal
+                {% else %}
+                    {{ app.get_purchase_type_display }}
+                {% endif %}
+            </span>
+        </div>
+        <div>
+            <span class="text-dark-400 text-12 uppercase tracking-wider block mb-4">Offer</span>
+            <span class="text-dark-900 font-semibold text-14" style="font-family:var(--font-mono,monospace)">
+                {% if app.offer_amount %}
+                    ${{ app.offer_amount|floatformat:2 }}
+                {% elif app.program_type == "vip_spotlight" %}
+                    See Proposal
+                {% else %}
+                    N/A
+                {% endif %}
+            </span>
+        </div>
+        <div>
+            <span class="text-dark-400 text-12 uppercase tracking-wider block mb-4">Age</span>
+            <span class="text-14 font-semibold {% if days_open >= 14 %}text-red-600{% elif days_open >= 7 %}text-amber-600{% else %}text-dark-900{% endif %}">
+                {% if days_open == 0 %}Today{% elif days_open == 1 %}1 day{% else %}{{ days_open }} days{% endif %}
+            </span>
+        </div>
+    </div>
+
+    {# Current status + reviewer #}
+    <div class="flex items-center gap-16 mb-16 pb-16" style="border-bottom:1px solid var(--color-border,#e5e7eb)">
+        <div class="flex items-center gap-8">
+            <span class="text-dark-400 text-12 uppercase tracking-wider">Status:</span>
+            {% include "admin/partials/_status_badge.html" with status=app.status label=app.get_status_display %}
+        </div>
+        <div class="flex items-center gap-8">
+            <span class="text-dark-400 text-12 uppercase tracking-wider">Reviewer:</span>
+            <span class="text-14 font-medium text-dark-700">
+                {% if app.assigned_to %}
+                    {{ app.assigned_to.get_full_name|default:app.assigned_to.get_username }}
+                {% else %}
+                    <span class="text-amber-600">Unassigned</span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    {# Document review panel — OK/Flag/Pending per document #}
+    {% include "admin/partials/_document_review_panel.html" %}
+
+    {# Recent status log #}
+    {% if recent_logs %}
+    <div class="mb-16">
+        <span class="text-dark-400 text-12 uppercase tracking-wider block mb-8">Recent Activity</span>
+        <div class="text-13 text-dark-600 space-y-4">
+            {% for log in recent_logs %}
+            <div class="flex items-center gap-8">
+                <span class="text-dark-400">{{ log.changed_at|date:"M j, g:i A" }}</span>
+                <span>{{ log.changed_by.get_username }}</span>
+                <span class="text-dark-400">&rarr;</span>
+                <span class="font-medium">{{ log.to_status_label }}</span>
+                {% if log.notes %}
+                    <span class="text-dark-400 truncate max-w-300">— {{ log.notes }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{# Action form #}
+<div class="card">
+    <form method="post"
+          action="{% url 'review_update_status' pk=app.pk %}"
+          class="flex flex-wrap items-end gap-16">
+        {% csrf_token %}
+
+        <div class="flex-1 min-w-200">
+            <label class="text-dark-400 text-12 uppercase tracking-wider block mb-4" for="status-select">
+                Update Status
+            </label>
+            <select name="status" id="status-select"
+                    class="form-select w-full rounded-lg border-dark-200 text-14 py-8 px-12">
+                <option value="">— Keep Current —</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="flex-1 min-w-200">
+            <label class="text-dark-400 text-12 uppercase tracking-wider block mb-4" for="note-input">
+                Note (required for some transitions)
+            </label>
+            <input type="text" name="note" id="note-input"
+                   class="form-input w-full rounded-lg border-dark-200 text-14 py-8 px-12"
+                   placeholder="Brief note for the buyer or file...">
+        </div>
+
+        <div class="flex gap-8">
+            <button type="submit" class="btn btn-primary">
+                Update &amp; Next
+                <svg class="w-14 h-14 ml-4"><use xlink:href="#Right-small"></use></svg>
+            </button>
+        </div>
+    </form>
+</div>

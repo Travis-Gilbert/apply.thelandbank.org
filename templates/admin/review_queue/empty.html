@@ -1,0 +1,22 @@
+{% extends "sb_admin/sb_admin_base.html" %}
+
+{% block title %}Review Queue — GCLBA{% endblock %}
+
+{% block content %}
+<div class="max-w-1180 mx-auto">
+    <div class="flex items-center justify-between mb-24">
+        <h1 class="text-24 md:text-30 text-dark-900 font-bold font-heading">Review Queue</h1>
+    </div>
+
+    <div class="card text-center py-64">
+        <svg class="w-48 h-48 mx-auto mb-16 text-dark-300">
+            <use xlink:href="#Checks"></use>
+        </svg>
+        <h2 class="text-20 font-semibold text-dark-700 mb-8">Queue is empty</h2>
+        <p class="text-dark-500 text-14 mb-24">
+            All active applications have been reviewed. Check back later for new submissions.
+        </p>
+        <a href="/admin/" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

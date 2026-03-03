@@ -1,0 +1,130 @@
+{# Document review panel — vanilla JS OK/Flag/Pending buttons per document #}
+{% if documents %}
+<div class="mb-16">
+    <span class="text-dark-400 text-12 uppercase tracking-wider block mb-8">Document Review</span>
+    <div class="space-y-6" id="doc-review-panel" data-app-pk="{{ app.pk }}">
+        {% for doc in documents %}
+        <div class="flex items-center gap-8 py-6 px-8 rounded-lg"
+             style="background:var(--color-bg-secondary,#f9fafb)"
+             data-doc-id="{{ doc.pk }}">
+            <a href="{% url 'applications:document_view' document_id=doc.pk %}"
+               target="_blank" rel="noopener"
+               class="text-13 font-medium flex-1 truncate"
+               style="color:var(--color-primary-600,#1e3a8a);text-decoration:none">
+                {{ doc.get_doc_type_display }}
+                {% if doc.original_filename %}
+                    <span class="text-dark-400 font-normal ml-4">{{ doc.original_filename }}</span>
+                {% endif %}
+            </a>
+            <div class="flex gap-4 doc-review-btns">
+                {% with current_status=app.document_review %}
+                <button type="button"
+                        class="doc-review-btn {% if current_status|default:""|stringformat:"s" != "" %}{% endif %}"
+                        data-status="ok"
+                        style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;
+                               font-size:11px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s;
+                               {% if doc.pk|stringformat:"s" in current_status and current_status|default:""  %}
+                               {% endif %}"
+                        onclick="setDocReview(this, {{ doc.pk }}, 'ok')">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg>
+                    OK
+                </button>
+                <button type="button"
+                        class="doc-review-btn"
+                        data-status="flagged"
+                        style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;
+                               font-size:11px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s"
+                        onclick="setDocReview(this, {{ doc.pk }}, 'flagged')">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.47.22A.749.749 0 015 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 01-.22.53l-4.25 4.25A.749.749 0 0111 16H5a.749.749 0 01-.53-.22L.22 11.53A.749.749 0 010 11V5a.749.749 0 01.22-.53zM8 4a.75.75 0 00-.75.75v3.5a.75.75 0 001.5 0v-3.5A.75.75 0 008 4zm0 8a1 1 0 100-2 1 1 0 000 2z"/></svg>
+                    Flag
+                </button>
+                <button type="button"
+                        class="doc-review-btn"
+                        data-status="pending"
+                        style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;
+                               font-size:11px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s"
+                        onclick="setDocReview(this, {{ doc.pk }}, 'pending')">
+                    ?
+                </button>
+                {% endwith %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+(function() {
+    // Color schemes for each status
+    var statusStyles = {
+        ok:      { bg: '#dcfce7', color: '#166534', border: '#86efac' },
+        flagged: { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
+        pending: { bg: '#fef3c7', color: '#92400e', border: '#fcd34d' },
+        none:    { bg: 'transparent', color: '#6b7280', border: '#d1d5db' }
+    };
+
+    // Initialize button states from server data
+    var reviewData = {{ app.document_review|default:"{}"|safe }};
+    document.querySelectorAll('#doc-review-panel [data-doc-id]').forEach(function(row) {
+        var docId = row.getAttribute('data-doc-id');
+        var status = reviewData[docId] || null;
+        if (status) {
+            applyButtonState(row, status);
+        } else {
+            // All buttons start in "none" style
+            row.querySelectorAll('.doc-review-btn').forEach(function(btn) {
+                applyStyle(btn, 'none');
+            });
+        }
+    });
+
+    function applyStyle(btn, key) {
+        var s = statusStyles[key];
+        btn.style.background = s.bg;
+        btn.style.color = s.color;
+        btn.style.borderColor = s.border;
+    }
+
+    function applyButtonState(row, activeStatus) {
+        row.querySelectorAll('.doc-review-btn').forEach(function(btn) {
+            var btnStatus = btn.getAttribute('data-status');
+            applyStyle(btn, btnStatus === activeStatus ? btnStatus : 'none');
+        });
+    }
+
+    // Global handler called by onclick
+    window.setDocReview = function(btn, docId, status) {
+        var panel = document.getElementById('doc-review-panel');
+        var appPk = panel.getAttribute('data-app-pk');
+        var row = btn.closest('[data-doc-id]');
+
+        // Optimistic UI update
+        applyButtonState(row, status);
+
+        // POST to server
+        var csrfToken = window.csrf_token
+                     || document.querySelector('[name=csrfmiddlewaretoken]')?.value
+                     || '';
+
+        fetch('/admin/api/doc-review/' + appPk + '/', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ doc_id: docId, status: status })
+        })
+        .then(function(r) {
+            if (!r.ok) {
+                // Revert on error — clear active state
+                applyButtonState(row, null);
+            }
+        })
+        .catch(function() {
+            applyButtonState(row, null);
+        });
+    };
+})();
+</script>
+{% endif %}
