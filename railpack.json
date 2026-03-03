@@ -7,12 +7,11 @@
     "install": {
       "commands": [
         "...",
-        "python -m pip install --no-deps django-smartbase-admin==1.1.1",
-        "cd theme/static_src && npm install"
+        "python -m pip install --no-deps django-smartbase-admin==1.1.1"
       ]
     }
   },
   "deploy": {
-    "startCommand": "python manage.py tailwind build && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"
+    "startCommand": "npm --prefix theme/static_src install && python manage.py tailwind build && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser && gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3"
   }
 }
