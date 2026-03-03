@@ -633,7 +633,7 @@ AWS_S3_REGION_NAME
 | Task | Status | Notes |
 |------|--------|-------|
 | Comprehensive improvement plan — Phase A | Done | 12 fixes: security (1.1-1.6), error handling (2.1, 2.7), accessibility (6.1-6.4). Commit `f467008`. |
-| Comprehensive improvement plan — Phase B | Next | Dashboard (3.1), HTMX sync (2.6), bulk action validation (3.2), DRY refactors (4.3-4.7), dead templates (4.9) |
+| Comprehensive improvement plan — Phase B | Done | Dashboard widget (3.1), hx-sync (2.6), DRY forms+templates (4.3-4.7), dead template cleanup (4.9). Commit `63941e0`. |
 | Tailwind build + cotton components | Planned | Plan: `docs/plans/2026-02-28-tailwind-build-cotton-components.md` |
 | S3 credentials on Railway | Open | AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY needed |
 | Resend API key on Railway | Open | RESEND_API_KEY + EMAIL_BACKEND=anymail.backends.resend.EmailBackend |
@@ -644,10 +644,9 @@ command before production launch with real user data.
 
 ## Next Step
 
-1. **Phase B of improvement plan** — post-launch polish: wire SmartBase dashboard (3.1), add `hx-sync` on purchase type radios + property search (2.6), bulk action transition validation (3.2), DRY refactors (4.3-4.7), dead template cleanup (4.9). See `docs/plans/2026-03-02-comprehensive-improvement-plan.md`.
-2. **Execute Tailwind build + cotton components plan** — 3 phases, 9 commit batches. Run `/execute-plan docs/plans/2026-02-28-tailwind-build-cotton-components.md`.
-3. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
-4. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
+1. **Execute Tailwind build + cotton components plan** — 3 phases, 9 commit batches. Run `/execute-plan docs/plans/2026-02-28-tailwind-build-cotton-components.md`.
+2. **S3 bucket + credentials** — create bucket, set IAM credentials, add env vars on Railway
+3. **Resend domain verification** — verify `thelandbank.org` in Resend, set `RESEND_API_KEY` on Railway
 
 ### Future
 
