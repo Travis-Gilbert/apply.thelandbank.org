@@ -8,6 +8,7 @@ from django_smartbase_admin.engine.configuration import (
     SBAdminConfigurationBase,
     SBAdminRoleConfiguration,
 )
+from django_smartbase_admin.models import ColorScheme
 from django_smartbase_admin.engine.menu_item import SBAdminMenuItem
 from django_smartbase_admin.views.dashboard_view import SBAdminDashboardView
 
@@ -36,7 +37,7 @@ config = SBAdminRoleConfiguration(
                     view_id="applications_application",
                 ),
                 SBAdminMenuItem(
-                    label="Drafts (In Progress)",
+                    label="In Progress",
                     view_id="applications_applicationdraft",
                 ),
             ],
@@ -64,6 +65,7 @@ config = SBAdminRoleConfiguration(
 class SBAdminConfiguration(SBAdminConfigurationBase):
     site_title = "GCLBA Sales Admin"
     site_header = "The Genesee County Land Bank Authority"
+    default_color_scheme = ColorScheme.LIGHT
 
     def get_configuration_for_roles(self, user_roles):
         return config
