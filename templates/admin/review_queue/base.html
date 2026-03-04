@@ -1,0 +1,55 @@
+{# Review queue base — standalone shell that bypasses SmartBase's pipeline.
+
+   SmartBase's navigation.html requires request_data.menu_items (populated by
+   SBAdminSite.admin_view → initialize_admin_view). Review queue views use
+   plain Django render() so that object is never created. Rather than faking
+   the entire request_data chain, we extend the minimal SmartBase skeleton
+   (CSS + sprites + HTMX) and provide our own simple top-bar navigation. #}
+
+{% extends "sb_admin/sb_admin_base_no_sidebar.html" %}
+{% load static %}
+
+{# Force light theme — user_config.color_scheme is empty without SmartBase pipeline #}
+{% block extrahead %}
+<script>document.documentElement.dataset.theme = 'light';</script>
+{% endblock %}
+
+{# GCLBA favicon #}
+{% block icons %}
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <meta name="theme-color" content="#2e7d32">
+{% endblock %}
+
+{# GCLBA theme overrides #}
+{% block style_init %}
+    <link rel="stylesheet" href="{% static 'sb_admin/css/gclba_theme.css' %}">
+{% endblock %}
+
+{# Layout: top navigation bar + content area #}
+{% block main_wrapper %}
+<div class="w-full min-h-screen" style="background: var(--color-bg-base, #f9fafb);">
+
+    {# Top navigation bar #}
+    <nav style="background:#fff; border-bottom:1px solid var(--color-border,#e5e7eb); padding:12px 24px;">
+        <div class="flex items-center justify-between" style="max-width:1180px; margin:0 auto;">
+            <a href="/admin/"
+               class="flex items-center gap-8 text-14 font-semibold text-dark-700"
+               style="text-decoration:none;">
+                <svg class="w-16 h-16"><use xlink:href="#Left-small"></use></svg>
+                Back to Admin
+            </a>
+            <div class="flex items-center gap-16">
+                <a href="/admin/" class="text-13 text-dark-500" style="text-decoration:none;">Dashboard</a>
+                <a href="/admin/applications/application/" class="text-13 text-dark-500" style="text-decoration:none;">Applications</a>
+                <a href="/admin/review/" class="text-13 font-semibold" style="text-decoration:none; color:var(--color-primary);">Review Queue</a>
+            </div>
+        </div>
+    </nav>
+
+    {# Content area — same padding as SmartBase's main_wrapper #}
+    <div class="sm:p-24">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

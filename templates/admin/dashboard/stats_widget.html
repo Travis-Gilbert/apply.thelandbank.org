@@ -19,11 +19,55 @@
 {# ── Status overview cards ─────────────────────────────────── #}
 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-16 mb-24">
     {% for status in status_cards %}
-    <div class="card text-center" style="border-top: 3px solid {{ status.color }};">
+    <a href="/admin/applications/application/?status__exact={{ status.status_value }}"
+       class="card text-center"
+       style="border-top: 3px solid {{ status.color }}; text-decoration:none; display:block; transition:box-shadow .15s;">
         <div class="text-24 font-bold text-dark-900">{{ status.count }}</div>
         <div class="text-12 text-dark-400 mt-4">{{ status.label }}</div>
-    </div>
+    </a>
     {% endfor %}
+</div>
+
+{# ── Recent submissions table (most actionable, shown first) ─ #}
+<div class="card mb-24">
+    <h3 class="text-14 font-bold text-dark-700 mb-12">Recent Submissions</h3>
+    {% if stats.recent.applications %}
+    <div style="overflow-x: auto;">
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    <th>Ref #</th>
+                    <th>Applicant</th>
+                    <th>Program</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in stats.recent.applications %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin:applications_application_change' app.pk %}"
+                           style="font-family:var(--font-mono,monospace); color:var(--color-primary); text-decoration:none;"
+                           onmouseover="this.style.textDecoration='underline'"
+                           onmouseout="this.style.textDecoration='none'">
+                            {{ app.reference_number|default:"--" }}
+                        </a>
+                    </td>
+                    <td class="text-dark-700">{{ app.first_name }} {{ app.last_name }}</td>
+                    <td class="text-dark-500">{{ app.get_program_type_display }}</td>
+                    <td>
+                        {% include "admin/partials/_status_badge.html" with status=app.status label=app.get_status_display %}
+                    </td>
+                    <td class="text-dark-500">{{ app.submitted_at|date:"M j, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-14 text-dark-400">No recent submissions</p>
+    {% endif %}
 </div>
 
 {# ── Queue health + workload row ───────────────────────────── #}
@@ -122,48 +166,6 @@
             </span>
         </div>
     </div>
-</div>
-
-{# ── Recent submissions table ──────────────────────────────── #}
-<div class="card">
-    <h3 class="text-14 font-bold text-dark-700 mb-12">Recent Submissions</h3>
-    {% if stats.recent.applications %}
-    <div style="overflow-x: auto;">
-        <table class="dash-table">
-            <thead>
-                <tr>
-                    <th>Ref #</th>
-                    <th>Applicant</th>
-                    <th>Program</th>
-                    <th>Status</th>
-                    <th>Submitted</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for app in stats.recent.applications %}
-                <tr>
-                    <td>
-                        <a href="{% url 'admin:applications_application_change' app.pk %}"
-                           style="font-family:var(--font-mono,monospace); color:var(--color-primary); text-decoration:none;"
-                           onmouseover="this.style.textDecoration='underline'"
-                           onmouseout="this.style.textDecoration='none'">
-                            {{ app.reference_number|default:"--" }}
-                        </a>
-                    </td>
-                    <td class="text-dark-700">{{ app.first_name }} {{ app.last_name }}</td>
-                    <td class="text-dark-500">{{ app.get_program_type_display }}</td>
-                    <td>
-                        {% include "admin/partials/_status_badge.html" with status=app.status label=app.get_status_display %}
-                    </td>
-                    <td class="text-dark-500">{{ app.submitted_at|date:"M j, Y" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p class="text-14 text-dark-400">No recent submissions</p>
-    {% endif %}
 </div>
 
 </div>{# /col-span-12 #}

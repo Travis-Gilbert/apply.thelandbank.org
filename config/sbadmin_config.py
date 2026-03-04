@@ -30,7 +30,7 @@ config = SBAdminRoleConfiguration(
         ),
         SBAdminMenuItem(
             label="Applications",
-            icon="Box",
+            icon="Write",
             sub_items=[
                 SBAdminMenuItem(
                     label="All Applications",
@@ -49,7 +49,7 @@ config = SBAdminRoleConfiguration(
         ),
         SBAdminMenuItem(
             label="Users",
-            icon="User-business",
+            icon="People-top-card",
             view_id="applications_user",
         ),
     ],

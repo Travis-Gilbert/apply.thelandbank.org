@@ -114,6 +114,10 @@
 [data-theme="dark"] .text-status-error { color: #f87171; }
 [data-theme="dark"] .text-status-ok    { color: #4ade80; }
 
+/* ── Clickable card hover ───────────────────────────────── */
+a.card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+[data-theme="dark"] a.card:hover { box-shadow: 0 2px 8px rgba(255,255,255,.06); }
+
 /* ── Dashboard table ─────────────────────────────────────── */
 .dash-table              { width: 100%; border-collapse: collapse; }
 .dash-table th           { text-align: left; font-size: 12px; font-weight: 500;

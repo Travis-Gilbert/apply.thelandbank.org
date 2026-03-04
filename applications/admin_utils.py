@@ -167,6 +167,7 @@ class DashboardStatsWidget(SBAdminDashboardWidget):
                 "label": status_label,
                 "count": stats["status_counts"].get(status_value, 0),
                 "color": STATUS_COLORS.get(status_value, "#6b7280"),
+                "status_value": status_value,
             })
 
         # Build program breakdown cards
