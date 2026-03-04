@@ -128,8 +128,10 @@ a.card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .dash-table td           { padding: 8px 12px 8px 0; font-size: 14px;
                            color: var(--color-dark-700, #374151); }
 .dash-table tbody tr     { border-bottom: 1px solid var(--color-border-light, #f3f4f6); }
-.dash-table tbody tr:hover { background: var(--color-bg-hover, rgba(0,0,0,.02)); }
-[data-theme="dark"] .dash-table tbody tr:hover { background: rgba(255,255,255,.03); }
+.dash-table tbody tr:nth-child(even) { background: #F0F4F8; }
+.dash-table tbody tr:hover { background: #e4ecf3; }
+[data-theme="dark"] .dash-table tbody tr:nth-child(even) { background: rgba(255,255,255,.03); }
+[data-theme="dark"] .dash-table tbody tr:hover { background: rgba(255,255,255,.06); }
 
 /* ── Timeline dot ────────────────────────────────────────── */
 .timeline-dot { width: 16px; height: 16px; border-radius: 50%;
