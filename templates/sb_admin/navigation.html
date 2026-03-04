@@ -31,15 +31,17 @@ Everything else is identical to the vendor template.
              id="main-navigation">
 
             {# Desktop sidebar header — GCLBA branding #}
-            <header class="px-20 py-20 hidden xl:!block border-b border-dark-200">
-                <a href="/admin/" style="text-decoration:none; display:block;">
+            <header class="px-16 py-16 hidden xl:!block border-b border-dark-200">
+                <a href="/admin/" class="flex items-center gap-12" style="text-decoration:none;">
                     <img src="{% static 'img/gclba-logo-icon-400.png' %}"
-                         alt="GCLBA" style="height:44px; width:auto; margin-bottom:8px;">
-                    <div style="font-size:18px; font-weight:700; color:#2d5f7a; line-height:1.25;">
-                        Genesee County<br>Land Bank Authority
-                    </div>
-                    <div style="font-size:12px; color:#6b7280; margin-top:4px; font-weight:500;">
-                        Sales Admin
+                         alt="GCLBA" style="height:42px; width:auto; flex-shrink:0;">
+                    <div style="min-width:0;">
+                        <div style="font-size:14px; font-weight:700; color:#2d5f7a; line-height:1.3;">
+                            Genesee County Land Bank Authority
+                        </div>
+                        <div style="font-size:11px; color:#6b7280; margin-top:2px;">
+                            Sales Admin
+                        </div>
                     </div>
                 </a>
             </header>
