@@ -164,37 +164,55 @@ class PropertyAdmin(SBAdmin):
         """SmartBase list view: application count. `value` = Count annotation."""
         return value or 0
 
-    # ── Django detail view methods (receive model instance) ──
+    # ── Dual-compatible display methods (instance OR obj_id+value) ──
 
     @admin.display(description="Program", ordering="program_type")
-    def display_program(self, instance):
-        bg, fg = self.PROGRAM_PALETTE.get(instance.program_type, ("#e5e7eb", "#374151"))
+    def display_program(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Property):
+            program = obj_or_id.program_type
+            label = obj_or_id.get_program_type_display()
+        else:
+            program = value
+            label = dict(Application.ProgramType.choices).get(value, value or "—")
+        bg, fg = self.PROGRAM_PALETTE.get(program, ("#e5e7eb", "#374151"))
         return format_html(
             "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
             "border-radius:999px;font-size:12px;font-weight:600;"
             "background:{};color:{}'>{}</span>",
-            bg, fg, instance.get_program_type_display(),
+            bg, fg, label,
         )
 
     @admin.display(description="Status", ordering="status")
-    def display_status(self, instance):
-        bg, fg = self.PROPERTY_STATUS_PALETTE.get(instance.status, ("#e5e7eb", "#374151"))
+    def display_status(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Property):
+            status = obj_or_id.status
+            label = obj_or_id.get_status_display()
+        else:
+            status = value
+            label = dict(Property.Status.choices).get(value, value or "—")
+        bg, fg = self.PROPERTY_STATUS_PALETTE.get(status, ("#e5e7eb", "#374151"))
         return format_html(
             "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
             "border-radius:999px;font-size:12px;font-weight:600;"
             "background:{};color:{}'>{}</span>",
-            bg, fg, instance.get_status_display(),
+            bg, fg, label,
         )
 
     @admin.display(description="Price", ordering="listing_price")
-    def listing_price_display(self, instance):
-        if instance.listing_price is None:
+    def listing_price_display(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Property):
+            price = obj_or_id.listing_price
+        else:
+            price = value
+        if price is None:
             return "N/A"
-        return f"${instance.listing_price:,.2f}"
+        return f"${price:,.2f}"
 
     @admin.display(description="Apps")
-    def application_count(self, instance):
-        return instance._application_count
+    def application_count(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Property):
+            return obj_or_id._application_count
+        return value or 0
 
     @admin.action(description="Import properties from CSV")
     def import_csv_action(self, request, queryset):
@@ -230,10 +248,15 @@ class DocumentInline(SBAdminTableInline):
     readonly_fields = ("view_file", "uploaded_at")
 
     @admin.display(description="View", ordering="uploaded_at")
-    def view_file(self, instance):
-        if not instance.pk or not instance.file:
-            return "N/A"
-        url = reverse("applications:document_view", args=[instance.pk])
+    def view_file(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Document):
+            if not obj_or_id.pk or not obj_or_id.file:
+                return "N/A"
+            pk = obj_or_id.pk
+        else:
+            # SmartBase path — obj_or_id is the PK
+            pk = obj_or_id
+        url = reverse("applications:document_view", args=[pk])
         return format_html(
             '<a href="{}" target="_blank" rel="noopener">Open</a>',
             url,
@@ -488,7 +511,7 @@ class ApplicationAdmin(SBAdmin):
         DocsStateFilter,
         "submitted_at",
     )
-    list_display_links = ("reference_number", "display_full_name")
+    list_display_links = ("reference_number",)
     date_hierarchy = "submitted_at"
     ordering = ("-submitted_at",)
     list_per_page = 50
@@ -864,14 +887,23 @@ class ApplicationAdmin(SBAdmin):
             bg=bg, color=color, label=label,
         )
 
-    # ── Django detail view methods (receive model instance) ────
+    # ── Dual-compatible display methods ──────────────────────────
+    # These handle BOTH calling conventions:
+    #   Django detail/change view: (self, instance)    — instance is a model object
+    #   SmartBase AG Grid list:    (self, obj_id, value, **kwargs) — obj_id is PK int
+    # The isinstance() check detects which path we're on.
 
     @admin.display(description="Name", ordering="last_name")
-    def display_full_name(self, instance):
-        return instance.full_name
+    def display_full_name(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            return obj_or_id.full_name
+        # SmartBase path — use kwargs from sbadmin_list_display_data
+        first = kwargs.get("first_name", "")
+        last = kwargs.get("last_name", "")
+        return f"{first} {last}".strip() or value or "—"
 
     @admin.display(description="Status", ordering="status")
-    def display_status(self, instance):
+    def display_status(self, obj_or_id, value=None, **kwargs):
         palette = {
             Application.Status.RECEIVED: ("#dbeafe", "#1e40af"),
             Application.Status.UNDER_REVIEW: ("#fef3c7", "#92400e"),
@@ -879,7 +911,13 @@ class ApplicationAdmin(SBAdmin):
             Application.Status.APPROVED: ("#dcfce7", "#166534"),
             Application.Status.DECLINED: ("#fee2e2", "#991b1b"),
         }
-        bg, fg = palette.get(instance.status, ("#e5e7eb", "#374151"))
+        if isinstance(obj_or_id, Application):
+            status = obj_or_id.status
+            label = obj_or_id.get_status_display()
+        else:
+            status = value
+            label = dict(Application.Status.choices).get(value, value or "—")
+        bg, fg = palette.get(status, ("#e5e7eb", "#374151"))
         return format_html(
             (
                 "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
@@ -888,30 +926,51 @@ class ApplicationAdmin(SBAdmin):
             ),
             bg,
             fg,
-            instance.get_status_display(),
+            label,
         )
 
     @admin.display(description="Program", ordering="program_type")
-    def display_program(self, instance):
-        return instance.get_program_type_display()
+    def display_program(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            return obj_or_id.get_program_type_display()
+        return dict(Application.ProgramType.choices).get(value, value or "—")
 
     @admin.display(description="Purchase Type", ordering="purchase_type")
-    def display_purchase_type(self, instance):
-        if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+    def display_purchase_type(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            if obj_or_id.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+                return "Proposal"
+            return obj_or_id.get_purchase_type_display()
+        # SmartBase path
+        program = kwargs.get("program_type")
+        if program == Application.ProgramType.VIP_SPOTLIGHT:
             return "Proposal"
-        return instance.get_purchase_type_display()
+        return dict(Application.PurchaseType.choices).get(value, value or "—")
 
     @admin.display(description="Offer", ordering="offer_amount")
-    def display_offer(self, instance):
-        if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+    def display_offer(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            if obj_or_id.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+                return "See Proposal"
+            if obj_or_id.offer_amount is None:
+                return "N/A"
+            return f"${obj_or_id.offer_amount:,.2f}"
+        # SmartBase path
+        program = kwargs.get("program_type")
+        if program == Application.ProgramType.VIP_SPOTLIGHT:
             return "See Proposal"
-        if instance.offer_amount is None:
+        if value is None:
             return "N/A"
-        return f"${instance.offer_amount:,.2f}"
+        return f"${value:,.2f}"
 
     @admin.display(description="Docs", ordering="submitted_at")
-    def display_docs(self, instance):
-        if instance.docs_complete:
+    def display_docs(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            is_complete = obj_or_id.docs_complete
+        else:
+            # SmartBase path — no reliable way to check docs_complete, show "—"
+            return "—"
+        if is_complete:
             return mark_safe(
                 "<span style='display:inline-flex;align-items:center;padding:2px 8px;"
                 "border-radius:999px;font-size:12px;font-weight:600;"
@@ -924,7 +983,11 @@ class ApplicationAdmin(SBAdmin):
         )
 
     @admin.display(description="Quick Docs", ordering="submitted_at")
-    def quick_docs(self, instance):
+    def quick_docs(self, obj_or_id, value=None, **kwargs):
+        if not isinstance(obj_or_id, Application):
+            # SmartBase path — needs full instance for documents queryset, skip
+            return "—"
+        instance = obj_or_id
         docs = list(instance.documents.all())
         if not docs:
             return "N/A"
@@ -960,8 +1023,27 @@ class ApplicationAdmin(SBAdmin):
         return format_html(wrap, links_html)
 
     @admin.display(description="Reviewer", ordering="assigned_to")
-    def display_assignee(self, instance):
-        if not instance.assigned_to:
+    def display_assignee(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            instance = obj_or_id
+            if not instance.assigned_to:
+                return format_html(
+                    '<span id="claim-{pk}">'
+                    '<button type="button" '
+                    'hx-post="/admin/api/assign/{pk}/" '
+                    'hx-target="#claim-{pk}" '
+                    'hx-swap="innerHTML" '
+                    'onclick="event.stopPropagation()" '
+                    'style="display:inline-flex;align-items:center;padding:2px 10px;'
+                    'border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;'
+                    'background:#dbeafe;color:#1e40af;border:1px solid #93c5fd">'
+                    'Claim</button></span>',
+                    pk=instance.pk,
+                )
+            return instance.assigned_to.get_full_name() or instance.assigned_to.get_username()
+        # SmartBase path — use kwargs from sbadmin_list_display_data
+        assigned_id = kwargs.get("assigned_to_id") or value
+        if not assigned_id:
             return format_html(
                 '<span id="claim-{pk}">'
                 '<button type="button" '
@@ -973,13 +1055,25 @@ class ApplicationAdmin(SBAdmin):
                 'border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;'
                 'background:#dbeafe;color:#1e40af;border:1px solid #93c5fd">'
                 'Claim</button></span>',
-                pk=instance.pk,
+                pk=obj_or_id,
             )
-        return instance.assigned_to.get_full_name() or instance.assigned_to.get_username()
+        first = kwargs.get("assigned_to__first_name", "")
+        last = kwargs.get("assigned_to__last_name", "")
+        full = f"{first} {last}".strip()
+        return full or kwargs.get("assigned_to__username", "Staff")
 
     @admin.display(description="Age", ordering="submitted_at")
-    def submitted_age(self, instance):
-        days_open = (timezone.now() - instance.submitted_at).days
+    def submitted_age(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            submitted_at = obj_or_id.submitted_at
+            status = obj_or_id.status
+        else:
+            submitted_at = value
+            status = kwargs.get("status")
+
+        if not submitted_at:
+            return "—"
+        days_open = (timezone.now() - submitted_at).days
         if days_open == 0:
             label = "Today"
         elif days_open == 1:
@@ -993,7 +1087,7 @@ class ApplicationAdmin(SBAdmin):
             Application.Status.UNDER_REVIEW,
             Application.Status.NEEDS_MORE_INFO,
         )
-        if instance.status not in open_statuses:
+        if status not in open_statuses:
             return label
 
         # Green < 7 days, amber 7-13, red 14+
@@ -1013,14 +1107,20 @@ class ApplicationAdmin(SBAdmin):
         )
 
     @admin.display(description="Closing Fee", ordering="purchase_type")
-    def closing_fee_display(self, instance):
-        if instance.program_type == Application.ProgramType.FEATURED_HOMES:
-            if instance.purchase_type == Application.PurchaseType.LAND_CONTRACT:
+    def closing_fee_display(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, Application):
+            program = obj_or_id.program_type
+            purchase = obj_or_id.purchase_type
+        else:
+            program = kwargs.get("program_type", value)
+            purchase = kwargs.get("purchase_type")
+        if program == Application.ProgramType.FEATURED_HOMES:
+            if purchase == Application.PurchaseType.LAND_CONTRACT:
                 return "$125"
             return "$75"
-        if instance.program_type == Application.ProgramType.READY_FOR_REHAB:
+        if program == Application.ProgramType.READY_FOR_REHAB:
             return "$75"
-        if instance.program_type == Application.ProgramType.VIP_SPOTLIGHT:
+        if program == Application.ProgramType.VIP_SPOTLIGHT:
             return "Per Purchase & Development Agreement"
         return "TBD"
 
@@ -1192,6 +1292,15 @@ class ApplicationDraftAdmin(SBAdmin):
         "is_expired_display",
         "updated_at",
     )
+    sbadmin_list_display = [
+        SBAdminField(name="sb_token", title="Token", annotate=F("token")),
+        "email",
+        "program_type",
+        "current_step",
+        "submitted",
+        SBAdminField(name="sb_expired", title="Expired?", annotate=F("expires_at")),
+        "updated_at",
+    ]
     list_filter = ("program_type", "current_step", "submitted")
     search_fields = ("email",)
     readonly_fields = (
@@ -1204,10 +1313,40 @@ class ApplicationDraftAdmin(SBAdmin):
         "submitted_at",
     )
 
+    # ── SmartBase AG Grid methods ──
+
+    def sb_token(self, obj_id, value, **kwargs):
+        """SmartBase list: shortened token. `value` = token UUID."""
+        if value is None:
+            return "—"
+        if hasattr(value, "hex"):
+            return value.hex[:8]
+        return str(value).replace("-", "")[:8]
+
+    def sb_expired(self, obj_id, value, **kwargs):
+        """SmartBase list: expired check. `value` = expires_at datetime."""
+        if value is None:
+            return False
+        return timezone.now() >= value
+
+    # ── Dual-compatible display methods ──
+
     @admin.display(description="Token", ordering="token")
-    def token_short(self, obj):
-        return obj.token.hex[:8]
+    def token_short(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, ApplicationDraft):
+            return obj_or_id.token.hex[:8]
+        # SmartBase path
+        if value is None:
+            return "—"
+        if hasattr(value, "hex"):
+            return value.hex[:8]
+        return str(value).replace("-", "")[:8]
 
     @admin.display(description="Expired?", boolean=True, ordering="expires_at")
-    def is_expired_display(self, obj):
-        return obj.is_expired
+    def is_expired_display(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, ApplicationDraft):
+            return obj_or_id.is_expired
+        # SmartBase path
+        if value is None:
+            return False
+        return timezone.now() >= value
