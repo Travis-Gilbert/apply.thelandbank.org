@@ -209,9 +209,10 @@ def review_update_status(request, pk):
             status=422,
         )
 
-    # Return the next application panel
+    # Return the next application panel — exclude the one just reviewed so we
+    # don't loop back to it when it's still in the queue (e.g. moved to under_review)
     queue = _queue_queryset(request.user)
-    next_app = queue.first()
+    next_app = queue.exclude(pk=app.pk).first()
     if next_app:
         return redirect("review_application", pk=next_app.pk)
 

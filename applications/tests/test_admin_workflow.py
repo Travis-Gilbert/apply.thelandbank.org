@@ -127,6 +127,20 @@ class ReviewQueueTests(TestCase):
         )
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_review_update_does_not_loop_back_to_same_app(self):
+        """After updating the only queued app, redirect to empty state, not the same app."""
+        response = self.client.post(
+            f"/admin/review/{self.app.pk}/update/",
+            {"status": "under_review", "note": ""},
+            follow=True,
+        )
+        # Should land on the empty queue page, not loop back to this app
+        self.assertNotIn(
+            f"/admin/review/{self.app.pk}/",
+            response.redirect_chain[-1][0] if response.redirect_chain else "",
+        )
+        self.assertEqual(response.status_code, 200)
+
 
 @override_settings(STORAGES=TEST_STORAGES)
 class AdminAPITests(TestCase):
