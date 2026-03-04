@@ -3,9 +3,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms.models import model_to_dict
 from django.test import TestCase, override_settings
 
-from .admin import ApplicationAdminForm
-from .models import Application, ApplicationDraft
-from .status_notifications import requires_transition_note, send_buyer_status_email
+from applications.admin import ApplicationAdminForm
+from applications.models import Application, ApplicationDraft
+from applications.status_notifications import requires_transition_note, send_buyer_status_email
 
 TEST_STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

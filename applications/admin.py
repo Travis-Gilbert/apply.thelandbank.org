@@ -1375,6 +1375,7 @@ class ApplicationAdmin(SBAdmin):
 class ApplicationDraftAdmin(SBAdmin):
     list_display = (
         "token_short",
+        "applicant_name",
         "email",
         "program_type",
         "current_step",
@@ -1384,6 +1385,7 @@ class ApplicationDraftAdmin(SBAdmin):
     )
     sbadmin_list_display = [
         SBAdminField(name="sb_token", title="Token", annotate=F("token")),
+        SBAdminField(name="sb_name", title="Applicant", annotate=F("form_data")),
         "email",
         "program_type",
         "current_step",
@@ -1413,6 +1415,14 @@ class ApplicationDraftAdmin(SBAdmin):
             return value.hex[:8]
         return str(value).replace("-", "")[:8]
 
+    def sb_name(self, obj_id, value, **kwargs):
+        """SmartBase list: applicant name from form_data JSON. `value` = form_data dict."""
+        if not value:
+            return "—"
+        first = value.get("first_name", "")
+        last = value.get("last_name", "")
+        return f"{first} {last}".strip() or "—"
+
     def sb_expired(self, obj_id, value, **kwargs):
         """SmartBase list: expired check. `value` = expires_at datetime."""
         if value is None:
@@ -1431,6 +1441,20 @@ class ApplicationDraftAdmin(SBAdmin):
         if hasattr(value, "hex"):
             return value.hex[:8]
         return str(value).replace("-", "")[:8]
+
+    @admin.display(description="Applicant")
+    def applicant_name(self, obj_or_id, value=None, **kwargs):
+        if isinstance(obj_or_id, ApplicationDraft):
+            data = obj_or_id.form_data or {}
+            first = data.get("first_name", "")
+            last = data.get("last_name", "")
+            return f"{first} {last}".strip() or "—"
+        # SmartBase path (value = form_data dict)
+        if not value:
+            return "—"
+        first = value.get("first_name", "")
+        last = value.get("last_name", "")
+        return f"{first} {last}".strip() or "—"
 
     @admin.display(description="Expired?", boolean=True, ordering="expires_at")
     def is_expired_display(self, obj_or_id, value=None, **kwargs):
