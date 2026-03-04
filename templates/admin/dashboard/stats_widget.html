@@ -4,12 +4,9 @@
 {# col-span-12: dashboard.html uses a 12-col grid; without this, each div is 1/12 width. #}
 <div class="col-span-12">
 
-{# ── Greeting + summary row ────────────────────────────────── #}
+{# ── Summary row ───────────────────────────────────────────── #}
 <div class="mb-24">
-    <h2 class="text-20 font-bold text-dark-900 mb-4">
-        Good {{ stats.greeting_time }}{% if user.first_name %}, {{ user.first_name }}{% endif %}
-    </h2>
-    <p class="text-14 text-dark-500">
+    <p class="text-20 font-semibold text-dark-700">
         {{ stats.total_applications }} total application{{ stats.total_applications|pluralize }}
         &middot;
         {{ stats.recent.week_count }} submitted this week
