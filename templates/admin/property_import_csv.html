@@ -1,0 +1,199 @@
+{% extends "sb_admin/sb_admin_base_no_sidebar.html" %}
+{% comment %}
+Property CSV import — standalone page using the same shell as the review queue.
+Extends the minimal SmartBase skeleton (CSS + sprites) with a simple top nav.
+{% endcomment %}
+{% load static %}
+
+{% block extrahead %}
+<script>document.documentElement.dataset.theme = 'light';</script>
+{% endblock %}
+
+{% block icons %}
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/gclba-logo-icon-400.png' %}">
+    <meta name="theme-color" content="#2e7d32">
+{% endblock %}
+
+{% block style_init %}
+    <link rel="stylesheet" href="{% static 'sb_admin/css/gclba_theme.css' %}">
+{% endblock %}
+
+{% block main_wrapper %}
+<div class="w-full min-h-screen" style="background: var(--color-bg-base, #f9fafb);">
+
+    {# Top navigation bar #}
+    <nav style="background:#fff; border-bottom:1px solid var(--color-border,#e5e7eb); padding:12px 24px;">
+        <div class="flex items-center justify-between" style="max-width:900px; margin:0 auto;">
+            <a href="/admin/applications/property/"
+               class="flex items-center gap-8 text-14 font-semibold text-dark-700"
+               style="text-decoration:none;">
+                <svg class="w-16 h-16"><use xlink:href="#Left-small"></use></svg>
+                Back to Properties
+            </a>
+            <div class="flex items-center gap-16">
+                <a href="/admin/" class="text-13 text-dark-500" style="text-decoration:none;">Dashboard</a>
+                <a href="/admin/applications/application/" class="text-13 text-dark-500" style="text-decoration:none;">Applications</a>
+                <a href="/admin/applications/property/" class="text-13 font-semibold" style="text-decoration:none; color:var(--color-primary);">Properties</a>
+            </div>
+        </div>
+    </nav>
+
+    {# Content area #}
+    <div class="sm:p-24">
+        <div style="max-width:700px; margin:0 auto; padding:24px 16px;">
+
+            <h1 class="text-20 font-bold text-dark-900 mb-4">Import Properties</h1>
+            <p class="text-14 text-dark-500 mb-24">
+                Upload a CSV or Excel file to add or update available properties.
+                Properties are matched by parcel ID (CSV) or normalized address (Excel).
+            </p>
+
+            {# ── Format reference ─────────────────────── #}
+            <div class="card mb-24" style="background:var(--color-bg-subtle,#f8fafc);">
+                <h3 class="text-13 font-bold text-dark-700 mb-8">Expected CSV columns</h3>
+                <code class="text-12 text-dark-600" style="font-family:var(--font-mono,monospace);">
+                    address, parcel_id, program, price (optional)
+                </code>
+                <p class="text-12 text-dark-400 mt-4">
+                    Program values: <code style="font-family:var(--font-mono,monospace);">featured_homes</code>,
+                    <code style="font-family:var(--font-mono,monospace);">ready_for_rehab</code>,
+                    <code style="font-family:var(--font-mono,monospace);">vip_spotlight</code>,
+                    <code style="font-family:var(--font-mono,monospace);">vacant_lot</code>
+                    (or common aliases like <code style="font-family:var(--font-mono,monospace);">fh</code>,
+                    <code style="font-family:var(--font-mono,monospace);">r4r</code>,
+                    <code style="font-family:var(--font-mono,monospace);">vip</code>)
+                </p>
+                <p class="text-12 text-dark-400 mt-4">
+                    Excel (.xlsx): expects FileMaker export format with columns
+                    <em>Street Address</em>, <em>GCLB Owned</em>, <em>Structure Flag</em>,
+                    <em>Minimum Bid</em>. Only rows where "GCLB Owned = Yes" are imported.
+                </p>
+            </div>
+
+            {# ── Error message ────────────────────────── #}
+            {% if error %}
+            <div class="card mb-24" style="border-left:3px solid var(--color-status-error,#ef4444);">
+                <p class="text-14 font-semibold text-dark-900">Upload error</p>
+                <p class="text-13 text-dark-600 mt-4">{{ error }}</p>
+            </div>
+            {% endif %}
+
+            {# ── Result summary ───────────────────────── #}
+            {% if result %}
+            <div class="card mb-24"
+                 style="border-left:3px solid {% if result.errors %}var(--color-status-warn,#f59e0b){% else %}var(--color-status-success,#22c55e){% endif %};">
+                <h3 class="text-14 font-bold text-dark-900 mb-12">Import complete</h3>
+                <div class="grid grid-cols-3 gap-16 mb-16">
+                    <div class="text-center">
+                        <div class="text-24 font-bold text-dark-900" style="font-family:var(--font-mono,monospace);">{{ result.created }}</div>
+                        <div class="text-12 text-dark-400">Created</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-24 font-bold text-dark-900" style="font-family:var(--font-mono,monospace);">{{ result.updated }}</div>
+                        <div class="text-12 text-dark-400">Updated</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-24 font-bold text-dark-900" style="font-family:var(--font-mono,monospace);">{{ result.skipped }}</div>
+                        <div class="text-12 text-dark-400">Skipped</div>
+                    </div>
+                </div>
+                {% if result.errors %}
+                <div style="background:var(--color-bg-subtle,#f8fafc); border-radius:6px; padding:12px;">
+                    <p class="text-13 font-semibold text-dark-700 mb-8">
+                        {{ result.errors|length }} row error{{ result.errors|length|pluralize }}:
+                    </p>
+                    <ul style="list-style:disc; padding-left:16px;">
+                        {% for err in result.errors|slice:":20" %}
+                        <li class="text-12 text-dark-600 mb-2">{{ err }}</li>
+                        {% endfor %}
+                        {% if result.errors|length > 20 %}
+                        <li class="text-12 text-dark-400">
+                            … and {{ result.errors|length|add:"-20" }} more
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="mt-12">
+                    <a href="/admin/applications/property/"
+                       class="text-13 font-semibold"
+                       style="color:var(--color-primary); text-decoration:none;">
+                        View properties list →
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {# ── Upload form ──────────────────────────── #}
+            <div class="card">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-16">
+                        <label class="block text-14 font-semibold text-dark-700 mb-6"
+                               for="file">
+                            Select file
+                        </label>
+                        <input type="file"
+                               name="file"
+                               id="file"
+                               accept=".csv,.xlsx,.xls,.xlsm"
+                               required
+                               style="display:block; width:100%; padding:8px 12px;
+                                      border:1px solid var(--color-border,#e5e7eb);
+                                      border-radius:6px; font-size:13px; color:var(--color-text-primary);
+                                      background:#fff;">
+                        <p class="text-12 text-dark-400 mt-4">Accepted: .csv, .xlsx, .xls</p>
+                    </div>
+
+                    <div class="mb-16">
+                        <label class="block text-14 font-semibold text-dark-700 mb-6"
+                               for="batch_label">
+                            Batch label <span class="text-dark-400 font-normal">(optional)</span>
+                        </label>
+                        <input type="text"
+                               name="batch_label"
+                               id="batch_label"
+                               placeholder="e.g. March 2026"
+                               style="display:block; width:100%; padding:8px 12px;
+                                      border:1px solid var(--color-border,#e5e7eb);
+                                      border-radius:6px; font-size:13px; color:var(--color-text-primary);
+                                      background:#fff;">
+                        <p class="text-12 text-dark-400 mt-4">
+                            Tags this batch in the property list for easy filtering.
+                            Defaults to import timestamp if left blank.
+                        </p>
+                    </div>
+
+                    <div class="mb-24">
+                        <label class="flex items-start gap-8 cursor-pointer">
+                            <input type="checkbox"
+                                   name="replace_existing"
+                                   id="replace_existing"
+                                   style="margin-top:2px; flex-shrink:0;">
+                            <span>
+                                <span class="text-14 font-semibold text-dark-700">Replace existing inventory</span>
+                                <span class="block text-12 text-dark-400 mt-1">
+                                    Marks all currently <em>available</em> properties as
+                                    <em>withdrawn</em> before importing. Use for a full weekly refresh.
+                                    Leave unchecked to add or update without affecting other listings.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                            style="background:var(--color-primary,#2d6a8a); color:#fff;
+                                   padding:10px 24px; border:none; border-radius:6px;
+                                   font-size:14px; font-weight:600; cursor:pointer;">
+                        Upload and Import
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

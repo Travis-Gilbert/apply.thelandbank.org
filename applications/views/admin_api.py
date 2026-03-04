@@ -11,7 +11,7 @@ import json
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils.html import format_html
 from django.views.decorators.http import require_http_methods
 
@@ -106,3 +106,50 @@ def save_document_review(request, pk):
     app.save(update_fields=["document_review", "updated_at"])
 
     return JsonResponse({"ok": True, "doc_id": doc_id, "status": status})
+
+
+@staff_member_required
+@require_http_methods(["GET", "POST"])
+def import_properties_csv(request):
+    """
+    Admin view: upload a CSV or Excel file to import available properties.
+
+    GET:  renders upload form
+    POST: processes file via csv_import module, renders results
+    """
+    from applications.csv_import import (
+        import_properties_from_csv,
+        import_properties_from_excel,
+    )
+
+    result = None
+    error = None
+
+    if request.method == "POST":
+        uploaded = request.FILES.get("file")
+        replace_existing = request.POST.get("replace_existing") == "on"
+        batch_label = request.POST.get("batch_label", "").strip()
+
+        if not uploaded:
+            error = "Please select a file to upload."
+        else:
+            filename = uploaded.name.lower()
+            if filename.endswith((".xlsx", ".xls", ".xlsm")):
+                result = import_properties_from_excel(
+                    uploaded,
+                    replace_existing=replace_existing,
+                    batch_label=batch_label or "",
+                )
+            elif filename.endswith(".csv"):
+                result = import_properties_from_csv(
+                    uploaded,
+                    replace_existing=replace_existing,
+                    batch_label=batch_label or "",
+                )
+            else:
+                error = "Unsupported file type. Please upload a .csv or .xlsx file."
+
+    return render(request, "admin/property_import_csv.html", {
+        "result": result,
+        "error": error,
+    })

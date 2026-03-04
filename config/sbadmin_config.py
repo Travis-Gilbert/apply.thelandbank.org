@@ -45,7 +45,16 @@ config = SBAdminRoleConfiguration(
         SBAdminMenuItem(
             label="Properties",
             icon="Home",
-            view_id="applications_property",
+            sub_items=[
+                SBAdminMenuItem(
+                    label="All Properties",
+                    view_id="applications_property",
+                ),
+                SBAdminMenuItem(
+                    label="Import CSV / Excel",
+                    url="/admin/properties/import-csv/",
+                ),
+            ],
         ),
         SBAdminMenuItem(
             label="Users",

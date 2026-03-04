@@ -8,7 +8,12 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 from django_smartbase_admin.admin.site import sb_admin_site
 
-from applications.views.admin_api import assign_to_me, pending_count, save_document_review
+from applications.views.admin_api import (
+    assign_to_me,
+    import_properties_csv,
+    pending_count,
+    save_document_review,
+)
 from applications.views.review_queue import (
     review_application,
     review_queue,
@@ -23,6 +28,7 @@ urlpatterns = [
     path("admin/api/assign/<int:pk>/", assign_to_me, name="admin_assign_to_me"),
     path("admin/api/pending/", pending_count, name="admin_pending_count"),
     path("admin/api/doc-review/<int:pk>/", save_document_review, name="admin_doc_review"),
+    path("admin/properties/import-csv/", import_properties_csv, name="admin_import_properties_csv"),
     path("admin/", sb_admin_site.urls),
     path("apply/", include("applications.urls")),
     path("", RedirectView.as_view(url="/apply/", permanent=False)),
