@@ -611,6 +611,13 @@ AWS_S3_REGION_NAME
     sessions while Current Status still says "Planned". Cross-check `git log --oneline` against the plan's
     commit strategy table before starting work.
 
+30. **Program card copy is duplicated** — program descriptions exist in BOTH `applications/views/accordion.py`
+    (Python dict) AND `templates/apply/v2/sections/program_expanded.html`. Update both when changing program card text.
+
+31. **SmartBase page title block** — vendor template uses `{% block title %}{{ admin_title }}{% endblock %}` in
+    `sb_admin_base_no_sidebar.html`. To override the "SBAdmin" browser tab title, add
+    `{% block title %}GCLBA Sales Admin{% endblock %}` to `templates/sb_admin/sb_admin_base.html`.
+
 ---
 
 ## Phase 1 MVP Scope
