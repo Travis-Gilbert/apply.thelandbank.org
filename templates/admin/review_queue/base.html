@@ -1,12 +1,12 @@
-{# Review queue base — standalone shell that bypasses SmartBase's pipeline.
-
-   SmartBase's navigation.html requires request_data.menu_items (populated by
-   SBAdminSite.admin_view → initialize_admin_view). Review queue views use
-   plain Django render() so that object is never created. Rather than faking
-   the entire request_data chain, we extend the minimal SmartBase skeleton
-   (CSS + sprites + HTMX) and provide our own simple top-bar navigation. #}
-
 {% extends "sb_admin/sb_admin_base_no_sidebar.html" %}
+{% comment %}
+Review queue base — standalone shell that bypasses SmartBase's pipeline.
+SmartBase's navigation.html requires request_data.menu_items (populated by
+SBAdminSite.admin_view → initialize_admin_view). Review queue views use
+plain Django render() so that object is never created. Rather than faking
+the entire request_data chain, we extend the minimal SmartBase skeleton
+(CSS + sprites + HTMX) and provide our own simple top-bar navigation.
+{% endcomment %}
 {% load static %}
 
 {# Force light theme — user_config.color_scheme is empty without SmartBase pipeline #}
