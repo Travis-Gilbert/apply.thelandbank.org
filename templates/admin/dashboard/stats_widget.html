@@ -1,5 +1,9 @@
 {# Dashboard stats widget — renders all cards from get_dashboard_stats() #}
-{# All classes are SmartBase-native. Supplemental utilities in gclba_theme.css. #}
+{# Missing utilities defined in gclba_theme.css (SmartBase only compiles its own). #}
+
+{# col-span-12 is critical: dashboard.html renders widgets inside a 12-col CSS grid.
+   Without this wrapper, each div becomes a 1/12-width grid item. #}
+<div class="col-span-12">
 
 {# ── Greeting + summary row ────────────────────────────────── #}
 <div class="mb-24">
@@ -162,3 +166,5 @@
     <p class="text-14 text-dark-400">No recent submissions</p>
     {% endif %}
 </div>
+
+</div>{# /col-span-12 #}

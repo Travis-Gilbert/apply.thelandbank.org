@@ -45,15 +45,52 @@
 
 
 /* ═══════════════════════════════════════════════════════════
-   Supplemental utilities for admin templates
-   SmartBase ships 2/3/4-col grids; we need 5-col for dashboard.
-   Badge colors, accent text, table styling, and timeline dots
-   fill gaps SmartBase's tree-shaken output doesn't cover.
+   Supplemental CSS for GCLBA admin templates.
+
+   SmartBase compiles Tailwind from its own templates only.
+   Any utility class our custom templates use that SmartBase's
+   templates don't also use will be missing from main_style.css.
+   We define those missing utilities here.
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Responsive grid extras ──────────────────────────────── */
-@media (min-width: 640px)  { .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1024px) { .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* ── Missing typography ────────────────────────────────────── */
+.text-20       { font-size: 1.25rem; line-height: 1.75rem; }
+.text-dark-500 { color: var(--color-dark-500, #6b7280); }
+.text-dark-700 { color: var(--color-dark-700, #374151); }
+.tracking-wider { letter-spacing: 0.05em; }
+
+/* ── Missing spacing ───────────────────────────────────────── */
+.mt-4  { margin-top: 0.25rem; }
+.mb-12 { margin-bottom: 0.75rem; }
+.mb-20 { margin-bottom: 1.25rem; }
+.py-4  { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.pl-12 { padding-left: 0.75rem; }
+
+/* ── Missing flexbox ───────────────────────────────────────── */
+.items-start { align-items: flex-start; }
+.items-end   { align-items: flex-end; }
+
+/* ── Missing grid + responsive ─────────────────────────────── */
+/* Base grid columns not in SmartBase's compiled output */
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+/* Responsive variants — using SmartBase breakpoints (sm:576, md:768, lg:992) */
+@media (min-width: 576px) {
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 768px) {
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 992px) {
+  .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+/* ── Missing misc ──────────────────────────────────────────── */
+.text-center { text-align: center; }
 
 /* ── Status badge color pairs ────────────────────────────── */
 .badge-blue   { background: #dbeafe; color: #1e40af; }
@@ -95,6 +132,3 @@
                 border: 2px solid var(--color-bg, #fff);
                 box-shadow: 0 1px 2px rgba(0,0,0,.1); flex-shrink: 0; }
 [data-theme="dark"] .timeline-dot { border-color: var(--color-dark-800, #1f2937); }
-
-/* ── Text-center (SmartBase may not ship this) ───────────── */
-.text-center { text-align: center; }
