@@ -13,7 +13,7 @@ from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -303,7 +303,6 @@ def confirmation_page(request, ref):
     (set during submit_application). This prevents random URL guessing.
     """
     if request.session.get("confirmed_ref") != ref:
-        from django.shortcuts import redirect
         return redirect("applications:apply_page")
 
     app = get_object_or_404(Application, reference_number=ref)

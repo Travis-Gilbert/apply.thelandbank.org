@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.html import format_html
 from django.views.decorators.http import require_http_methods
 
-from applications.models import Application
+from applications.models import Application, StatusLog
 
 
 @staff_member_required
@@ -42,6 +42,14 @@ def assign_to_me(request, pk):
     app.assigned_to = request.user
     app.save(update_fields=["assigned_to", "updated_at"])
 
+    StatusLog.objects.create(
+        application=app,
+        from_status=app.status,
+        to_status=app.status,
+        changed_by=request.user,
+        notes=f"Claimed for review by {request.user.get_full_name() or request.user.get_username()}",
+    )
+
     name = request.user.get_full_name() or request.user.get_username()
     return HttpResponse(
         format_html(
@@ -54,18 +62,30 @@ def assign_to_me(request, pk):
 @staff_member_required
 def pending_count(request):
     """
-    JSON endpoint: return count of applications needing review.
+    JSON endpoint: return counts of applications needing action.
+
+    Returns:
+      - action_needed: Received applications (new work for staff)
+      - waiting_on_buyer: Needs More Info (buyer response pending)
+      - total: Sum of both (for the sidebar badge number)
+      - count: Alias for action_needed (backward compat with sidebar badge JS)
 
     Polled by the sidebar badge every 60 seconds.
     """
-    count = Application.objects.filter(
-        status__in=[
-            Application.Status.RECEIVED,
-            Application.Status.NEEDS_MORE_INFO,
-        ]
+    action_needed = Application.objects.filter(
+        status=Application.Status.RECEIVED,
     ).count()
 
-    return JsonResponse({"count": count})
+    waiting_on_buyer = Application.objects.filter(
+        status=Application.Status.NEEDS_MORE_INFO,
+    ).count()
+
+    return JsonResponse({
+        "count": action_needed,  # sidebar badge shows genuinely new work only
+        "action_needed": action_needed,
+        "waiting_on_buyer": waiting_on_buyer,
+        "total": action_needed + waiting_on_buyer,
+    })
 
 
 VALID_DOC_STATUSES = {"ok", "flagged", "pending"}

@@ -19,6 +19,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from applications.models import Application, StatusLog
+from applications.status_notifications import requires_transition_note, send_buyer_status_email
 
 
 def _queue_queryset(user):
@@ -141,9 +142,16 @@ def review_update_status(request, pk):
 
     errors = []
 
-    # Auto-claim if unassigned
+    # Auto-claim if unassigned — log the claim before any status change
     if not app.assigned_to:
         app.assigned_to = request.user
+        StatusLog.objects.create(
+            application=app,
+            from_status=app.status,
+            to_status=app.status,
+            changed_by=request.user,
+            notes=f"Auto-claimed by {request.user.get_full_name() or request.user.get_username()} via review queue",
+        )
 
     # Validate and apply status change
     if new_status and new_status != app.status:
@@ -153,17 +161,44 @@ def review_update_status(request, pk):
             new_label = dict(Application.Status.choices).get(new_status, new_status)
             errors.append(f"Cannot move from {old_label} to {new_label}.")
         else:
-            old_status = app.status
-            app.status = new_status
-            app.save(update_fields=["status", "assigned_to", "updated_at"])
+            # Require a note for buyer-facing negative transitions
+            if requires_transition_note(new_status) and not note:
+                new_label = dict(Application.Status.choices).get(new_status, new_status)
+                errors.append(
+                    f"A note is required when setting status to {new_label}. "
+                    f"The buyer will see this note in their email."
+                )
+            else:
+                old_status = app.status
+                app.status = new_status
+                app.save(update_fields=["status", "assigned_to", "updated_at"])
 
-            StatusLog.objects.create(
-                application=app,
-                from_status=old_status,
-                to_status=new_status,
-                changed_by=request.user,
-                notes=note or "",
-            )
+                log_entry = StatusLog.objects.create(
+                    application=app,
+                    from_status=old_status,
+                    to_status=new_status,
+                    changed_by=request.user,
+                    notes=note or "",
+                )
+
+                # Send buyer notification email (non-blocking)
+                try:
+                    import logging as _logging
+                    outcome = send_buyer_status_email(
+                        application=app,
+                        old_status=old_status,
+                        note=note,
+                    )
+                    if outcome == "failed":
+                        log_entry.notes = (
+                            (log_entry.notes or "")
+                            + "\n[SYSTEM] Buyer notification email failed. Manual follow-up needed."
+                        ).strip()
+                        log_entry.save(update_fields=["notes"])
+                except Exception:
+                    _logging.getLogger(__name__).exception(
+                        "Email send failed for %s", app.reference_number
+                    )
     else:
         # Just save the claim
         app.save(update_fields=["assigned_to", "updated_at"])

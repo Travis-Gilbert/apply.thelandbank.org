@@ -5,7 +5,10 @@ Uses SmartBase Admin for a modern staff dashboard with colored status badges,
 organized fieldsets, inline documents, and automatic status audit logging.
 """
 
+import csv
+
 from django import forms
+from django.http import HttpResponse
 from django.contrib import admin, messages
 from django_smartbase_admin.admin.admin_base import SBAdminTableInline
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -543,6 +546,7 @@ class ApplicationAdmin(SBAdmin):
         "mark_declined",
         "assign_to_me",
         "clear_assignee",
+        "export_csv",
     )
 
     fieldsets = (
@@ -1196,6 +1200,16 @@ class ApplicationAdmin(SBAdmin):
             )
             if outcome == "failed":
                 email_failures += 1
+                log = StatusLog.objects.filter(
+                    application_id=app.id,
+                    to_status=new_status,
+                ).order_by("-changed_at").first()
+                if log:
+                    log.notes = (
+                        (log.notes or "")
+                        + "\n[SYSTEM] Buyer notification email failed. Manual follow-up needed."
+                    ).strip()
+                    log.save(update_fields=["notes"])
 
         msg = f"Updated {len(ids)} application(s)."
         if skipped_bad_transition:
@@ -1228,10 +1242,28 @@ class ApplicationAdmin(SBAdmin):
     @admin.action(description="Set me as reviewer")
     def assign_to_me(self, request, queryset):
         try:
-            updated = queryset.exclude(assigned_to=request.user).update(
-                assigned_to=request.user,
-                updated_at=timezone.now(),
-            )
+            eligible = queryset.exclude(assigned_to=request.user)
+            updated = 0
+            reviewer_name = request.user.get_full_name() or request.user.get_username()
+            for app in eligible:
+                old_assignee = app.assigned_to
+                app.assigned_to = request.user
+                app.save(update_fields=["assigned_to", "updated_at"])
+                StatusLog.objects.create(
+                    application=app,
+                    from_status=app.status,
+                    to_status=app.status,
+                    changed_by=request.user,
+                    notes=(
+                        f"Reviewer changed to {reviewer_name}"
+                        + (
+                            f" (was: {old_assignee.get_full_name() or old_assignee.get_username()})"
+                            if old_assignee
+                            else " (was: unassigned)"
+                        )
+                    ),
+                )
+                updated += 1
             self.message_user(request, f"You are now reviewer for {updated} application(s).")
         except Exception as e:
             self.message_user(
@@ -1241,11 +1273,69 @@ class ApplicationAdmin(SBAdmin):
             )
 
     @admin.action(description="Remove reviewer")
+    @admin.action(description="Export selected as CSV")
+    def export_csv(self, request, queryset):
+        """Export selected applications to a downloadable CSV file."""
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="applications_export.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow([
+            "Reference #",
+            "First Name",
+            "Last Name",
+            "Email",
+            "Phone",
+            "Property Address",
+            "Parcel ID",
+            "Program",
+            "Purchase Type",
+            "Offer Amount",
+            "Status",
+            "Reviewer",
+            "Submitted",
+            "Last Updated",
+        ])
+
+        for app in queryset.select_related("assigned_to").order_by("-submitted_at"):
+            reviewer = ""
+            if app.assigned_to:
+                reviewer = app.assigned_to.get_full_name() or app.assigned_to.get_username()
+            writer.writerow([
+                app.reference_number,
+                app.first_name,
+                app.last_name,
+                app.email,
+                app.phone,
+                app.property_address,
+                app.parcel_id,
+                app.get_program_type_display(),
+                app.get_purchase_type_display(),
+                f"${app.offer_amount:,.2f}" if app.offer_amount else "",
+                app.get_status_display(),
+                reviewer,
+                app.submitted_at.strftime("%Y-%m-%d %I:%M %p") if app.submitted_at else "",
+                app.updated_at.strftime("%Y-%m-%d %I:%M %p") if app.updated_at else "",
+            ])
+
+        return response
+
     def clear_assignee(self, request, queryset):
-        updated = queryset.exclude(assigned_to=None).update(
-            assigned_to=None,
-            updated_at=timezone.now(),
-        )
+        eligible = queryset.exclude(assigned_to=None)
+        updated = 0
+        for app in eligible:
+            old_assignee = app.assigned_to
+            old_name = old_assignee.get_full_name() or old_assignee.get_username()
+            app.assigned_to = None
+            app.save(update_fields=["assigned_to", "updated_at"])
+            StatusLog.objects.create(
+                application=app,
+                from_status=app.status,
+                to_status=app.status,
+                changed_by=request.user,
+                notes=f"Reviewer removed (was: {old_name})",
+            )
+            updated += 1
         self.message_user(request, f"Removed reviewer from {updated} application(s).")
 
     def save_model(self, request, obj, form, change):
