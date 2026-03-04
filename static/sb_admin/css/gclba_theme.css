@@ -114,6 +114,18 @@
 [data-theme="dark"] .text-status-error { color: #f87171; }
 [data-theme="dark"] .text-status-ok    { color: #4ade80; }
 
+/* ── Sidebar civic-blue separation ──────────────────────────── */
+/* !important needed: SmartBase's compiled Tailwind loads after this file */
+#main-navigation {
+  border-right-color: #2d6a8a !important;
+}
+#main-navigation header {
+  border-bottom-color: #2d6a8a !important;
+}
+#main-navigation footer {
+  border-top-color: #2d6a8a !important;
+}
+
 /* ── Clickable card hover ───────────────────────────────── */
 a.card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 [data-theme="dark"] a.card:hover { box-shadow: 0 2px 8px rgba(255,255,255,.06); }
