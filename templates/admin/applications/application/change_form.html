@@ -4,59 +4,62 @@
 {% block content %}
 {% if original %}
 {# ── Application Summary Card ── #}
-<div class="mb-6 p-5 rounded-xl border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
-  <div class="flex items-start justify-between mb-4">
+<div class="card mb-24">
+  <div class="flex items-start justify-between mb-16">
     <div>
-      <p class="font-mono text-xs text-green-700 dark:text-green-400 font-semibold mb-0.5">
+      <p class="text-12 font-bold text-status-ok mb-4"
+         style="font-family:var(--font-mono,monospace)">
         {{ original.reference_number|default:"No ref" }}
       </p>
-      <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
+      <h2 class="text-20 font-bold text-dark-900">
         {{ original.full_name }}
       </h2>
-      <p class="text-sm text-gray-500 mt-0.5">{{ original.email }}</p>
+      <p class="text-14 text-dark-500 mt-4">{{ original.email }}</p>
     </div>
-    <div class="flex flex-col items-end gap-2">
+    <div class="flex flex-col items-end gap-8">
       {% include "admin/partials/_status_badge.html" with status=original.status label=original.get_status_display %}
       {% if original.assigned_to %}
-      <span class="text-xs text-gray-400">Reviewer: <strong>{{ original.assigned_to.get_short_name }}</strong></span>
+      <span class="text-12 text-dark-400">Reviewer: <strong>{{ original.assigned_to.get_short_name }}</strong></span>
       {% else %}
-      <span class="text-xs text-red-500 font-medium">Unassigned</span>
+      <span class="text-12 text-status-error font-medium">Unassigned</span>
       {% endif %}
     </div>
   </div>
 
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-16 pt-16"
+       style="border-top: 1px solid var(--color-border, #e5e7eb);">
     <div>
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Program</p>
-      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ original.get_program_type_display }}</p>
+      <p class="text-12 text-dark-400 uppercase tracking-wider block mb-4">Program</p>
+      <p class="text-14 font-semibold text-dark-900">{{ original.get_program_type_display }}</p>
     </div>
     <div>
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Payment</p>
-      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ original.get_purchase_type_display|default:"N/A" }}</p>
+      <p class="text-12 text-dark-400 uppercase tracking-wider block mb-4">Payment</p>
+      <p class="text-14 font-semibold text-dark-900">{{ original.get_purchase_type_display|default:"N/A" }}</p>
     </div>
     <div>
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Offer</p>
-      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+      <p class="text-12 text-dark-400 uppercase tracking-wider block mb-4">Offer</p>
+      <p class="text-14 font-semibold text-dark-900"
+         style="font-family:var(--font-mono,monospace)">
         {% if original.offer_amount %}${{ original.offer_amount|floatformat:0 }}{% else %}N/A{% endif %}
       </p>
     </div>
     <div>
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Submitted</p>
-      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+      <p class="text-12 text-dark-400 uppercase tracking-wider block mb-4">Submitted</p>
+      <p class="text-14 font-semibold text-dark-900">
         {{ original.submitted_at|date:"M j, Y" }}
-        <span class="text-xs text-gray-400">({{ original.submitted_at|timesince }} ago)</span>
+        <span class="text-12 text-dark-400">({{ original.submitted_at|timesince }} ago)</span>
       </p>
     </div>
   </div>
 
   {# Keyboard shortcut hint #}
-  <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-    <p class="text-xs text-gray-500 dark:text-gray-400">
+  <div class="mt-16 pt-16" style="border-top: 1px solid var(--color-border, #e5e7eb);">
+    <p class="text-12 text-dark-500">
       <strong>Shortcuts:</strong>
-      <kbd class="px-1 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-[10px]">Ctrl+Shift+R</kbd> Review
-      <kbd class="px-1 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-[10px]">Ctrl+Shift+D</kbd> Needs Info
-      <kbd class="px-1 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-[10px]">Ctrl+Shift+A</kbd> Approve
-      <kbd class="px-1 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-[10px]">Ctrl+Shift+N</kbd> Decline
+      <kbd style="padding:2px 6px; border:1px solid var(--color-border,#d1d5db); border-radius:4px; font-size:11px; background:var(--color-bg,#fff);">Ctrl+Shift+R</kbd> Review
+      <kbd style="padding:2px 6px; border:1px solid var(--color-border,#d1d5db); border-radius:4px; font-size:11px; background:var(--color-bg,#fff);">Ctrl+Shift+D</kbd> Needs Info
+      <kbd style="padding:2px 6px; border:1px solid var(--color-border,#d1d5db); border-radius:4px; font-size:11px; background:var(--color-bg,#fff);">Ctrl+Shift+A</kbd> Approve
+      <kbd style="padding:2px 6px; border:1px solid var(--color-border,#d1d5db); border-radius:4px; font-size:11px; background:var(--color-bg,#fff);">Ctrl+Shift+N</kbd> Decline
     </p>
   </div>
 </div>
@@ -67,42 +70,43 @@
 
 {% if original %}
 {# ── Status Timeline ── #}
-<div class="mt-6 p-6 rounded-xl border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
-  <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-5">Application Timeline</h3>
-  <div class="relative pl-7">
-    <div class="absolute left-1.5 top-1 bottom-1 w-0.5 bg-gray-200 dark:bg-gray-600"></div>
+<div class="card mt-24">
+  <h3 class="text-14 font-bold text-dark-900 mb-20">Application Timeline</h3>
+  <div style="position:relative; padding-left:28px;">
+    <div style="position:absolute; left:6px; top:4px; bottom:4px; width:2px; background:var(--color-border,#e5e7eb);"></div>
 
-    <div class="relative mb-5">
-      <div class="absolute -left-7 top-0.5 w-4 h-4 rounded-full bg-green-500 border-2 border-white dark:border-gray-800 shadow"></div>
-      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Application Submitted</p>
-      <p class="text-xs text-gray-500 mt-0.5">
+    <div style="position:relative; margin-bottom:20px;">
+      <div class="timeline-dot" style="position:absolute; left:-28px; top:2px; background:#22c55e;"></div>
+      <p class="text-14 font-semibold text-dark-900">Application Submitted</p>
+      <p class="text-12 text-dark-500 mt-4">
         {{ original.submitted_at|date:"M j, Y \a\t g:i A" }} &middot; {{ original.full_name }} &middot; {{ original.get_program_type_display }}
       </p>
     </div>
 
     {% for log in original.status_logs.all reversed %}
-    <div class="relative mb-5">
-      <div class="absolute -left-7 top-0.5 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 shadow
-        {% if log.to_status == 'approved' %}bg-green-500
-        {% elif log.to_status == 'declined' %}bg-red-500
-        {% elif log.to_status == 'needs_more_info' %}bg-orange-500
-        {% elif log.to_status == 'under_review' %}bg-amber-500
-        {% else %}bg-gray-400{% endif %}"></div>
-      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+    <div style="position:relative; margin-bottom:20px;">
+      <div class="timeline-dot" style="position:absolute; left:-28px; top:2px;
+        {% if log.to_status == 'approved' %}background:#22c55e;
+        {% elif log.to_status == 'declined' %}background:#ef4444;
+        {% elif log.to_status == 'needs_more_info' %}background:#f97316;
+        {% elif log.to_status == 'under_review' %}background:#f59e0b;
+        {% else %}background:#9ca3af;{% endif %}"></div>
+      <p class="text-14 font-semibold text-dark-900">
         {{ log.from_status_label }} &rarr; {{ log.to_status_label }}
       </p>
-      <p class="text-xs text-gray-500 mt-0.5">
+      <p class="text-12 text-dark-500 mt-4">
         {{ log.changed_at|date:"M j, Y \a\t g:i A" }}
         {% if log.changed_by %}&middot; {{ log.changed_by.get_short_name|default:log.changed_by.username }}{% endif %}
       </p>
       {% if log.notes %}
-      <p class="text-xs text-gray-600 dark:text-gray-300 mt-1.5 px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-md border-l-2 border-gray-300 dark:border-gray-500">
+      <p class="text-12 text-dark-600 mt-8 px-12 py-8"
+         style="background:var(--color-bg-hover,#f9fafb); border-radius:6px; border-left:2px solid var(--color-border,#d1d5db);">
         {{ log.notes }}
       </p>
       {% endif %}
     </div>
     {% empty %}
-    <p class="text-sm text-gray-400">No status changes yet.</p>
+    <p class="text-14 text-dark-400">No status changes yet.</p>
     {% endfor %}
   </div>
 </div>

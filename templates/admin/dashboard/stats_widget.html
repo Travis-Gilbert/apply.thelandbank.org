@@ -1,66 +1,12 @@
 {# Dashboard stats widget — renders all cards from get_dashboard_stats() #}
-{# Utility classes not in SmartBase's compiled CSS — scoped to dashboard #}
-<style>
-  /* Typography (SmartBase uses text-12/text-14/text-16, not Tailwind's text-sm/text-xl/text-2xl) */
-  .dash .text-xs   { font-size: 0.75rem; line-height: 1rem; }
-  .dash .text-sm   { font-size: 0.875rem; line-height: 1.25rem; }
-  .dash .text-xl   { font-size: 1.25rem; line-height: 1.75rem; }
-  .dash .text-2xl  { font-size: 1.5rem; line-height: 2rem; }
-  /* Borders + rounding */
-  .dash .rounded-lg { border-radius: 0.5rem; }
-  .dash .rounded-full { border-radius: 9999px; }
-  .dash .border { border-width: 1px; }
-  .dash .border-b { border-bottom-width: 1px; }
-  .dash .border-t { border-top-width: 1px; }
-  .dash .border-gray-100 { border-color: #f3f4f6; }
-  .dash .border-gray-200 { border-color: #e5e7eb; }
-  /* Layout */
-  .dash .grid { display: grid; }
-  .dash .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-  .dash .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  @media (min-width: 640px)  { .dash .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (min-width: 768px)  { .dash .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 1024px) { .dash .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-  .dash .inline-flex { display: inline-flex; }
-  .dash .items-center { align-items: center; }
-  .dash .overflow-x-auto { overflow-x: auto; }
-  /* Colors not in SmartBase */
-  .dash .text-gray-400 { color: #9ca3af; }
-  .dash .text-gray-500 { color: #6b7280; }
-  .dash .text-gray-600 { color: #4b5563; }
-  .dash .text-gray-700 { color: #374151; }
-  .dash .text-gray-900 { color: #111827; }
-  .dash .text-blue-600 { color: #2563eb; }
-  .dash .text-blue-700 { color: #1d4ed8; }
-  .dash .text-blue-800 { color: #1e40af; }
-  .dash .text-amber-600 { color: #d97706; }
-  .dash .text-amber-700 { color: #b45309; }
-  .dash .text-red-600 { color: #dc2626; }
-  .dash .text-red-700 { color: #b91c1c; }
-  .dash .text-green-700 { color: #15803d; }
-  .dash .text-orange-700 { color: #c2410c; }
-  .dash .bg-blue-100 { background-color: #dbeafe; }
-  .dash .bg-amber-100 { background-color: #fef3c7; }
-  .dash .bg-green-100 { background-color: #dcfce7; }
-  .dash .bg-red-100 { background-color: #fee2e2; }
-  .dash .bg-orange-100 { background-color: #ffedd5; }
-  .dash .bg-gray-50 { background-color: #f9fafb; }
-  .dash .hover\:bg-gray-50:hover { background-color: #f9fafb; }
-  .dash .hover\:underline:hover { text-decoration: underline; }
-  /* Spacing */
-  .dash .space-y-8 > * + * { margin-top: 0.5rem; }
-  .dash .tracking-wider { letter-spacing: 0.05em; }
-  .dash .uppercase { text-transform: uppercase; }
-</style>
-
-<div class="dash">
+{# All classes are SmartBase-native. Supplemental utilities in gclba_theme.css. #}
 
 {# ── Greeting + summary row ────────────────────────────────── #}
 <div class="mb-24">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+    <h2 class="text-20 font-bold text-dark-900 mb-4">
         Good {{ stats.greeting_time }}{% if user.first_name %}, {{ user.first_name }}{% endif %}
     </h2>
-    <p class="text-sm text-gray-500">
+    <p class="text-14 text-dark-500">
         {{ stats.total_applications }} total application{{ stats.total_applications|pluralize }}
         &middot;
         {{ stats.recent.week_count }} submitted this week
@@ -70,9 +16,9 @@
 {# ── Status overview cards ─────────────────────────────────── #}
 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-16 mb-24">
     {% for status in status_cards %}
-    <div class="rounded-lg border border-gray-200 p-16 text-center" style="border-top: 3px solid {{ status.color }};">
-        <div class="text-2xl font-bold text-gray-900">{{ status.count }}</div>
-        <div class="text-xs text-gray-500 mt-4">{{ status.label }}</div>
+    <div class="card text-center" style="border-top: 3px solid {{ status.color }};">
+        <div class="text-24 font-bold text-dark-900">{{ status.count }}</div>
+        <div class="text-12 text-dark-400 mt-4">{{ status.label }}</div>
     </div>
     {% endfor %}
 </div>
@@ -81,46 +27,49 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-16 mb-24">
 
     {# Queue health #}
-    <div class="rounded-lg border border-gray-200 p-16">
-        <h3 class="text-sm font-semibold text-gray-700 mb-12">Queue Health</h3>
-        <div class="space-y-8">
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">Unassigned (Received)</span>
-                <span class="text-sm font-mono font-semibold {% if stats.queue_health.unassigned > 0 %}text-amber-600{% else %}text-gray-400{% endif %}">
-                    {{ stats.queue_health.unassigned }}
-                </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">Stale Received (&gt; 5 days)</span>
-                <span class="text-sm font-mono font-semibold {% if stats.queue_health.stale_received > 0 %}text-red-600{% else %}text-gray-400{% endif %}">
-                    {{ stats.queue_health.stale_received }}
-                </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">Stale Under Review (&gt; 14 days)</span>
-                <span class="text-sm font-mono font-semibold {% if stats.queue_health.stale_under_review > 0 %}text-red-600{% else %}text-gray-400{% endif %}">
-                    {{ stats.queue_health.stale_under_review }}
-                </span>
-            </div>
+    <div class="card">
+        <h3 class="text-14 font-bold text-dark-700 mb-12">Queue Health</h3>
+
+        <div class="flex items-center justify-between mb-8">
+            <span class="text-14 text-dark-600">Unassigned (Received)</span>
+            <span class="text-14 font-semibold {% if stats.queue_health.unassigned > 0 %}text-status-warn{% else %}text-dark-400{% endif %}"
+                  style="font-family:var(--font-mono,monospace)">
+                {{ stats.queue_health.unassigned }}
+            </span>
+        </div>
+        <div class="flex items-center justify-between mb-8">
+            <span class="text-14 text-dark-600">Stale Received (&gt; 5 days)</span>
+            <span class="text-14 font-semibold {% if stats.queue_health.stale_received > 0 %}text-status-error{% else %}text-dark-400{% endif %}"
+                  style="font-family:var(--font-mono,monospace)">
+                {{ stats.queue_health.stale_received }}
+            </span>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="text-14 text-dark-600">Stale Under Review (&gt; 14 days)</span>
+            <span class="text-14 font-semibold {% if stats.queue_health.stale_under_review > 0 %}text-status-error{% else %}text-dark-400{% endif %}"
+                  style="font-family:var(--font-mono,monospace)">
+                {{ stats.queue_health.stale_under_review }}
+            </span>
         </div>
     </div>
 
     {# My workload #}
-    <div class="rounded-lg border border-gray-200 p-16">
-        <h3 class="text-sm font-semibold text-gray-700 mb-12">My Workload</h3>
-        <div class="space-y-8">
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">Under Review (assigned to me)</span>
-                <span class="text-sm font-mono font-semibold {% if stats.my_workload.my_review > 0 %}text-blue-600{% else %}text-gray-400{% endif %}">
-                    {{ stats.my_workload.my_review }}
-                </span>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">Needs More Info (assigned to me)</span>
-                <span class="text-sm font-mono font-semibold {% if stats.my_workload.my_needs_more_info > 0 %}text-amber-600{% else %}text-gray-400{% endif %}">
-                    {{ stats.my_workload.my_needs_more_info }}
-                </span>
-            </div>
+    <div class="card">
+        <h3 class="text-14 font-bold text-dark-700 mb-12">My Workload</h3>
+
+        <div class="flex items-center justify-between mb-8">
+            <span class="text-14 text-dark-600">Under Review (assigned to me)</span>
+            <span class="text-14 font-semibold {% if stats.my_workload.my_review > 0 %}text-primary{% else %}text-dark-400{% endif %}"
+                  style="font-family:var(--font-mono,monospace)">
+                {{ stats.my_workload.my_review }}
+            </span>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="text-14 text-dark-600">Needs More Info (assigned to me)</span>
+            <span class="text-14 font-semibold {% if stats.my_workload.my_needs_more_info > 0 %}text-status-warn{% else %}text-dark-400{% endif %}"
+                  style="font-family:var(--font-mono,monospace)">
+                {{ stats.my_workload.my_needs_more_info }}
+            </span>
         </div>
     </div>
 </div>
@@ -129,92 +78,87 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-16 mb-24">
 
     {# Program breakdown #}
-    <div class="rounded-lg border border-gray-200 p-16">
-        <h3 class="text-sm font-semibold text-gray-700 mb-12">Applications by Program</h3>
-        <div class="space-y-8">
-            {% for program in program_cards %}
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">{{ program.label }}</span>
-                <span class="text-sm font-mono font-semibold text-gray-700">{{ program.count }}</span>
-            </div>
-            {% empty %}
-            <p class="text-sm text-gray-400">No applications yet</p>
-            {% endfor %}
+    <div class="card">
+        <h3 class="text-14 font-bold text-dark-700 mb-12">Applications by Program</h3>
+
+        {% for program in program_cards %}
+        <div class="flex items-center justify-between mb-8">
+            <span class="text-14 text-dark-600">{{ program.label }}</span>
+            <span class="text-14 font-semibold text-dark-700"
+                  style="font-family:var(--font-mono,monospace)">{{ program.count }}</span>
         </div>
+        {% empty %}
+        <p class="text-14 text-dark-400">No applications yet</p>
+        {% endfor %}
     </div>
 
     {# Property inventory #}
-    <div class="rounded-lg border border-gray-200 p-16">
-        <h3 class="text-sm font-semibold text-gray-700 mb-12">Property Inventory</h3>
-        <div class="space-y-8">
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">Total Available</span>
-                <span class="text-sm font-mono font-semibold text-gray-700">
-                    {{ stats.property_stats.total_available }}
-                </span>
-            </div>
-            {% for prop in property_cards %}
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600 pl-12">{{ prop.label }}</span>
-                <span class="text-sm font-mono text-gray-500">{{ prop.count }}</span>
-            </div>
-            {% endfor %}
-            <div class="flex items-center justify-between pt-8 border-t border-gray-100">
-                <span class="text-sm text-gray-600">Applications without property match</span>
-                <span class="text-sm font-mono font-semibold {% if stats.property_stats.unlisted_applications > 0 %}text-amber-600{% else %}text-gray-400{% endif %}">
-                    {{ stats.property_stats.unlisted_applications }}
-                </span>
-            </div>
+    <div class="card">
+        <h3 class="text-14 font-bold text-dark-700 mb-12">Property Inventory</h3>
+
+        <div class="flex items-center justify-between mb-8">
+            <span class="text-14 text-dark-600">Total Available</span>
+            <span class="text-14 font-semibold text-dark-700"
+                  style="font-family:var(--font-mono,monospace)">
+                {{ stats.property_stats.total_available }}
+            </span>
+        </div>
+        {% for prop in property_cards %}
+        <div class="flex items-center justify-between mb-8">
+            <span class="text-14 text-dark-600 pl-12">{{ prop.label }}</span>
+            <span class="text-14 text-dark-500"
+                  style="font-family:var(--font-mono,monospace)">{{ prop.count }}</span>
+        </div>
+        {% endfor %}
+        <div class="flex items-center justify-between pt-8"
+             style="border-top: 1px solid var(--color-border-light, #f3f4f6);">
+            <span class="text-14 text-dark-600">Applications without property match</span>
+            <span class="text-14 font-semibold {% if stats.property_stats.unlisted_applications > 0 %}text-status-warn{% else %}text-dark-400{% endif %}"
+                  style="font-family:var(--font-mono,monospace)">
+                {{ stats.property_stats.unlisted_applications }}
+            </span>
         </div>
     </div>
 </div>
 
 {# ── Recent submissions table ──────────────────────────────── #}
-<div class="rounded-lg border border-gray-200 p-16">
-    <h3 class="text-sm font-semibold text-gray-700 mb-12">Recent Submissions</h3>
+<div class="card">
+    <h3 class="text-14 font-bold text-dark-700 mb-12">Recent Submissions</h3>
     {% if stats.recent.applications %}
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+    <div style="overflow-x: auto;">
+        <table class="dash-table">
             <thead>
-                <tr class="border-b border-gray-200">
-                    <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-8 pr-12">Ref #</th>
-                    <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-8 pr-12">Applicant</th>
-                    <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-8 pr-12">Program</th>
-                    <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-8 pr-12">Status</th>
-                    <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-8">Submitted</th>
+                <tr>
+                    <th>Ref #</th>
+                    <th>Applicant</th>
+                    <th>Program</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
                 </tr>
             </thead>
             <tbody>
                 {% for app in stats.recent.applications %}
-                <tr class="border-b border-gray-100 hover:bg-gray-50">
-                    <td class="py-8 pr-12">
+                <tr>
+                    <td>
                         <a href="{% url 'admin:applications_application_change' app.pk %}"
-                           class="font-mono text-blue-600 hover:underline">
+                           style="font-family:var(--font-mono,monospace); color:var(--color-primary); text-decoration:none;"
+                           onmouseover="this.style.textDecoration='underline'"
+                           onmouseout="this.style.textDecoration='none'">
                             {{ app.reference_number|default:"--" }}
                         </a>
                     </td>
-                    <td class="py-8 pr-12 text-gray-700">{{ app.first_name }} {{ app.last_name }}</td>
-                    <td class="py-8 pr-12 text-gray-500">{{ app.get_program_type_display }}</td>
-                    <td class="py-8 pr-12">
-                        <span class="inline-flex items-center px-8 py-2 rounded-full text-xs font-medium
-                            {% if app.status == 'received' %}bg-blue-100 text-blue-700
-                            {% elif app.status == 'under_review' %}bg-amber-100 text-amber-700
-                            {% elif app.status == 'approved' %}bg-green-100 text-green-700
-                            {% elif app.status == 'declined' %}bg-red-100 text-red-700
-                            {% elif app.status == 'needs_more_info' %}bg-orange-100 text-orange-700
-                            {% endif %}">
-                            {{ app.get_status_display }}
-                        </span>
+                    <td class="text-dark-700">{{ app.first_name }} {{ app.last_name }}</td>
+                    <td class="text-dark-500">{{ app.get_program_type_display }}</td>
+                    <td>
+                        {% include "admin/partials/_status_badge.html" with status=app.status label=app.get_status_display %}
                     </td>
-                    <td class="py-8 text-gray-500">{{ app.submitted_at|date:"M j, Y" }}</td>
+                    <td class="text-dark-500">{{ app.submitted_at|date:"M j, Y" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-    <p class="text-sm text-gray-400">No recent submissions</p>
+    <p class="text-14 text-dark-400">No recent submissions</p>
     {% endif %}
 </div>
-
-</div>{# /.dash #}

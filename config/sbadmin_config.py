@@ -62,8 +62,8 @@ config = SBAdminRoleConfiguration(
 
 
 class SBAdminConfiguration(SBAdminConfigurationBase):
-    site_title = "GCLBA Application Portal"
-    site_header = "Genesee County Land Bank"
+    site_title = "GCLBA Sales Admin"
+    site_header = "The Genesee County Land Bank Authority"
 
     def get_configuration_for_roles(self, user_roles):
         return config
