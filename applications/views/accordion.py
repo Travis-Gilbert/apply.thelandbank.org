@@ -46,7 +46,7 @@ PROGRAM_META = {
         "icon": "",
         "icon_svg": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2d6a8a" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0s-.83-2.17 0-3L12 9"/><path d="M17.64 15L22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V6.5L15.5 4H12l-2 2v3l2.5 3h1.7c.85 0 1.65.33 2.25.93l1.25 1.25"/></svg>',
         "tagline": "Homes that need renovation at lower costs",
-        "description": "As-is homes sold at lower purchase prices",
+        "description": "Your fixer-upper! Homes sold as-is",
         "note": "Cash only. Detailed cost estimates required.",
         "time": "15-20 minutes",
         "color": "#2d6a8a",
