@@ -15,6 +15,7 @@ from .htmx import (
     htmx_down_payment_minimum,
     htmx_intended_use_fields,
     htmx_progress_bar,
+    htmx_properties_json,
     htmx_property_search,
     htmx_purchase_type_fields,
     htmx_renovation_totals,
@@ -41,6 +42,7 @@ __all__ = [
     "htmx_self_employed_label",
     "htmx_down_payment_minimum",
     "htmx_progress_bar",
+    "htmx_properties_json",
     "htmx_property_search",
     # Save & resume
     "save_progress",

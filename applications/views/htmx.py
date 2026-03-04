@@ -9,7 +9,7 @@ buyer-facing form templates.
 import logging
 from decimal import Decimal, InvalidOperation
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django_ratelimit.decorators import ratelimit
 
@@ -131,6 +131,30 @@ def htmx_progress_bar(request):
         f'<span class="text-[11px] font-mono text-warm-500 flex-shrink-0">'
         f"2/{total}</span>"
     )
+
+
+@ratelimit(key="ip", rate="30/m", method="GET", block=True)
+def htmx_properties_json(request):
+    """
+    Return all available properties as JSON for client-side search.
+
+    Called once on page load; the browser filters locally on every keystroke.
+    Excludes vacant_lot (program not yet implemented).
+    """
+    from ..models import Property
+    from .accordion import PROGRAM_META
+
+    props = list(
+        Property.objects.filter(status="available")
+        .exclude(program_type="vacant_lot")
+        .values("id", "address", "parcel_id", "program_type", "address_normalized")
+    )
+    for p in props:
+        meta = PROGRAM_META.get(p["program_type"], {})
+        p["program_name"] = meta.get("name", p["program_type"])
+        p["program_color"] = meta.get("color", "#666")
+
+    return JsonResponse(props, safe=False)
 
 
 @ratelimit(key="ip", rate="30/m", method="GET", block=True)

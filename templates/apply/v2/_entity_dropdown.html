@@ -1,49 +1,58 @@
-{# LLC/Trust collapsible dropdown - details/summary pattern #}
-{# Include with: form (expects entity_type, entity_name, contact_name_different fields) #}
-<details class="entity-dropdown mt-4 p-4 rounded-xl bg-warm-50 border border-warm-200">
-    <summary class="flex items-center justify-between min-h-[44px]">
+{# LLC/Trust collapsible dropdown - Alpine x-data/x-show/x-collapse pattern #}
+{# Include with: form (expects purchasing_entity_name, contact_name_different fields) #}
+{# Pre-opens if entity name already filled (save-and-return state) #}
+<div class="mt-4 rounded-xl bg-warm-50 border border-warm-200"
+     x-data="{ open: {% if form.purchasing_entity_name.value %}true{% else %}false{% endif %} }">
+
+    <button type="button"
+            @click="open = !open"
+            class="flex items-center justify-between w-full px-4 py-3 min-h-[44px] text-left">
         <div class="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-warm-500">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-warm-500 flex-shrink-0">
                 <path d="M3 21h18M3 7v1a3 3 0 003 3h12a3 3 0 003-3V7M6 11v10M18 11v10M3 7l9-4 9 4" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span class="text-sm font-medium text-warm-700">Purchasing as LLC, Trust, or Entity?</span>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="entity-chevron text-warm-400">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             class="text-warm-400 transition-transform duration-200"
+             :class="{ 'rotate-180': open }">
             <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-    </summary>
+    </button>
 
-    <div class="mt-4 space-y-4">
-        {# Entity type #}
-        <div class="space-y-1.5">
-            <label for="{{ form.purchasing_entity_name.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                Entity Name
-            </label>
-            <input type="text"
-                   name="{{ form.purchasing_entity_name.html_name }}"
-                   id="{{ form.purchasing_entity_name.id_for_label }}"
-                   value="{{ form.purchasing_entity_name.value|default:'' }}"
-                   placeholder="e.g. Elm Street Properties LLC"
-                   class="gclba-input{% if form.purchasing_entity_name.errors %} has-error{% endif %}">
-            {% if form.purchasing_entity_name.errors %}
-            <p class="text-xs text-red-600 font-medium">{{ form.purchasing_entity_name.errors.0 }}</p>
-            {% endif %}
-        </div>
+    <div x-show="open" x-collapse x-cloak>
+        <div class="px-4 pb-4 space-y-4 border-t border-warm-200 pt-3">
+            {# Entity name #}
+            <div class="space-y-1.5">
+                <label for="{{ form.purchasing_entity_name.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    Entity Name
+                </label>
+                <input type="text"
+                       name="{{ form.purchasing_entity_name.html_name }}"
+                       id="{{ form.purchasing_entity_name.id_for_label }}"
+                       value="{{ form.purchasing_entity_name.value|default:'' }}"
+                       placeholder="e.g. Elm Street Properties LLC"
+                       class="gclba-input{% if form.purchasing_entity_name.errors %} has-error{% endif %}">
+                {% if form.purchasing_entity_name.errors %}
+                <p class="text-xs text-red-600 font-medium">{{ form.purchasing_entity_name.errors.0 }}</p>
+                {% endif %}
+            </div>
 
-        {# Contact name if different #}
-        <div class="space-y-1.5">
-            <label for="{{ form.contact_name_different.id_for_label }}" class="block text-sm font-medium text-warm-900">
-                Contact Name <span class="text-warm-400 text-xs font-normal">(if different from applicant)</span>
-            </label>
-            <input type="text"
-                   name="{{ form.contact_name_different.html_name }}"
-                   id="{{ form.contact_name_different.id_for_label }}"
-                   value="{{ form.contact_name_different.value|default:'' }}"
-                   placeholder="Contact person for entity"
-                   class="gclba-input{% if form.contact_name_different.errors %} has-error{% endif %}">
-            {% if form.contact_name_different.errors %}
-            <p class="text-xs text-red-600 font-medium">{{ form.contact_name_different.errors.0 }}</p>
-            {% endif %}
+            {# Contact name if different #}
+            <div class="space-y-1.5">
+                <label for="{{ form.contact_name_different.id_for_label }}" class="block text-sm font-medium text-warm-900">
+                    Contact Name <span class="text-warm-400 text-xs font-normal">(if different from applicant)</span>
+                </label>
+                <input type="text"
+                       name="{{ form.contact_name_different.html_name }}"
+                       id="{{ form.contact_name_different.id_for_label }}"
+                       value="{{ form.contact_name_different.value|default:'' }}"
+                       placeholder="Contact person for entity"
+                       class="gclba-input{% if form.contact_name_different.errors %} has-error{% endif %}">
+                {% if form.contact_name_different.errors %}
+                <p class="text-xs text-red-600 font-medium">{{ form.contact_name_different.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
     </div>
-</details>
+</div>

@@ -61,6 +61,11 @@ urlpatterns = [
         name="htmx_progress_bar",
     ),
     path(
+        "htmx/properties-json/",
+        views.htmx_properties_json,
+        name="htmx_properties_json",
+    ),
+    path(
         "htmx/property-search/",
         views.htmx_property_search,
         name="htmx_property_search",
