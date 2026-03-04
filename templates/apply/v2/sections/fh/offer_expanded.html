@@ -47,7 +47,7 @@
                    name="{{ form.offer_amount.html_name }}" id="{{ form.offer_amount.id_for_label }}"
                    value="{{ form.offer_amount.value|default:'' }}" required
                    placeholder="Enter amount"
-                   class="gclba-input pl-7 font-mono{% if form.offer_amount.errors %} has-error{% endif %}">
+                   class="gclba-input has-prefix font-mono{% if form.offer_amount.errors %} has-error{% endif %}">
         </div>
         {% if form.offer_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.offer_amount.errors.0 }}</p>{% endif %}
     </div>
@@ -67,7 +67,7 @@
                            name="{{ form.down_payment_amount.html_name }}" id="{{ form.down_payment_amount.id_for_label }}"
                            value="{{ form.down_payment_amount.value|default:'' }}"
                            placeholder="Enter amount"
-                           class="gclba-input pl-7 font-mono{% if form.down_payment_amount.errors %} has-error{% endif %}">
+                           class="gclba-input has-prefix font-mono{% if form.down_payment_amount.errors %} has-error{% endif %}">
                 </div>
                 <p class="text-xs text-warm-500">Minimum: 10% of offer or $1,000, whichever is higher</p>
                 {% if form.down_payment_amount.errors %}<p class="text-xs text-red-600 font-medium">{{ form.down_payment_amount.errors.0 }}</p>{% endif %}

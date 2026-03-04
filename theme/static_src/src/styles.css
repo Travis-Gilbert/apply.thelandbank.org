@@ -59,7 +59,8 @@ main, header, footer, .sticky { position: relative; z-index: 1; }
 @media (min-width: 640px) { .gclba-input { font-size: 0.875rem; } }
 .gclba-input::placeholder { color: #A09890; }
 .gclba-input:focus { border-color: #2d6a8a; box-shadow: 0 0 0 3px rgba(45, 106, 138, 0.10); outline: none; background-color: #fff; }
-.gclba-input.has-error { border-color: #dc2626; }
+.gclba-input.has-error { border-color: #dc2626; animation: errorShake 400ms ease-out; }
+.gclba-input.has-prefix { padding-left: 1.75rem; }
 .field-error-accent { border-left: 3px solid #dc2626; padding-left: 0.75rem; border-radius: 2px; }
 .gclba-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237A746C' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; }
 /* Mobile: prevent iOS zoom on focus (requires 16px+ font-size) */
@@ -537,6 +538,7 @@ label.touch-label:has(input[type="radio"]:checked) {
     .section-expand { animation: none; opacity: 1; transform: none; }
     .check-icon { animation: none; transform: none; }
     .error-shake { animation: none; transform: none; }
+    .gclba-input.has-error { animation: none; }
 }
 
 /* ── Mobile Optimizations ─────────────────────── */
@@ -590,10 +592,13 @@ label.touch-label:has(input[type="radio"]:checked) {
     .file-upload-zone { min-height: 80px; padding: 1.25rem; }
 }
 
-/* Hide number input spinners on renovation fields */
+/* Hide number input spinners — renovation fields and all money inputs */
 input[data-reno-group]::-webkit-outer-spin-button,
 input[data-reno-group]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[data-reno-group] { -moz-appearance: textfield; }
+input[type="number"].gclba-input::-webkit-outer-spin-button,
+input[type="number"].gclba-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"].gclba-input { -moz-appearance: textfield; }
 
 /* Renovation line items: stack label above input at narrow widths */
 @media (max-width: 400px) {
