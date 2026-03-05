@@ -21,10 +21,10 @@
         <ul class="mt-2 space-y-1">
             {% if existing_file.0 %}
                 {% for file in existing_file %}
-                <li class="text-xs text-civic-green-800 truncate">{{ file.filename|default:file.name }}</li>
+                <li class="text-xs text-civic-green-800 truncate">{{ file.display_name|default:"Uploaded file" }}</li>
                 {% endfor %}
             {% else %}
-                <li class="text-xs text-civic-green-800 truncate">{{ existing_file.filename|default:existing_file.name }}</li>
+                <li class="text-xs text-civic-green-800 truncate">{{ existing_file.display_name|default:"Uploaded file" }}</li>
             {% endif %}
         </ul>
     </div>

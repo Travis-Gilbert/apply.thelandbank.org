@@ -267,6 +267,49 @@ def _uploaded_doc_present(uploads, doc_type):
     return any(True for _ in _iter_uploaded_entries(uploads.get(doc_type)))
 
 
+def _upload_display_name(upload_entry):
+    """Resolve a safe display label for an uploaded file entry."""
+    if not isinstance(upload_entry, dict):
+        return "Uploaded file"
+
+    raw_name = str(upload_entry.get("filename") or upload_entry.get("name") or "").strip()
+    if raw_name:
+        return raw_name
+
+    path = str(upload_entry.get("path") or "").strip()
+    if path:
+        basename = os.path.basename(path)
+        if basename:
+            return basename
+
+    return "Uploaded file"
+
+
+def _normalize_uploaded_for_template(uploaded):
+    """Add display_name to upload entries without mutating stored draft data."""
+    normalized = {}
+    for doc_type, upload_value in (uploaded or {}).items():
+        if isinstance(upload_value, list):
+            entries = []
+            for entry in upload_value:
+                if isinstance(entry, dict):
+                    normalized_entry = dict(entry)
+                    normalized_entry["display_name"] = _upload_display_name(entry)
+                    entries.append(normalized_entry)
+            normalized[doc_type] = entries
+            continue
+
+        if isinstance(upload_value, dict):
+            normalized_entry = dict(upload_value)
+            normalized_entry["display_name"] = _upload_display_name(upload_value)
+            normalized[doc_type] = normalized_entry
+            continue
+
+        normalized[doc_type] = upload_value
+
+    return normalized
+
+
 def _build_document_context(program_type, purchase_type, form_data,
                             required_docs=None, optional_docs=None, uploaded=None):
     """Build the template context dict for document upload sections.
@@ -283,11 +326,12 @@ def _build_document_context(program_type, purchase_type, form_data,
         optional_docs = _get_optional_docs(program_type)
     if uploaded is None:
         uploaded = form_data.get("uploads", {})
+    uploaded_for_template = _normalize_uploaded_for_template(uploaded)
 
     return {
         "required_docs": required_docs,
         "optional_docs": optional_docs,
-        "uploaded": uploaded,
+        "uploaded": uploaded_for_template,
         "required_count": len(required_docs),
         "uploaded_required_count": sum(
             1 for d in required_docs if _uploaded_doc_present(uploaded, d)

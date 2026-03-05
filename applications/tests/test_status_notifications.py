@@ -176,3 +176,25 @@ class DocumentUploadBehaviorTests(TestCase):
         draft.refresh_from_db()
         uploads = draft.form_data.get("uploads", {})
         self.assertNotIn("vip_portfolio_photo", uploads)
+
+    def test_documents_rerender_shows_saved_filename_when_required_doc_missing(self):
+        draft = ApplicationDraft.objects.create(
+            form_data={
+                "program_type": Application.ProgramType.VIP_SPOTLIGHT,
+                "purchase_type": Application.PurchaseType.CASH,
+                "uploads": {},
+            },
+            program_type=Application.ProgramType.VIP_SPOTLIGHT,
+        )
+        self._set_draft_session(draft)
+
+        response = self.client.post(
+            "/apply/section/documents/validate/",
+            {
+                "proof_of_funds": self._fake_pdf("funds.pdf"),
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Missing required documents")
+        self.assertContains(response, "funds.pdf")

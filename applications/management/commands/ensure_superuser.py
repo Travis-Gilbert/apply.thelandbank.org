@@ -25,30 +25,18 @@ class Command(BaseCommand):
         self.stdout.write(f"User model: {User}")
         self.stdout.write(f"DB table: {User._meta.db_table}")
 
-        # Debug: check if the table exists
+        # Debug: check if the table exists (backend-agnostic)
+        table_names = set(connection.introspection.table_names())
+        if User._meta.db_table not in table_names:
+            self.stderr.write(self.style.ERROR(f"Table '{User._meta.db_table}' does NOT exist!"))
+            self.stderr.write("Migration likely failed. Check 'python manage.py showmigrations'")
+            return
+
+        self.stdout.write(f"Table '{User._meta.db_table}' exists")
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT tablename FROM pg_tables WHERE tablename = %s",
-                [User._meta.db_table],
-            )
-            row = cursor.fetchone()
-            if row:
-                self.stdout.write(f"Table '{User._meta.db_table}' exists")
-                # Check columns
-                cursor.execute(
-                    "SELECT column_name FROM information_schema.columns WHERE table_name = %s ORDER BY ordinal_position",
-                    [User._meta.db_table],
-                )
-                cols = [r[0] for r in cursor.fetchall()]
-                self.stdout.write(f"Columns: {', '.join(cols)}")
-                # Count existing users
-                cursor.execute(f"SELECT COUNT(*) FROM {User._meta.db_table}")
-                count = cursor.fetchone()[0]
-                self.stdout.write(f"Existing users: {count}")
-            else:
-                self.stderr.write(self.style.ERROR(f"Table '{User._meta.db_table}' does NOT exist!"))
-                self.stderr.write("Migration likely failed. Check 'python manage.py showmigrations'")
-                return
+            columns = connection.introspection.get_table_description(cursor, User._meta.db_table)
+        self.stdout.write(f"Columns: {', '.join(col.name for col in columns)}")
+        self.stdout.write(f"Existing users: {User.objects.count()}")
 
         # Debug: check migration state
         with connection.cursor() as cursor:
