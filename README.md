@@ -1,128 +1,94 @@
 # GCLBA Application Portal
 
-Property purchase application portal for the Genesee County Land Bank Authority (GCLBA), built for two audiences:
+Property purchase portal for the Genesee County Land Bank Authority (GCLBA).
 
-- Buyers applying for property programs
-- Internal sales staff reviewing and managing submissions
+## Current App Surfaces
 
-## Surfaces
+- Buyer application flow: `/apply/`
+- Staff admin and review tools: `/admin/`
+- Staff review queue: `/admin/review/`
 
-- Buyer surface: `/apply/`
-- Admin surface: `/admin/`
+## Current Feature Set
 
-The buyer experience is server-rendered Django templates with HTMX interactions.  
-The admin experience uses Django Admin with the Unfold theme and sales-specific workflow customizations.
-
-## Core Features
-
-- Program-specific application paths:
+- Property-first accordion application flow (HTMX + server-rendered templates)
+- Program support:
   - Featured Homes
   - Ready for Rehab
   - VIP Spotlight
-  - Vacant Lot placeholder (not fully implemented)
-- Save and resume via draft token links
-- Conditional document requirements by program/purchase type
-- Renovation line-item totals for Ready for Rehab
-- Staff review workflow with status tracking and audit logs
-- Buyer status emails for:
-  - Needs More Info
-  - Approved
-  - Declined
-- Admin transition note enforcement for buyer-facing negative transitions
+  - Vacant Lot is present in metadata but intentionally disabled
+- Draft save/resume with magic-link email (`/apply/save/`, `/apply/resume/<token>/`)
+- Conditional document requirements by program and purchase type
+- VIP multi-file uploads for portfolio photos and support letters
+- Eligibility disqualification gate before full submission
+- Draft-to-submission conversion with typed `Document` rows
+- Buyer confirmation email + staff new-submission email on submit
+- Staff review queue with auto-claim and "update and next" workflow
+- Admin assignment endpoint, pending-count endpoint, and per-document review status API
+- Status transition audit trail (`StatusLog`) with transition validation
+- Buyer status emails on:
+  - `needs_more_info`
+  - `approved`
+  - `declined`
+- Required note enforcement for:
+  - `needs_more_info`
+  - `declined`
 
 ## Tech Stack
 
 - Python 3.13
 - Django 6.0.2
-- django-unfold
-- HTMX
-- Tailwind via CDN (no build pipeline)
-- PostgreSQL in production (Railway), SQLite locally by default
+- `django-smartbase-admin` (admin UI layer)
+- HTMX + Alpine.js
+- Tailwind CSS (built via `django-tailwind` + Node toolchain)
+- PostgreSQL in production (`DATABASE_URL`), SQLite locally by default
 - WhiteNoise for static files
-- django-anymail (Resend) for outbound email
+- `django-anymail` (Resend backend option) for outbound email
+- `django-storages` for S3-compatible media storage in production
 
-## Project Layout
+## Key App Components
 
 ```text
 applications/
-  admin.py                    # Admin UX + workflow actions
-  admin_utils.py              # Unfold dashboard callbacks/badges
-  models.py                   # Application, Draft, Document, StatusLog
-  forms/                      # Program-specific forms
-  views/                      # Accordion flow, shared steps, submission
-  status_notifications.py     # Status-email and note-requirement helpers
-  migrations/
+  admin.py                    # SmartBase admin registrations, actions, filters
+  admin_utils.py              # Dashboard widget helpers
+  models.py                   # User, Property, ApplicationDraft, Application, Document, StatusLog
+  status_notifications.py     # Buyer-status email + transition-note rules
+  csv_import.py               # CSV/Excel import logic for Property inventory
+  views/
+    accordion.py              # Main /apply/ accordion flow
+    submission.py             # Draft -> Application conversion + submit emails
+    review_queue.py           # /admin/review/* workflow
+    admin_api.py              # assign/pending/doc-review/admin import endpoints
+    documents.py              # Staff-only document access
 
 config/
-  settings.py                 # App config, Unfold, email, DB
-  urls.py                     # /apply + /admin routing
+  settings.py                 # Runtime config (DB, email, storage, security)
+  urls.py                     # Root routes
+  sbadmin_config.py           # SmartBase menu + dashboard config
 
 templates/
-  apply/                      # Buyer templates
-  emails/                     # Buyer status-change email templates
-
-CLAUDE.md                     # Detailed product and implementation context
+  apply/                      # Buyer flow templates
+  admin/review_queue/         # Staff queue templates
+  emails/                     # Outbound email templates
 ```
 
-## Project Architecture / Structure
+## Data Model (Primary)
 
-### High-Level Request Flow
-
-1. Buyer starts at `/apply/` (accordion flow in `applications/views/accordion.py`).
-2. Section submissions validate with Django forms in `applications/forms/*`.
-3. Draft progress is stored in `ApplicationDraft.form_data` (JSON) with step tracking.
-4. Final submission creates a flat `Application` record plus related `Document` rows.
-5. Staff reviews in `/admin/` using Unfold customizations from `applications/admin.py`.
-6. Status changes write `StatusLog` and can trigger buyer email notifications.
-
-### Domain Model
-
-- `ApplicationDraft`: in-progress buyer application state
-- `Application`: submitted application used by staff for filtering/review
-- `Document`: typed upload linked to `Application`
-- `StatusLog`: immutable audit trail of status transitions
-
-### Buyer Surface Layers
-
-- Routes: `applications/urls.py`
-- Views:
-  - `applications/views/accordion.py` (primary flow)
-  - `applications/views/shared.py` (legacy shared steps + save/resume helpers)
-  - `applications/views/submission.py` (draft-to-application conversion + submit emails)
-- Forms:
-  - `applications/forms/featured_homes.py`
-  - `applications/forms/ready_for_rehab.py`
-  - `applications/forms/vip_spotlight.py`
-  - `applications/forms/shared.py`
-- Templates: `templates/apply/**`
-
-### Admin Surface Layers
-
-- Admin config/actions/filters: `applications/admin.py`
-- Dashboard callbacks + sidebar badge counts: `applications/admin_utils.py`
-- Status email + transition-note helper logic: `applications/status_notifications.py`
-- Email templates:
-  - `templates/emails/status_change_needs_more_info.*`
-  - `templates/emails/status_change_approved.*`
-  - `templates/emails/status_change_declined.*`
-
-### Configuration and Runtime
-
-- App config: `config/settings.py`
-- Root routing: `config/urls.py`
-- WSGI entrypoint: `config/wsgi.py`
-- Deployment command references:
-  - `Procfile`
-  - `nixpacks.toml`
+- `ApplicationDraft`: in-progress JSON-backed draft with 14-day expiry token
+- `Application`: submitted record used for staff filtering/review
+- `Document`: uploaded file metadata per application
+- `StatusLog`: immutable audit log of status transitions
+- `Property`: searchable inventory used by property picker/autocomplete
+- `User`: custom auth model (`AUTH_USER_MODEL=applications.User`)
 
 ## Local Development
 
 ### 1. Prerequisites
 
 - Python 3.13+
-- `pip`
+- Node.js (required for Tailwind build)
 
-### 2. Install
+### 2. Install Python Dependencies
 
 ```bash
 python3.13 -m venv venv
@@ -130,22 +96,35 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Configure Environment
+For lint/test tooling:
 
-Create `.env` in repo root. Minimal local values:
+```bash
+pip install -r requirements/development.txt
+```
+
+### 3. Install Frontend Dependencies and Build CSS
+
+```bash
+npm --prefix theme/static_src install
+./venv/bin/python manage.py tailwind build
+```
+
+### 4. Configure Environment
+
+Create `.env` in repo root:
 
 ```env
 DJANGO_SECRET_KEY=dev-only-secret
 DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-CSRF_TRUSTED_ORIGINS=http://localhost:8199,http://127.0.0.1:8199
+CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000,http://localhost:8199,http://127.0.0.1:8199
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 DEFAULT_FROM_EMAIL=applications@thelandbank.org
 STAFF_NOTIFICATION_EMAIL=offers@thelandbank.org
 RESEND_API_KEY=
 ```
 
-### 4. Database + Run
+### 5. Migrate and Run
 
 ```bash
 ./venv/bin/python manage.py migrate
@@ -158,7 +137,7 @@ Open:
 - Buyer: `http://127.0.0.1:8199/apply/`
 - Admin: `http://127.0.0.1:8199/admin/`
 
-## Validation Commands
+## Useful Commands
 
 ```bash
 ./venv/bin/python manage.py check
@@ -167,9 +146,17 @@ Open:
 ruff check .
 ```
 
-## Admin Workflow
+Property import commands:
 
-### Statuses
+```bash
+./venv/bin/python manage.py import_properties path/to/file.csv
+./venv/bin/python manage.py import_properties path/to/file.xlsx --replace --batch "March 2026"
+./venv/bin/python manage.py import_fm_csv featured_homes path/to/filemaker.csv --replace
+```
+
+## Status Workflow
+
+Statuses:
 
 - `received`
 - `under_review`
@@ -177,32 +164,28 @@ ruff check .
 - `approved`
 - `declined`
 
-### Rules
+Allowed transitions:
 
-- Status changes create `StatusLog` records
-- Transition notes are required for:
-  - `needs_more_info`
-  - `declined`
-- Buyer status emails are sent on:
-  - `needs_more_info`
-  - `approved`
-  - `declined`
+- `received -> under_review`
+- `under_review -> approved|declined|needs_more_info`
+- `needs_more_info -> under_review`
+- `declined -> under_review` (re-open allowed)
+- `approved` is terminal
 
-## Deployment
+## Deployment Notes
 
-- Platform: Railway
-- Main app URL: `https://apply.thelandbank.org`
-- Auto-deploy branch: `main`
-
-Branch flow in this repo:
-
-- `Admin` -> `develop` -> `main`
-
-Typical push command:
-
-```bash
-git push origin Admin develop main
-```
+- Deployment scripts currently run:
+  1. Node install for Tailwind assets
+  2. `python manage.py tailwind build`
+  3. `python manage.py collectstatic --noinput`
+  4. `python manage.py migrate --noinput`
+  5. `python manage.py ensure_superuser`
+  6. `gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3`
+- These commands are defined in:
+  - `Procfile`
+  - `nixpacks.toml`
+  - `railpack.json`
+- `ensure_superuser` currently creates/resets username `Admin` with password `Admin123` unless that command is changed.
 
 ## Key Environment Variables (Production)
 
@@ -215,79 +198,46 @@ git push origin Admin develop main
 - `RESEND_API_KEY`
 - `DEFAULT_FROM_EMAIL`
 - `STAFF_NOTIFICATION_EMAIL`
-
-## Additional Context
-
-For full product requirements, program rules, and historical implementation notes, see:
-
-- `CLAUDE.md`
+- Optional S3-compatible media storage:
+  - `AWS_STORAGE_BUCKET_NAME` (or `AWS_S3_BUCKET_NAME`)
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+  - `AWS_S3_REGION_NAME` (or `AWS_DEFAULT_REGION`)
+  - `AWS_S3_ENDPOINT_URL`
+  - `AWS_S3_CUSTOM_DOMAIN`
 
 ## Troubleshooting
 
-### `python` command not found
-
-Use the venv interpreter directly:
-
-```bash
-./venv/bin/python manage.py runserver 8199
-```
-
-or activate first:
-
-```bash
-source venv/bin/activate
-python manage.py runserver 8199
-```
-
 ### `ModuleNotFoundError: No module named 'django'`
 
-Dependencies are not installed in the active environment:
+Install dependencies into the active environment:
 
 ```bash
-python3.13 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ### `RuntimeError: DJANGO_SECRET_KEY must be set in production`
 
-Expected when `DJANGO_DEBUG=False` without a secret key.  
-Set `DJANGO_SECRET_KEY` in your environment (or `.env`) before startup.
+Expected when `DJANGO_DEBUG=False` and `DJANGO_SECRET_KEY` is not set.
 
-### `No changes detected` vs missing DB columns
+### Missing CSS / broken styling
 
-If the app complains about missing columns, run migrations in the current environment:
+Rebuild Tailwind output:
 
 ```bash
-./venv/bin/python manage.py migrate
+npm --prefix theme/static_src install
+./venv/bin/python manage.py tailwind build
 ```
 
-### Admin status change blocked for missing note
+### Status change blocked in admin
 
-`needs_more_info` and `declined` require `staff_notes`.  
-Add a note in the application record, then retry the status update/action.
+`needs_more_info` and `declined` require a staff note.
 
-### Buyer status emails are not being delivered
+### Buyer emails not sending
 
-1. For local development, set:
-   - `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend`
-2. For Resend, confirm:
-   - `EMAIL_BACKEND=anymail.backends.resend.EmailBackend`
-   - `RESEND_API_KEY` is set
-   - `DEFAULT_FROM_EMAIL` is valid for your provider setup
+Check:
 
-### Static files missing in production
-
-Ensure collectstatic runs during deploy (already in `Procfile` and `nixpacks.toml`), and verify:
-
-- `DEBUG=False`
-- `STATIC_ROOT` points to `staticfiles`
-
-### CSRF errors on local or Railway domain
-
-Verify host/origin configuration:
-
-- `DJANGO_ALLOWED_HOSTS`
-- `CSRF_TRUSTED_ORIGINS`
-
-Include `http://localhost:8199` for local and deployed domain(s) for production.
+- `EMAIL_BACKEND`
+- `RESEND_API_KEY` (if using Resend backend)
+- `DEFAULT_FROM_EMAIL`
