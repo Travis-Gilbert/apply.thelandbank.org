@@ -85,4 +85,9 @@ urlpatterns = [
         views.document_view,
         name="document_view",
     ),
+    path(
+        "documents/<int:document_id>/thumbnail/",
+        views.document_thumbnail,
+        name="document_thumbnail",
+    ),
 ]

@@ -4,18 +4,57 @@
     <span class="text-dark-400 text-12 uppercase tracking-wider block mb-8">Document Review</span>
     <div class="space-y-6" id="doc-review-panel" data-app-pk="{{ app.pk }}">
         {% for doc in documents %}
-        <div class="flex items-center gap-8 py-6 px-8 rounded-lg"
+        <div class="flex items-start gap-8 py-6 px-8 rounded-lg"
              style="background:var(--color-bg-secondary,#f9fafb)"
              data-doc-id="{{ doc.pk }}">
-            <a href="{% url 'applications:document_view' document_id=doc.pk %}"
-               target="_blank" rel="noopener"
-               class="text-13 font-medium flex-1 truncate"
-               style="color:var(--color-primary-600,#1e3a8a);text-decoration:none">
-                {{ doc.get_doc_type_display }}
-                {% if doc.original_filename %}
-                    <span class="text-dark-400 font-normal ml-4">{{ doc.original_filename }}</span>
-                {% endif %}
-            </a>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start gap-10">
+                    {% if doc.is_pdf %}
+                    <a href="{% url 'applications:document_view' document_id=doc.pk %}"
+                       target="_blank" rel="noopener"
+                       class="shrink-0 rounded-md overflow-hidden"
+                       style="width:56px;height:72px;border:1px solid var(--color-border,#e5e7eb);background:#fff">
+                        <img src="{% url 'applications:document_thumbnail' document_id=doc.pk %}?size=220"
+                             alt="{{ doc.get_doc_type_display }}"
+                             loading="lazy"
+                             style="width:100%;height:100%;object-fit:contain;background:#fff">
+                    </a>
+                    {% elif doc.is_image %}
+                    <a href="{% url 'applications:document_view' document_id=doc.pk %}"
+                       target="_blank" rel="noopener"
+                       class="shrink-0 rounded-md overflow-hidden"
+                       style="width:72px;height:72px;border:1px solid var(--color-border,#e5e7eb);background:#fff">
+                        <img src="{% url 'applications:document_thumbnail' document_id=doc.pk %}?size=160"
+                             alt="{{ doc.get_doc_type_display }}"
+                             loading="lazy"
+                             style="width:100%;height:100%;object-fit:cover">
+                    </a>
+                    {% else %}
+                    <a href="{% url 'applications:document_view' document_id=doc.pk %}"
+                       target="_blank" rel="noopener"
+                       class="shrink-0 rounded-md flex items-center justify-center text-11 font-semibold"
+                       style="width:72px;height:72px;border:1px solid var(--color-border,#e5e7eb);background:#fff;color:#6b7280;text-decoration:none">
+                        OPEN
+                    </a>
+                    {% endif %}
+
+                    <div class="min-w-0 pt-2">
+                        <a href="{% url 'applications:document_view' document_id=doc.pk %}"
+                           target="_blank" rel="noopener"
+                           class="text-13 font-medium block truncate"
+                           style="color:var(--color-primary-600,#1e3a8a);text-decoration:none">
+                            {{ doc.get_doc_type_display }}
+                        </a>
+                        <div class="text-12 text-dark-400 truncate mt-2">
+                            {% if doc.original_filename %}
+                                {{ doc.original_filename }}
+                            {% else %}
+                                {{ doc.file.name }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="flex gap-4 doc-review-btns">
                 {% with current_status=app.document_review %}
                 <button type="button"

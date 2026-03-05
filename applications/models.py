@@ -12,6 +12,7 @@ Six models:
 
 import re
 import uuid
+import mimetypes
 from datetime import timedelta
 from decimal import Decimal
 
@@ -766,6 +767,27 @@ class Document(models.Model):
 
     def __str__(self):
         return f"{self.get_doc_type_display()} - {self.application.reference_number}"
+
+    @property
+    def guessed_content_type(self):
+        """Best-effort MIME type from the uploaded filename."""
+        candidate = self.original_filename or (self.file.name if self.file else "")
+        content_type, _ = mimetypes.guess_type(candidate)
+        if content_type:
+            return content_type
+        if candidate.lower().endswith(".pdf"):
+            return "application/pdf"
+        return ""
+
+    @property
+    def is_image(self):
+        """True when the uploaded file appears to be an image type."""
+        return self.guessed_content_type.startswith("image/")
+
+    @property
+    def is_pdf(self):
+        """True when the uploaded file appears to be a PDF."""
+        return self.guessed_content_type == "application/pdf"
 
 
 class StatusLog(models.Model):

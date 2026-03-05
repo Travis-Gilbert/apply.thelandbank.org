@@ -26,6 +26,7 @@ psycopg2-binary==2.9.11
 # File handling
 boto3==1.42.54
 pillow==12.1.1
+PyMuPDF==1.26.5
 openpyxl==3.1.5
 
 # Security

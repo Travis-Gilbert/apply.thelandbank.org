@@ -21,7 +21,7 @@ from .htmx import (
     htmx_renovation_totals,
     htmx_self_employed_label,
 )
-from .documents import document_view
+from .documents import document_thumbnail, document_view
 from .submission import confirmation_page
 from .shared import (
     resume_draft,
@@ -51,4 +51,5 @@ __all__ = [
     "confirmation_page",
     # Staff document access
     "document_view",
+    "document_thumbnail",
 ]

@@ -2,9 +2,14 @@
 Tests for admin workflow: review queue, admin API endpoints, bulk actions.
 """
 
+from io import BytesIO
+
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from django.urls import reverse
+from PIL import Image
 
 from applications.models import Application, Document, StatusLog
 
@@ -191,8 +196,6 @@ class AdminAPITests(TestCase):
         self.assertIn("count", data)
 
     def test_doc_review_saves_status(self):
-        from django.core.files.uploadedfile import SimpleUploadedFile
-
         doc = Document.objects.create(
             application=self.app,
             doc_type="photo_id",
@@ -215,6 +218,39 @@ class AdminAPITests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_document_thumbnail_returns_image_for_uploaded_image(self):
+        image_data = BytesIO()
+        Image.new("RGB", (20, 20), color="red").save(image_data, format="PNG")
+        image_data.seek(0)
+
+        doc = Document.objects.create(
+            application=self.app,
+            doc_type="photo_id",
+            file=SimpleUploadedFile("id.png", image_data.read(), content_type="image/png"),
+            original_filename="id.png",
+        )
+        response = self.client.get(
+            reverse("applications:document_thumbnail", args=[doc.pk]),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("image/"))
+
+    def test_document_thumbnail_pdf_returns_preview_or_placeholder(self):
+        doc = Document.objects.create(
+            application=self.app,
+            doc_type="photo_id",
+            file=SimpleUploadedFile("id.pdf", b"%PDF-test", content_type="application/pdf"),
+            original_filename="id.pdf",
+        )
+        response = self.client.get(
+            reverse("applications:document_thumbnail", args=[doc.pk]),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            response["Content-Type"],
+            {"image/png", "image/svg+xml"},
+        )
 
 
 class TransitionEnforcementTests(TestCase):
